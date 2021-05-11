@@ -10,10 +10,10 @@ def generic_response(code, data, message=None, params=None):
     }), code
 
 
-def response_error(message, params=None):
+def response_error(message, params=None, status_code=500):
     if params is None:
         params = {}
-    return generic_response(500, None, message, params)
+    return generic_response(status_code, None, message, params)
 
 
 def response_success(data=None):

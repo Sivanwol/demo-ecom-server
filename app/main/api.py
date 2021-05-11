@@ -10,5 +10,4 @@ api = Api(
 )
 
 api.add_resource(UserList, '/users')
-api.add_resource(User, '/users/<int:id>/')
 
