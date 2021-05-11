@@ -14,7 +14,7 @@ build/
 *.egg-info/
 
 service-account-file.json
-.env.*
+.env*
 !.env.template
 
 *.log
