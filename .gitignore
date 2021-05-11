@@ -15,4 +15,6 @@ dist/
 build/
 *.egg-info/
 
-service-account-file.json".env" 
+service-account-file.json
+.env.*
+!.env.template
