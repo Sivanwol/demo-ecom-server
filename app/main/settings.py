@@ -9,7 +9,7 @@ dotenv_path = os.path.join(APP_ROOT, '.env.'+os.environ.get("FLASK_ENV", "develo
 load_dotenv(dotenv_path)
 
 class Config:
-
+    API_PERFIX= "/api/v1"
     # project root directory
     BASE_DIR = os.path.join(os.pardir, os.path.dirname(__file__))
     SECRET_KEY = os.getenv("SECRET_KEY")

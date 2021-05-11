@@ -2,6 +2,9 @@ from firebase_admin.auth import UserNotFoundError
 from firebase_admin.exceptions import FirebaseError
 from flask import Flask
 from flask_restful import Resource
+
+from app import registry
+from app.controllers.schemas.user_schema import UserResponseSchema
 from app.middlewares.check_token import check_token
 from app.services.user import UserService
 from app.utils.responses import response_error, response_success
@@ -15,7 +18,7 @@ class User(Resource):
         self.userService = UserService()
 
     @check_token
-    @app.route('/user/<uid>', methods=['GET'])
+    @registry.handles('/user/<uid>', methods=['GET'], response_body_schema=UserResponseSchema)
     def get(self, uid):
         if verify_uid(uid):
             try:
@@ -33,7 +36,8 @@ class User(Resource):
                 return response_error("unknown error", {err: err.cause})
         return response_error("Error on format of the params", {uid: uid})
 
-    @app.route('/user/<uid>', methods=['POST'])
+    @check_token
+    @registry.handles('/user/<uid>', methods=['POST'], response_body_schema=UserResponseSchema)
     def sync_user_create(self, uid):
         if verify_uid(uid):
             try:
