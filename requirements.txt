@@ -8,6 +8,8 @@ certifi==2020.12.5
 cffi==1.14.5
 chardet==4.0.0
 click==7.1.2
+dnspython==2.1.0
+email-validator==1.1.2
 firebase-admin==5.0.0
 Flask==1.1.2
 Flask-Admin==1.5.6
@@ -19,6 +21,7 @@ flask-rebar==1.12.2
 Flask-RESTful==0.3.8
 Flask-Script==2.0.6
 Flask-SQLAlchemy==2.4.4
+Flask-Validator==1.4.2
 google-api-core==1.26.3
 google-api-python-client==2.3.0
 google-auth==1.30.0
@@ -33,6 +36,8 @@ greenlet==1.1.0
 grpcio==1.37.1
 httplib2==0.19.1
 idna==2.10
+isbnlib==3.10.3
+iso3166==1.0.1
 itsdangerous==1.1.0
 Jinja2==2.11.3
 Mako==1.1.4
@@ -43,8 +48,10 @@ packaging==20.9
 proto-plus==1.18.1
 protobuf==3.16.0
 psycopg2-binary==2.8.6
+py-moneyed==0.8.0
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
+pycountry==20.7.3
 pycparser==2.20
 pydantic==1.6.1
 PyJWT==2.1.0
@@ -52,9 +59,10 @@ pyparsing==2.4.7
 python-dateutil==2.8.1
 python-dotenv==0.17.1
 python-editor==1.0.4
-pytz==2021.1
+pytz==2020.1
 requests==2.25.1
 rsa==4.7.2
+schwifty==2020.9.0
 six==1.16.0
 SQLAlchemy==1.4.15
 SQLAlchemy-i18n==1.0.3

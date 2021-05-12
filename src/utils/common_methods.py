@@ -5,18 +5,16 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-from flask_rebar import Rebar
 
 from config import settings
-# from config.api import api
 from src.services.firebase import FirebaseService
 from src.utils.responses import response_error
 from config.database import db, migration
 
 
 def verify_uid(uid):
-    rules = {"uid": "require|min:10"}
-    result = validate({uid: uid}, rules)
+    rules = {"uid": "required|min:10"}
+    result = validate({"uid": uid}, rules)  # True
     if result:
         return True
     else:
@@ -37,8 +35,6 @@ def scan_routes(app):
 def create_app(name):
     app = Flask(name)
     app.config.from_object(settings[os.environ.get("FLASK_ENV", "development")])
-
-    rebar = Rebar()
     cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
     # Logs Initialization
     console = logging.getLogger('console')
@@ -54,8 +50,4 @@ def create_app(name):
 
     # Database Migrations Initialization
     migration.init_app(app, db)
-
-    # Flask API Initialization
-    rebar.init_app(app)
-    # api.init_app(app)
     return app

@@ -1,3 +1,4 @@
+import json
 import os
 
 from firebase_admin.auth import UserNotFoundError
@@ -43,17 +44,16 @@ def get(uid):
 def sync_user_create(uid):
     if verify_uid(uid):
         try:
-            response = {'user': None, 'extend_info': None}
-            response.user = userService.get_user(uid)
+            response = {'user': json.dumps(userService.get_user(uid).__dict__['_data'], indent=4), 'extend_info': None}
             userService.sync_user(uid)
-            response.extend_info = userService.get_extend_user_info(uid)
+            response['extend_info'] = userService.get_extend_user_info(uid).__dict__
             return response_success(response)
         except ValueError:
             return response_error("Error on format of the params", {uid: uid})
         except UserNotFoundError:
-            app.logger.error("User not found", {uid: uid})
+            current_app.logger.error("User not found", {uid: uid})
             return response_error("User not found", {uid: uid})
         except FirebaseError as err:
-            app.logger.error("unknown error", err)
+            current_app.logger.error("unknown error", err)
             return response_error("unknown error", {err: err.cause})
     return response_error("Error on format of the params", {uid: uid})
