@@ -3,8 +3,8 @@ from functools import wraps
 from firebase_admin import auth
 from flask import request
 
-from app.utils.common_methods import verify_response
-from app.utils.responses import response_error
+from src.utils.common_methods import verify_response
+from src.utils.responses import response_error
 
 
 def check_token(f):

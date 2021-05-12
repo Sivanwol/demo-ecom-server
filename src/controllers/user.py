@@ -1,23 +1,26 @@
+import os
+
 from firebase_admin.auth import UserNotFoundError
 from firebase_admin.exceptions import FirebaseError
-from flask import Flask
-from flask_restful import Resource
+from config import settings
+from config.api import app as current_app
+from src.middlewares.check_token import check_token
+from src.services.user import UserService
+from src.utils.responses import response_error, response_success
+from src.utils.common_methods import verify_uid
 
-from app.utils.rebar_utils import RebarUtils
-from app.controllers.schemas.user_schema import UserResponseSchema
-from app.middlewares.check_token import check_token
-from app.services.user import UserService
-from app.utils.responses import response_error, response_success
-from app.utils.common_methods import verify_uid
-
-app = Flask(__name__)
-
-rebar = RebarUtils()
 userService = UserService()
+print(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/health"))
+
+
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/health"))
+def get_health():
+    return {"status": "OK"}
+
 
 @check_token
-@rebar.registry.handles(rule='/user/<uid>', method='GET', response_body_schema=UserResponseSchema())
-def get( uid):
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>"))
+def get(uid):
     if verify_uid(uid):
         try:
             response = {'user': None, 'extend_info': None}
@@ -34,8 +37,9 @@ def get( uid):
             return response_error("unknown error", {err: err.cause})
     return response_error("Error on format of the params", {uid: uid})
 
+
 @check_token
-@rebar.registry.handles(rule='/user/<uid>', method='POST', response_body_schema=UserResponseSchema())
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>"), methods=["POST"])
 def sync_user_create(uid):
     if verify_uid(uid):
         try:
@@ -53,10 +57,3 @@ def sync_user_create(uid):
             app.logger.error("unknown error", err)
             return response_error("unknown error", {err: err.cause})
     return response_error("Error on format of the params", {uid: uid})
-
-
-class UserList(Resource):
-    @check_token
-    def get(self):
-        pass
-

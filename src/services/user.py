@@ -1,9 +1,8 @@
-import firebase_admin
 from firebase_admin import auth
 
-from app.models import User
-from app.utils.singleton import singleton
-from app.main.database import db
+from config.database import db
+from src.models import User
+from src.utils.singleton import singleton
 
 
 @singleton
