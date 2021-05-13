@@ -11,7 +11,7 @@ class FlaskTestCase(BaseTestCase):
     # Ensure that Flask was set up correctly
     def test_register_user(self):
         with self.client:
-            uid = 'abcd1234abcsd1234abcsd1234abcsd'
+            uid = self.Firebase_UID
             response = self.client.post(
                 '/api/user/%s' % uid,
                 data=dict(),
