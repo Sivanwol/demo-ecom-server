@@ -68,6 +68,7 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     ENV = os.environ.get("FLASK_ENV", "testing")
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     DEBUG = True
     TESTING = True
 
