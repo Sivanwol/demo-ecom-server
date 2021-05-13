@@ -22,3 +22,6 @@ class User(db.Model):
 
     def __repr__(self):
         return "<User(uid='{uid}', is_admin='{is_admin}')>".format (uid=self.uid, is_admin=self.is_admin)
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}

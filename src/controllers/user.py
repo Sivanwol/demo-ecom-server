@@ -46,7 +46,7 @@ def sync_user_create(uid):
         try:
             response = {'user': json.dumps(userService.get_user(uid).__dict__['_data'], indent=4), 'extend_info': None}
             userService.sync_user(uid)
-            response['extend_info'] = userService.get_extend_user_info(uid).__dict__
+            response['extend_info'] = userService.get_extend_user_info(uid).to_dict()
             return response_success(response)
         except ValueError:
             return response_error("Error on format of the params", {uid: uid})
