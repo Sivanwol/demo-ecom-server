@@ -22,7 +22,8 @@ class Config:
     PORT = 8000
 
     # firebase config
-    GOOGLE_APPLICATION_CREDENTIALS = os.getenv('FIREBASE_CONFIG_FILE')
+    GOOGLE_APPLICATION_CREDENTIALS = os.getenv('FIREBASE_SERVICE_CONFIG_FILE')
+    FIREBASE_CONFIG = os.getenv('FIREBASE_CONFIG_FILE')
     FIREBASE_APIKEY = os.getenv('FIREBASE_APIKEY')
     # log file path
     # --------------------------------------------------------------------
