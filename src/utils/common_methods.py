@@ -1,11 +1,11 @@
-from flask import request
+from urllib.parse import urlparse
+from flask import request, url_for
 from validator import validate
 import logging
 import os
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
-
 from config import settings
 from src.services.firebase import FirebaseService
 from src.utils.responses import response_error
@@ -27,9 +27,20 @@ def verify_response():
 
 
 def scan_routes(app):
-    # links = []
+    output = []
     for rule in app.url_map.iter_rules():
-        print("{url} - {method}".format(url=rule.rule, method=rule.methods))
+
+        options = {}
+        for arg in rule.arguments:
+            options[arg] = "[{0}]".format(arg)
+
+        methods = ','.join(rule.methods)
+        url = url_for(rule.endpoint, **options)
+        line = urlparse("{:50s} {:20s} {}".format(rule.endpoint, methods, url))
+        output.append(line)
+
+    for line in sorted(output):
+        print(line)
 
 
 def create_app(name):

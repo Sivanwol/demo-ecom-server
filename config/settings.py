@@ -41,13 +41,13 @@ class Config:
     # --------------------------------------------------------------------
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        'executemany_mode': 'batch',
-        'client_encoding': 'utf8',
-        'case_sensitive': False,
-        'echo': True,
-        'echo_pool': True
-    }
+    # SQLALCHEMY_ENGINE_OPTIONS = {
+    #     'executemany_mode': 'batch',
+    #     'client_encoding': 'utf8',
+    #     'case_sensitive': False,
+    #     'echo': True,
+    #     'echo_pool': True
+    # }
 
     # SMTP server config
     # --------------------------------------------------------------------

@@ -31,10 +31,10 @@ def get(uid):
         except ValueError:
             return response_error("Error on format of the params", {uid: uid})
         except UserNotFoundError:
-            app.logger.error("User not found", {uid: uid})
+            current_app.logger.error("User not found", {uid: uid})
             return response_error("User not found", {uid: uid})
         except FirebaseError as err:
-            app.logger.error("unknown error", err)
+            current_app.logger.error("unknown error", err)
             return response_error("unknown error", {err: err.cause})
     return response_error("Error on format of the params", {uid: uid})
 
