@@ -22,7 +22,8 @@ class Config:
     PORT = 8000
 
     # firebase config
-    GOOGLE_APPLICATION_CREDENTIALS = os.getenv('FIREBASE_CONFIG_FILE')
+    GOOGLE_APPLICATION_CREDENTIALS = os.getenv('FIREBASE_SERVICE_CONFIG_FILE')
+    FIREBASE_CONFIG = os.getenv('FIREBASE_CONFIG_FILE')
     FIREBASE_APIKEY = os.getenv('FIREBASE_APIKEY')
     # log file path
     # --------------------------------------------------------------------
@@ -41,13 +42,13 @@ class Config:
     # --------------------------------------------------------------------
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = True
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        'executemany_mode': 'batch',
-        'client_encoding': 'utf8',
-        'case_sensitive': False,
-        'echo': True,
-        'echo_pool': True
-    }
+    # SQLALCHEMY_ENGINE_OPTIONS = {
+    #     'executemany_mode': 'batch',
+    #     'client_encoding': 'utf8',
+    #     'case_sensitive': False,
+    #     'echo': True,
+    #     'echo_pool': True
+    # }
 
     # SMTP server config
     # --------------------------------------------------------------------
@@ -68,6 +69,7 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
     ENV = os.environ.get("FLASK_ENV", "testing")
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     DEBUG = True
     TESTING = True
 

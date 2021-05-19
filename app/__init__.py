@@ -1,5 +1,5 @@
 from config.api import app
-from src.controllers import user
+import config.routes
 
 if __name__ == '__main__':
     app.run()
