@@ -1,0 +1,1 @@
+FB_SIGNIN_EMAIL="http://localhost:9099/identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=%s"

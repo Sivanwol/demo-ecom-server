@@ -1,1 +1,1 @@
-from src.controllers import user
+from src.routes import user

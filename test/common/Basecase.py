@@ -4,7 +4,7 @@ from flask_testing import TestCase
 
 from config.api import app
 from config.database import db
-import config.routes
+from src.services.firebase import FirebaseService
 from src.utils.common_methods import scan_routes
 from test.common.firebase_utils import create_test_user, setup_firebase_client
 
@@ -16,6 +16,7 @@ class BaseTestCase(TestCase):
     firebase_password = "password!0101"
     firebase_UID = None
     firebase_client_object = None
+    firebaseService = FirebaseService()
 
     def create_app(self):
         # app.config.from_object('config.TestConfig')
@@ -25,6 +26,7 @@ class BaseTestCase(TestCase):
         if self.firebase_UID is not None:
             self.assertNotEqual(self.firebase_UID.uid, '')
         self.firebase_client_object = setup_firebase_client()
+        app.app_context().push()
         return app
 
     def setUp(self):

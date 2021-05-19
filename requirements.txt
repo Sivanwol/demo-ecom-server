@@ -68,7 +68,7 @@ python-dotenv==0.17.1
 python-editor==1.0.4
 python-jwt==2.0.1
 pytz==2020.1
-requests==2.11.1
+requests==2.25.1
 requests-toolbelt==0.7.0
 rsa==4.7.2
 schwifty==2020.9.0
