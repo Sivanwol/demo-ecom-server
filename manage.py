@@ -15,8 +15,8 @@ def list_routes():
 
 
 @manager.command
-@manager.add_option("-e", "--email", dest="email", required=True)
-@manager.add_option("-p", "--password", dest="password", required=True)
+@manager.option("-e", "--email", dest="email", required=True)
+@manager.option("-p", "--password", dest="password", required=True)
 def setup_owner(email, password):
     setup_owner_user(email, password)
 

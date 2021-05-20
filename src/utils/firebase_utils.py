@@ -2,7 +2,6 @@ import json
 import os
 import firebase_admin
 import requests
-from pyrebase import pyrebase
 
 from config import settings
 from test.common.firebase_emulator_url import FB_SIGNIN_EMAIL

@@ -15,9 +15,9 @@ from src.utils.firebase_utils import check_user, create_firebase_user
 from src.utils.responses import response_error
 from config.database import db, migration
 
-
 roleSerivce = RolesService()
 userService = UserService()
+
 
 def verify_uid(uid):
     rules = {"uid": "required|min:10"}
@@ -39,7 +39,10 @@ def setup_owner_user(email, password):
         user = create_firebase_user(email, password)
     if user is None:
         raise CommandUnableCreateOwnerUser(email)
-    uid = user['localId']
+
+    user_data = user.__dict__['_data']
+    print('owner user {} => {}, {}'.format(email, password, user_data))
+    uid = user_data['localId']
     roles = roleSerivce.get_roles(['owner'])
     userService.sync_user(uid, roles)
     print('owner user create {} => {}'.format(email, uid))

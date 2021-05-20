@@ -20,7 +20,7 @@ def upgrade():
     roles = op.create_table('roles',
                             sa.Column('id', sa.Integer(), nullable=False),
                             sa.Column('name', sa.String(length=255), nullable=False),
-                            sa.Column('active', sa.Boolean(), nullable=True),
+                            sa.Column('is_active', sa.Boolean(), nullable=True, default=True),
                             sa.PrimaryKeyConstraint('id'))
 
     op.bulk_insert(roles, [

@@ -1,10 +1,9 @@
-from flask_security import RoleMixin
 from sqlalchemy import Integer, String, Boolean
 
 from config.database import db
 
 
-class Roles(db.Model, RoleMixin):
+class Roles(db.Model):
     """
     This is a base user Model
     """
@@ -13,6 +12,8 @@ class Roles(db.Model, RoleMixin):
     id = db.Column(Integer, primary_key=True)
     name = db.Column(String(100), nullable=False)
     is_active = db.Column(Boolean, nullable=False)
+    # Define the relationship to Role via UserRoles
+    user = db.relationship('Users', secondary='user_roles')
 
     def __init__(self, name, is_active):
         self.name = name
