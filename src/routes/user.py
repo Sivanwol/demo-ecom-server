@@ -6,10 +6,12 @@ from firebase_admin.exceptions import FirebaseError
 from config import settings
 from config.api import app as current_app
 from src.middlewares.check_token import check_token
+from src.services.roels import RolesService
 from src.services.user import UserService
 from src.utils.responses import response_error, response_success
 from src.utils.common_methods import verify_uid
 
+roleSerivce = RolesService()
 userService = UserService()
 print(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/health"))
 
@@ -45,7 +47,8 @@ def sync_user_create(uid):
     if verify_uid(uid):
         try:
             response = {'user': json.dumps(userService.get_user(uid).__dict__['_data'], indent=4), 'extend_info': None}
-            userService.sync_user(uid)
+            roles = roleSerivce.get_roles(['customer'])
+            userService.sync_user(uid, roles)
             response['extend_info'] = userService.get_extend_user_info(uid).to_dict()
             return response_success(response)
         except ValueError:

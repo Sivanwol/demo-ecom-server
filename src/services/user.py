@@ -1,6 +1,7 @@
 from firebase_admin import auth
 
 from config.database import db
+from src.models import Users
 from src.utils.singleton import singleton
 
 
@@ -39,7 +40,8 @@ class UserService:
     def get_extend_user_info(self, uid):
         return Users.query.filter_by(uid=uid).first()
 
-    def sync_user(self, uid):
-        user = Users(uid)
+    def sync_user(self, uid, roles):
+        user = Users(uid, True)
+        user.roles = roles
         db.session.add(user)
         db.session.commit()

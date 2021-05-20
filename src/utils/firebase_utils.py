@@ -22,7 +22,7 @@ def check_user(email):
         return None
 
 
-def create_test_user(email, password):
+def create_firebase_user(email, password):
     user = check_user(email)
     if user is None:
         try:
