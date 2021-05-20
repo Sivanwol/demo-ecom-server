@@ -11,9 +11,6 @@ from test.common.firebase_emulator_url import FB_SIGNIN_EMAIL
 def setup_firebase_client():
     with open(settings[os.environ.get("FLASK_ENV", "development")].FIREBASE_CONFIG) as f:
         firebase_config = json.load(f)
-        print(firebase_config)
-        firebase = pyrebase.initialize_app(firebase_config)
-        return firebase
 
 
 def check_user(email):

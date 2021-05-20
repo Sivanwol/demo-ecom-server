@@ -13,9 +13,16 @@ $ pip install Flask
 Install all project dependencies using:
 
 ```
+When need install the deps of the system
+```
 $ pip install -r requirements.txt
 ```
 
+if ever need add a dep to the project please do as follow
+```angular2html
+$ pip install packagename
+$ pip-compile requirements.txt --generate-hashes # this will regenerate the requirements.txt
+```
 ### Running
  
 ```

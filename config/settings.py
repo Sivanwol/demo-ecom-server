@@ -4,7 +4,7 @@ import os
 # load dotenv in the base root
 from flask.cli import load_dotenv
 
-APP_ROOT = os.path.join(os.path.dirname(__file__), '../app', '..')  # refers to application_top
+APP_ROOT = os.path.join(os.path.dirname(__file__), '../src', '..')  # refers to application_top
 dotenv_path = os.path.join(APP_ROOT, '.env.' + os.environ.get("FLASK_ENV", "development"))
 load_dotenv(dotenv_path)
 

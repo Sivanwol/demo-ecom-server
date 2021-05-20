@@ -5,4 +5,4 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 # Database Migrations Configuration
-migration = Migrate(directory='./app/migrations')
+migration = Migrate(directory='./src/migrations')

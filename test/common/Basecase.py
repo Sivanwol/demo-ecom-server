@@ -15,7 +15,6 @@ class BaseTestCase(TestCase):
     firebase_user = "test@user.com"
     firebase_password = "password!0101"
     firebase_UID = None
-    firebase_client_object = None
     firebaseService = FirebaseService()
 
     def create_app(self):
@@ -25,7 +24,7 @@ class BaseTestCase(TestCase):
         self.assertIsNotNone(self.firebase_UID)
         if self.firebase_UID is not None:
             self.assertNotEqual(self.firebase_UID.uid, '')
-        self.firebase_client_object = setup_firebase_client()
+        setup_firebase_client()
         app.app_context().push()
         return app
 
