@@ -1,5 +1,4 @@
 from src.exceptions.error import Error
-from src.utils.common_methods import logger
 
 
 class CommandUnableCreateOwnerUser(Error):

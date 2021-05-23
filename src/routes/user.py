@@ -21,7 +21,7 @@ def get_health():
     return {"status": "OK"}
 
 
-@check_token()
+@check_token
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>"))
 def get(uid):
     if verify_uid(uid):
@@ -41,7 +41,7 @@ def get(uid):
     return response_error("Error on format of the params", {uid: uid})
 
 
-@check_token()
+@check_token
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>"), methods=["POST"])
 def sync_user_create(uid):
     if verify_uid(uid):

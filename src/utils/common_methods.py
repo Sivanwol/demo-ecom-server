@@ -1,7 +1,6 @@
 from urllib.parse import urlparse
 from flask import request, url_for
 from validator import validate
-import logging
 import os
 from flask import Flask
 from flask_cors import CORS
@@ -17,7 +16,6 @@ from config.database import db, migration
 
 roleSerivce = RolesService()
 userService = UserService()
-logger = None
 
 def verify_uid(uid):
     rules = {"uid": "required|min:10"}
@@ -35,7 +33,9 @@ def verify_response():
 
 def setup_owner_user(email, password):
     user = check_user(email)
+
     if user is None:
+        print("Firebase user creation")
         user = create_firebase_user(email, password)
     if user is None:
         raise CommandUnableCreateOwnerUser(email)
@@ -66,12 +66,9 @@ def scan_routes(app):
 
 
 def create_app(name):
-    global logger
     app = Flask(name)
     app.config.from_object(settings[os.environ.get("FLASK_ENV", "development")])
     cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
-    # Logs Initialization
-    logger = logging.getLogger('console')
     print("System Config", settings[os.environ.get("FLASK_ENV", "development")])
     # firebase loading
     firebase = FirebaseService()
