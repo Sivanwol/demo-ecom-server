@@ -2,10 +2,9 @@
 
 import unittest
 
-import config.routes
 from src.models.users import Users
 from test.common.Basecase import BaseTestCase
-from test.common.firebase_utils import login_user, is_json_key_present
+from src.utils.firebase_utils import login_user, is_json_key_present
 
 
 class FlaskTestCase(BaseTestCase):

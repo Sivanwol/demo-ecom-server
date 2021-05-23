@@ -21,7 +21,7 @@ $ pip install -r requirements.txt
 if ever need add a dep to the project please do as follow
 ```angular2html
 $ pip install packagename
-$ pip-compile requirements.txt --generate-hashes # this will regenerate the requirements.txt
+$ pip-compile requirements.txt # this will regenerate the requirements.txt
 ```
 ### Running
  
@@ -40,6 +40,46 @@ If you have the debugger disabled or trust the users on your network, you can ma
 ```
 flask run --host=0.0.0.0
 ```
+
+### Developing and Testing
+<p>
+as this system have a firebase user system that it is based upon there is a need quick way</p>
+<ul>
+    <li>Getting Id token from n user that use the emulator (else just use the client for fetching the id token)</li>
+    <li>Createing on new env master user that have role owner and able to do most stuff within system</li>
+</ul>
+as such there is two commands that able use both globally and within emulators
+for change where the system will work need run this command:
+<p><b>Note if any of the setup will set need make sure unset if want use globally</b></p>
+
+###### Set up the auth system
+
+```
+# mac / linux
+export FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
+# windows
+set FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
+```
+###### Set up the firestore system
+
+```
+# mac / linux
+export FIRESTORE_EMULATOR_HOST=localhost:9099
+# windows
+set FIRESTORE_EMULATOR_HOST=localhost:9099
+```
+
+##### Command Lines
+
+###### set up of master account
+```
+python manage.py setup_owner email@domain.com password
+```
+###### getting id token from an account
+```
+python manage.py get_id_token email@domain.com password
+```
+
 
 ### Running using Manager
 

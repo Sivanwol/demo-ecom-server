@@ -20,15 +20,15 @@ def upgrade():
     roles = op.create_table('roles',
                             sa.Column('id', sa.Integer(), nullable=False),
                             sa.Column('name', sa.String(length=255), nullable=False),
-                            sa.Column('active', sa.Boolean(), nullable=True),
+                            sa.Column('is_active', sa.Boolean(), default=True),
                             sa.PrimaryKeyConstraint('id'))
 
     op.bulk_insert(roles, [
-        {'name': 'owner'},
-        {'name': 'customer'},
-        {'name': 'account'},
-        {'name': 'reports'},
-        {'name': 'support'},
+        {'name': 'owner', 'is_active': True},
+        {'name': 'customer', 'is_active': True},
+        {'name': 'account', 'is_active': True},
+        {'name': 'reports', 'is_active': True},
+        {'name': 'support', 'is_active': True},
     ])
     # ### end Alembic commands ###
 

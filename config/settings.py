@@ -25,6 +25,7 @@ class Config:
     GOOGLE_APPLICATION_CREDENTIALS = os.getenv('FIREBASE_SERVICE_CONFIG_FILE')
     FIREBASE_CONFIG = os.getenv('FIREBASE_CONFIG_FILE')
     FIREBASE_APIKEY = os.getenv('FIREBASE_APIKEY')
+    FIREBASE_OWNER_ACCOUNT_UID = os.getenv('FIREBASE_OWNER_ACCOUNT_UID')
     # log file path
     # --------------------------------------------------------------------
     enable_access_log = False
@@ -68,6 +69,7 @@ class DevelopmentConfig(Config):
 
 
 class TestingConfig(Config):
+
     ENV = os.environ.get("FLASK_ENV", "testing")
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     DEBUG = True

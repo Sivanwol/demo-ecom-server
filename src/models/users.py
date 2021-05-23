@@ -1,10 +1,8 @@
-from flask_security import UserMixin
 from sqlalchemy import Integer, String, Boolean
 
 from config.database import db
 
-
-class Users(db.Model, UserMixin):
+class Users(db.Model):
     """
     This is a base user Model
     """
@@ -19,9 +17,9 @@ class Users(db.Model, UserMixin):
     is_active = db.Column(Boolean, nullable=False, default=False)
 
     # Define the relationship to Role via UserRoles
-    roles = db.relationship('Role', secondary='user_roles')
+    roles = db.relationship('Roles', secondary='user_roles')
 
-    def __init__(self, uid, is_active, avatar_id='', phone='', address1='', address2=''):
+    def __init__(self, uid, is_active, avatar_id=0, phone='', address1='', address2=''):
         self.uid = uid
         self.avatar_id = avatar_id
         self.phone = phone
@@ -32,5 +30,7 @@ class Users(db.Model, UserMixin):
     def __repr__(self):
         return "<User(id='{id}', uid='{uid}', is_active='{is_active}')>".format(id=self.id, uid=self.uid, is_active=self.is_active)
 
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    def __json__(self):
+        return ['uid', 'avatar_id', 'phone', 'address1', 'address2']
+    # def to_dict(self):
+    #     return {c.name: getattr(self, c.name) for c in self.__table__.columns}
