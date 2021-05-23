@@ -1,5 +1,5 @@
+from config import app
 from src.exceptions.error import Error
-from src.utils.common_methods import logger
 
 
 class UnknownRolesOrNotMatched(Error):
@@ -12,4 +12,4 @@ class UnknownRolesOrNotMatched(Error):
 
     def __init__(self, roles_name):
         self.message = 'one of the roles name dose not existed {}'.format(role_name for role_name in roles_name)
-        logger.error(self.message)
+        app.logger.error(self.message)

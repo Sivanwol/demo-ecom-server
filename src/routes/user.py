@@ -5,6 +5,7 @@ from firebase_admin.auth import UserNotFoundError
 from firebase_admin.exceptions import FirebaseError
 from config import settings
 from config.api import app as current_app
+from src.middlewares.check_role import check_role
 from src.middlewares.check_token import check_token
 from src.services.roels import RolesService
 from src.services.user import UserService
@@ -23,6 +24,32 @@ def get_health():
 @check_token
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>"))
 def get(uid):
+    if verify_uid(uid):
+        try:
+            response = {'user': {
+                'display_name': '',
+                'disabled': False
+            }, 'extend_info': None}
+            firebase_user_object = userService.get_firebase_user(uid)
+            response['user']['display_name'] = firebase_user_object.display_name
+            response['user']['disabled'] = firebase_user_object.disabled
+            response['extend_info'] = userService.get_user(uid)
+            # response['extend_info']['roles'] = role_schema.dump(user.roles)
+            return response_success(response)
+        except ValueError:
+            current_app.logger.error("User not found", {uid: uid})
+            return response_error("Error on format of the params", {uid: uid})
+        except UserNotFoundError:
+            return response_error("User not found", {uid: uid})
+        except FirebaseError as err:
+            current_app.logger.error("unknown error", err)
+            return response_error("unknown error", {err: err.cause})
+    return response_error("Error on format of the params", {uid: uid})
+
+
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/check/<uid>"))
+@check_role(['account', 'owner'])
+def get_check_roles(uid):
     if verify_uid(uid):
         try:
             response = {'user': {

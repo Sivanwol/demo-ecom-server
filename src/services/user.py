@@ -3,6 +3,7 @@ from firebase_admin import auth
 from config.database import db
 from src.models import Users
 from src.schemas.user_schema import UserSchema
+from src.utils.responses import response_error
 from src.utils.singleton import singleton
 
 
@@ -43,15 +44,50 @@ class UserService:
         user = Users.query.filter_by(uid=uid).first()
         return self.user_schema.dump(user, many=False).data
 
-    def check_user_roles(self, uid, roles_name):
+    def check_user_auth(self, request):
+        if not request.headers.get('authorization'):
+            return response_error('No token provided', None, 400)
+        try:
+            user = auth.verify_id_token(request.headers['authorization'])
+            request.uid = user["uid"]
+        except:
+            return response_error('Invalid token provided', None, 400)
+
+    def check_user_roles(self, uid, *requirements_roles):
+        """ Return True if the user has all of the specified roles. Return False otherwise.
+            has_roles() accepts a list of requirements:
+                has_role(requirement1, requirement2, requirement3).
+            Each requirement is either a role_name, or a tuple_of_role_names.
+                role_name example:   'manager'
+                tuple_of_role_names: ('funny', 'witty', 'hilarious')
+            A role_name-requirement is accepted when the user has this role.
+            A tuple_of_role_names-requirement is accepted when the user has ONE of these roles.
+            has_roles() returns true if ALL of the requirements have been accepted.
+            For example:
+                has_roles('a', ('b', 'c'), d)
+            Translates to:
+                User has role 'a' AND (role 'b' OR role 'c') AND role 'd'"""
         user = self.get_user(uid)
-        result = False
-        for role in user.roles:
-            role_name = role.name
-            try:
-                idx = roles_name.index(role_name)
-            except ValueError:
-                return False
+        role_names = user['roles']
+        for requirement in requirements_roles:
+            if isinstance(requirement, (list, tuple)):
+                # this is a tuple_of_role_names requirement
+                tuple_of_role_names = requirement
+                authorized = False
+                for role_object in role_names:
+                    if role_object['name'] in tuple_of_role_names[0]:
+                        # tuple_of_role_names requirement was met: break out of loop
+                        authorized = True
+                        break
+                if not authorized:
+                    return False  # tuple_of_role_names requirement failed: return False
+            else:
+                # the user must have this role
+                for role_object in role_names:
+                    if role_object['name'] in requirements_roles:
+                        return False  # role_name requirement failed: return False
+
+            # All requirements have been met: return True
         return True
 
     def sync_user(self, uid, roles):
