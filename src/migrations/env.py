@@ -63,14 +63,14 @@ def run_migrations_online():
     """
 
     # this callback is used to prevent an auto-migration from being generated
-    # when there are no changes to the schema
+    # when there are no changes to the schemas
     # reference: http://alembic.zzzcomputing.com/en/latest/cookbook.html
     def process_revision_directives(context, revision, directives):
         if getattr(config.cmd_opts, 'autogenerate', False):
             script = directives[0]
             if script.upgrade_ops.is_empty():
                 directives[:] = []
-                logger.info('No changes in schema detected.')
+                logger.info('No changes in schemas detected.')
 
     connectable = engine_from_config(
         config.get_section(config.config_ini_section),

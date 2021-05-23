@@ -21,7 +21,7 @@ $ pip install -r requirements.txt
 if ever need add a dep to the project please do as follow
 ```angular2html
 $ pip install packagename
-$ pip-compile requirements.txt --generate-hashes # this will regenerate the requirements.txt
+$ pip-compile requirements.txt # this will regenerate the requirements.txt
 ```
 ### Running
  

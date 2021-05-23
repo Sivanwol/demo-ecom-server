@@ -2,11 +2,13 @@ from firebase_admin import auth
 
 from config.database import db
 from src.models import Users
+from src.schemas.user_schema import UserSchema
 from src.utils.singleton import singleton
 
 
 @singleton
 class UserService:
+    user_schema = UserSchema()
     """Verifies the signature and data for the provided JWT.
 
     Accepts a signed token string, verifies that it is current, was issued
@@ -38,7 +40,8 @@ class UserService:
         return auth.get_user(uid)
 
     def get_user(self, uid):
-        return Users.query.filter_by(uid=uid).first()
+        user = Users.query.filter_by(uid=uid).first()
+        return self.user_schema.dump(user, many=False).data
 
     def check_user_roles(self, uid, roles_name):
         user = self.get_user(uid)

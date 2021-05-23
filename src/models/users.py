@@ -2,7 +2,6 @@ from sqlalchemy import Integer, String, Boolean
 
 from config.database import db
 
-
 class Users(db.Model):
     """
     This is a base user Model
@@ -31,5 +30,7 @@ class Users(db.Model):
     def __repr__(self):
         return "<User(id='{id}', uid='{uid}', is_active='{is_active}')>".format(id=self.id, uid=self.uid, is_active=self.is_active)
 
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    def __json__(self):
+        return ['uid', 'avatar_id', 'phone', 'address1', 'address2']
+    # def to_dict(self):
+    #     return {c.name: getattr(self, c.name) for c in self.__table__.columns}

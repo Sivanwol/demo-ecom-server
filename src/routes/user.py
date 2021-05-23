@@ -13,7 +13,6 @@ from src.utils.common_methods import verify_uid
 
 roleSerivce = RolesService()
 userService = UserService()
-print(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/health"))
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/health"))
@@ -26,14 +25,20 @@ def get_health():
 def get(uid):
     if verify_uid(uid):
         try:
-            response = {'user': None, 'extend_info': None}
-            response.user = userService.get_firebase_user(uid)
-            response.extend_info = userService.get_user(uid)
+            response = {'user': {
+                'display_name': '',
+                'disabled': False
+            }, 'extend_info': None}
+            firebase_user_object = userService.get_firebase_user(uid)
+            response['user']['display_name'] = firebase_user_object.display_name
+            response['user']['disabled'] = firebase_user_object.disabled
+            response['extend_info'] = userService.get_user(uid)
+            # response['extend_info']['roles'] = role_schema.dump(user.roles)
             return response_success(response)
         except ValueError:
+            current_app.logger.error("User not found", {uid: uid})
             return response_error("Error on format of the params", {uid: uid})
         except UserNotFoundError:
-            current_app.logger.error("User not found", {uid: uid})
             return response_error("User not found", {uid: uid})
         except FirebaseError as err:
             current_app.logger.error("unknown error", err)

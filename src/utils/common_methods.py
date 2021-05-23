@@ -1,18 +1,11 @@
 from urllib.parse import urlparse
 from flask import request, url_for
 from validator import validate
-import os
-from flask import Flask
-from flask_cors import CORS
-from flask_jwt_extended import JWTManager
-from config import settings
 from src.exceptions.unable_create_owner_user import CommandUnableCreateOwnerUser
-from src.services.firebase import FirebaseService
 from src.services.roels import RolesService
 from src.services.user import UserService
 from src.utils.firebase_utils import check_user, create_firebase_user
 from src.utils.responses import response_error
-from config.database import db, migration
 
 roleSerivce = RolesService()
 userService = UserService()
@@ -64,21 +57,3 @@ def scan_routes(app):
     for line in sorted(output):
         print(line)
 
-
-def create_app(name):
-    app = Flask(name)
-    app.config.from_object(settings[os.environ.get("FLASK_ENV", "development")])
-    cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
-    print("System Config", settings[os.environ.get("FLASK_ENV", "development")])
-    # firebase loading
-    firebase = FirebaseService()
-    firebase.load_firebase()
-    jwt = JWTManager(app)
-
-    # Database ORM Initialization
-
-    db.init_app(app)
-
-    # Database Migrations Initialization
-    migration.init_app(app, db)
-    return app
