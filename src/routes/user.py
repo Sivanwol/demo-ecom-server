@@ -21,14 +21,14 @@ def get_health():
     return {"status": "OK"}
 
 
-@check_token
+@check_token()
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>"))
 def get(uid):
     if verify_uid(uid):
         try:
             response = {'user': None, 'extend_info': None}
-            response.user = userService.get_user(uid)
-            response.extend_info = userService.get_extend_user_info(uid)
+            response.user = userService.get_firebase_user(uid)
+            response.extend_info = userService.get_user(uid)
             return response_success(response)
         except ValueError:
             return response_error("Error on format of the params", {uid: uid})
@@ -41,15 +41,15 @@ def get(uid):
     return response_error("Error on format of the params", {uid: uid})
 
 
-@check_token
+@check_token()
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>"), methods=["POST"])
 def sync_user_create(uid):
     if verify_uid(uid):
         try:
-            response = {'user': json.dumps(userService.get_user(uid).__dict__['_data'], indent=4), 'extend_info': None}
+            response = {'user': json.dumps(userService.get_firebase_user(uid).__dict__['_data'], indent=4), 'extend_info': None}
             roles = roleSerivce.get_roles(['customer'])
             userService.sync_user(uid, roles)
-            response['extend_info'] = userService.get_extend_user_info(uid).to_dict()
+            response['extend_info'] = userService.get_user(uid).to_dict()
             return response_success(response)
         except ValueError:
             return response_error("Error on format of the params", {uid: uid})

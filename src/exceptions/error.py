@@ -1,3 +1,4 @@
 
 class Error(Exception):
-    pass
+    def __init__(self):
+        logger

@@ -17,7 +17,7 @@ from config.database import db, migration
 
 roleSerivce = RolesService()
 userService = UserService()
-
+logger = None
 
 def verify_uid(uid):
     rules = {"uid": "required|min:10"}
@@ -66,11 +66,12 @@ def scan_routes(app):
 
 
 def create_app(name):
+    global logger
     app = Flask(name)
     app.config.from_object(settings[os.environ.get("FLASK_ENV", "development")])
     cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
     # Logs Initialization
-    console = logging.getLogger('console')
+    logger = logging.getLogger('console')
     print("System Config", settings[os.environ.get("FLASK_ENV", "development")])
     # firebase loading
     firebase = FirebaseService()

@@ -34,11 +34,22 @@ class UserService:
     def verify_token(self, token, check_revoked=False):
         return auth.verify_id_token(token, check_revoked)
 
-    def get_user(self, uid):
+    def get_firebase_user(self, uid):
         return auth.get_user(uid)
 
-    def get_extend_user_info(self, uid):
+    def get_user(self, uid):
         return Users.query.filter_by(uid=uid).first()
+
+    def check_user_roles(self, uid, roles_name):
+        user = self.get_user(uid)
+        result = False
+        for role in user.roles:
+            role_name = role.name
+            try:
+                idx = roles_name.index(role_name)
+            except ValueError:
+                return False
+        return True
 
     def sync_user(self, uid, roles):
         user = Users(uid, True)
