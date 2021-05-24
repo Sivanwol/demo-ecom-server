@@ -17,4 +17,7 @@ class UserSchema(SQLAlchemySchema):
     address1 = auto_field()
     address2 = auto_field()
     phone = auto_field()
+    is_pass_tutorial = auto_field()
+    country = auto_field()
+    currency = auto_field()
     roles = Nested(RoleSchema, many=True, exclude=('user',))

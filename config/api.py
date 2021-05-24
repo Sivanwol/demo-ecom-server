@@ -8,7 +8,6 @@ from flask_jwt_extended import JWTManager
 from config import settings
 from config.database import db, migration
 from src.services.firebase import FirebaseService
-# from src.utils.json_encoder import AlchemyEncoder
 
 
 def load_application():

@@ -5,7 +5,6 @@ from firebase_admin.auth import UserNotFoundError
 from firebase_admin.exceptions import FirebaseError
 from config import settings
 from config.api import app as current_app
-from src.middlewares.check_role import check_role
 from src.middlewares.check_token import check_token
 from src.services.roels import RolesService
 from src.services.user import UserService
@@ -18,6 +17,7 @@ userService = UserService()
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/health"))
 def get_health():
+
     return {"status": "OK"}
 
 
@@ -47,21 +47,16 @@ def get(uid):
     return response_error("Error on format of the params", {uid: uid})
 
 
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/check/<uid>"))
-@check_role(['account', 'owner'])
-def get_check_roles(uid):
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/passed_tutorial/<uid>"), methods=["PUT"])
+@check_token
+def mark_user_passed_tutorial(uid):
     if verify_uid(uid):
         try:
-            response = {'user': {
-                'display_name': '',
-                'disabled': False
-            }, 'extend_info': None}
-            firebase_user_object = userService.get_firebase_user(uid)
-            response['user']['display_name'] = firebase_user_object.display_name
-            response['user']['disabled'] = firebase_user_object.disabled
-            response['extend_info'] = userService.get_user(uid)
-            # response['extend_info']['roles'] = role_schema.dump(user.roles)
-            return response_success(response)
+            user = userService.get_user(uid)
+            if not user:
+                return response_error("User not found", {uid: uid})
+            userService.mark_user_passed_tutorial(uid)
+            return response_success({})
         except ValueError:
             current_app.logger.error("User not found", {uid: uid})
             return response_error("Error on format of the params", {uid: uid})

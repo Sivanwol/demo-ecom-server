@@ -53,6 +53,11 @@ class UserService:
         except:
             return response_error('Invalid token provided', None, 400)
 
+    def mark_user_passed_tutorial(self, uid):
+        user = self.get_user(uid)
+        user.is_pass_tutorial = True
+        user.save()
+
     def check_user_roles(self, uid, *requirements_roles):
         """ Return True if the user has all of the specified roles. Return False otherwise.
             has_roles() accepts a list of requirements:
@@ -90,8 +95,8 @@ class UserService:
             # All requirements have been met: return True
         return True
 
-    def sync_user(self, uid, roles):
-        user = Users(uid, True)
+    def sync_user(self, uid, roles, is_new_user=False):
+        user = Users(uid, True, is_new_user)
         user.roles = roles
         db.session.add(user)
         db.session.commit()
