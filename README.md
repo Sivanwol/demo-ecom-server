@@ -76,9 +76,19 @@ set FIRESTORE_EMULATOR_HOST=localhost:9099
 python manage.py list_routes
 ```
 
-###### set up of master account
+###### set up of master account on Role of owner
 ```
 python manage.py setup_owner email@domain.com password
+```
+
+###### set up of master account on Role of accounts
+```
+python manage.py setup_accounts email@domain.com password
+```
+
+###### set up of master account on Role of support
+```
+python manage.py setup_support email@domain.com password
 ```
 ###### getting id token from an account
 ```
