@@ -82,20 +82,23 @@ class UserService:
                 for role_object in role_names:
                     if role_object['name'] in tuple_of_role_names[0]:
                         # tuple_of_role_names requirement was met: break out of loop
-                        authorized = True
-                        break
+                        if role_object['is_active']:
+                            authorized = True
+                            break
                 if not authorized:
                     return False  # tuple_of_role_names requirement failed: return False
             else:
                 # the user must have this role
                 for role_object in role_names:
+                    if not role_object['is_active']:
+                        return False
                     if role_object['name'] in requirements_roles:
                         return False  # role_name requirement failed: return False
 
             # All requirements have been met: return True
         return True
 
-    def sync_user(self, uid, roles, is_new_user=False):
+    def sync_user(self, uid, roles, store_code, is_new_user=False):
         user = Users(uid, True, is_new_user)
         user.roles = roles
         db.session.add(user)
