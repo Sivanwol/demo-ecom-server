@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import Integer, String, Boolean
 
 from config.database import db
@@ -19,6 +21,8 @@ class Users(db.Model):
     is_pass_tutorial = db.Column(Boolean, nullable=False, default=False)
     country = db.Column(String(3), nullable=True)
     currency = db.Column(String(3), nullable=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now())
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now(), onupdate=datetime.now())
 
     # Define the relationship to Role via UserRoles
     roles = db.relationship('Roles', secondary='user_roles')

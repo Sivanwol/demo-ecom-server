@@ -71,6 +71,11 @@ set FIRESTORE_EMULATOR_HOST=localhost:9099
 
 ##### Command Lines
 
+###### getting list of route on the system
+```
+python manage.py list_routes
+```
+
 ###### set up of master account
 ```
 python manage.py setup_owner email@domain.com password
