@@ -15,6 +15,7 @@ class User(db.Model):
     uid = db.Column(String(100), nullable=False)
     avatar_id = db.Column(Integer, nullable=True)
     phone = db.Column(String(100), nullable=True)
+    store_code = db.Column(String(100), nullable=True)
     address1 = db.Column(String(255), nullable=True)
     address2 = db.Column(String(255), nullable=True)
     is_active = db.Column(Boolean, nullable=False, default=False)
@@ -27,7 +28,7 @@ class User(db.Model):
     # Define the relationship to Role via UserRoles
     roles = db.relationship('Roles', secondary='user_roles')
 
-    def __init__(self, uid, is_active, is_pass_tutorial, country=None, currency=None, avatar_id=0, phone='', address1='', address2=''):
+    def __init__(self, uid, is_active, is_pass_tutorial, country=None, currency=None, store_code=None, avatar_id=0, phone='', address1='', address2=''):
         self.uid = uid
         self.avatar_id = avatar_id
         self.phone = phone
@@ -37,9 +38,12 @@ class User(db.Model):
         self.is_pass_tutorial = is_pass_tutorial
         self.country = country
         self.currency = currency
+        self.store_code = store_code
 
     def __repr__(self):
-        return "<User(id='{id}', uid='{uid}', is_active='{is_active}' is_pass_tutorial={is_pass_tutorial})>".format(id=self.id, uid=self.uid,
-                                                                                                                    is_active=self.is_active,
-                                                                                                                    is_pass_tutorial=self.is_pass_tutorial)
-
+        return "<User(id='{id}', uid='{uid}', is_active='{is_active}' is_pass_tutorial={is_pass_tutorial} store_code='{store_code})>".format(
+            id=self.id,
+            uid=self.uid,
+            is_active=self.is_active,
+            is_pass_tutorial=self.is_pass_tutorial,
+            store_code=self.store_code)

@@ -3,8 +3,11 @@ from firebase_admin import auth
 from config.database import db
 from src.models import User
 from src.schemas.user_schema import UserSchema
+from src.services.store import StoreService
 from src.utils.responses import response_error
 from src.utils.singleton import singleton
+
+storeService = StoreService()
 
 
 @singleton
@@ -100,8 +103,12 @@ class UserService:
             # All requirements have been met: return True
         return True
 
-    def sync_user(self, uid, roles, store_code, is_new_user=False):
+    def sync_user(self, uid, roles, store_code=None, is_new_user=True):
         user = User(uid, True, is_new_user)
+        if store_code is not None:
+            user.store_code = store_code
+        if not is_new_user:
+            user.is_pass_tutorial = True
         user.roles = roles
         db.session.add(user)
         db.session.commit()
