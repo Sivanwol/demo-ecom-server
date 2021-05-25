@@ -5,7 +5,7 @@ from sqlalchemy import Integer, String, Boolean
 from config.database import db
 
 
-class Users(db.Model):
+class User(db.Model):
     """
     This is a base user Model
     """

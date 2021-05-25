@@ -7,41 +7,46 @@ from config import settings
 from config.api import app as current_app
 from src.middlewares.check_role import check_role
 from src.middlewares.check_token import check_token
+from src.schemas.user_schema import GetUserSchema, UserSchema, FirebaseUserSchema
 from src.services.roels import RolesService
 from src.services.user import UserService
 from src.utils.enums import RolesTypes
 from src.utils.responses import response_error, response_success
 from src.utils.common_methods import verify_uid
 
+
 roleSerivce = RolesService()
 userService = UserService()
 
 
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/health"))
-def get_health():
-    return {"status": "OK"}
-
-
-@check_token
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>"))
+@check_token
 def get(uid):
     if verify_uid(uid):
         try:
-            response = {'user': {
+            response = {
+                'user_meta': None,
+                'user_data': None
+            }
+            getUserSchema = GetUserSchema()
+            firebaseUserSchema = FirebaseUserSchema()
+            firebase_response = {
                 'display_name': '',
                 'disabled': False
-            }, 'extend_info': None}
+            }
             firebase_user_object = userService.get_firebase_user(uid)
-            response['user']['display_name'] = firebase_user_object.display_name
-            response['user']['disabled'] = firebase_user_object.disabled
-            response['extend_info'] = userService.get_user(uid)
+            firebase_response['display_name'] = firebase_user_object.display_name
+            firebase_response['disabled'] = firebase_user_object.disabled
+
+            response['user_meta'] = firebaseUserSchema.dump(firebase_response)
+            response['user_data'] = userService.get_user(uid)
             # response['extend_info']['roles'] = role_schema.dump(user.roles)
-            return response_success(response)
+            return response_success(getUserSchema.dump(response))
         except ValueError:
             current_app.logger.error("User not found", {uid: uid})
             return response_error("Error on format of the params", {uid: uid})
         except UserNotFoundError:
-            return response_error("User not found", {uid: uid})
+            return response_error("User not found", {uid: uid}, 404)
         except FirebaseError as err:
             current_app.logger.error("unknown error", err)
             return response_error("unknown error", {err: err.cause})
@@ -54,7 +59,7 @@ def mark_user_passed_tutorial(uid, store_code):
     if verify_uid(uid):
         try:
             user = userService.get_user(uid)
-            if not user:
+            if not user or user.is_pass_tutorial:
                 return response_error("User not found", {uid: uid})
             userService.mark_user_passed_tutorial(uid, store_code)
             return response_success({})
@@ -69,8 +74,8 @@ def mark_user_passed_tutorial(uid, store_code):
     return response_error("Error on format of the params", {uid: uid})
 
 
-@check_token
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/<store_code>"), methods=["POST"])
+@check_token
 def sync_user_create(uid, store_code):
     if verify_uid(uid):
         try:
@@ -110,7 +115,6 @@ def create_store(uid):
             current_app.logger.error("unknown error", err)
             return response_error("unknown error", {err: err.cause})
     return response_error("Error on format of the params", {uid: uid})
-
 
 
 # Todo: add logic to Delete store

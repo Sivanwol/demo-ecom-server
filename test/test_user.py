@@ -2,7 +2,7 @@
 
 import unittest
 
-from src.models.users import Users
+from src.models.user import User
 from test.common.Basecase import BaseTestCase
 from src.utils.firebase_utils import login_user, is_json_key_present
 
@@ -28,7 +28,7 @@ class FlaskTestCase(BaseTestCase):
                 content_type='application/json'
             )
             self.assertEqual(response.status_code, 200)
-            user = Users.query.filter_by(uid=uid).first()
+            user = User.query.filter_by(uid=uid).first()
             self.assertIsNotNone(user)
 
 

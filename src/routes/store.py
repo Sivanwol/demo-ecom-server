@@ -5,19 +5,34 @@ from config import settings
 from config.api import app as current_app
 from src.middlewares.check_role import check_role
 from src.middlewares.check_token import check_token
+from src.services.store import StoreService
+from src.services.user import UserService
+from src.utils.common_methods import verify_uid
 from src.utils.enums import RolesTypes
-from src.utils.responses import response_success
+from src.utils.responses import response_success, response_error
+
+storeService = StoreService()
+userService = UserService()
 
 
 # Todo: add logic to get store info
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/info"))
 @check_token
 def get_store_info(uid, store_code):
-    countries = {}
-    for country in list(pycountry.countries):
-        obj = {"{}".format(country.alpha_3): country.__dict__['_fields']}
-        countries.update(obj)
-    return response_success(countries)
+    if verify_uid(uid):
+        store = storeService.get_store(uid, store_code)
+        if store is None:
+            response_error("error store not existed", {uid: uid, store_code: store_code})
+
+        return response_success(storeService.get_store(uid, store_code))
+    return response_error("Error on format of the params", {uid: uid})
+
+
+# Todo: add logic to update store info
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/list"))
+@check_role([RolesTypes.Support, RolesTypes.Owner, RolesTypes.Accounts, RolesTypes.Reports])
+def list_stores():
+    return response_success(storeService.get_stores())
 
 
 # Todo: add logic to update store info

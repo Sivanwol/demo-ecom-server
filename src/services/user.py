@@ -1,7 +1,7 @@
 from firebase_admin import auth
 
 from config.database import db
-from src.models import Users
+from src.models import User
 from src.schemas.user_schema import UserSchema
 from src.utils.responses import response_error
 from src.utils.singleton import singleton
@@ -40,9 +40,11 @@ class UserService:
     def get_firebase_user(self, uid):
         return auth.get_user(uid)
 
-    def get_user(self, uid):
-        user = Users.query.filter_by(uid=uid).first()
-        return self.user_schema.dump(user, many=False).data
+    def get_user(self, uid, return_schema=True):
+        user = User.query.filter_by(uid=uid).first()
+        if return_schema:
+            return self.user_schema.dump(user, many=False).data
+        return user
 
     def check_user_auth(self, request):
         if not request.headers.get('authorization'):
@@ -54,7 +56,7 @@ class UserService:
             return response_error('Invalid token provided', None, 400)
 
     def mark_user_passed_tutorial(self, uid):
-        user = self.get_user(uid)
+        user = self.get_user(uid, False)
         user.is_pass_tutorial = True
         user.save()
 
@@ -72,7 +74,7 @@ class UserService:
                 has_roles('a', ('b', 'c'), d)
             Translates to:
                 User has role 'a' AND (role 'b' OR role 'c') AND role 'd'"""
-        user = self.get_user(uid)
+        user = self.get_user(uid, False)
         role_names = user['roles']
         for requirement in requirements_roles:
             if isinstance(requirement, (list, tuple)):
@@ -99,7 +101,7 @@ class UserService:
         return True
 
     def sync_user(self, uid, roles, store_code, is_new_user=False):
-        user = Users(uid, True, is_new_user)
+        user = User(uid, True, is_new_user)
         user.roles = roles
         db.session.add(user)
         db.session.commit()
