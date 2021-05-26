@@ -62,6 +62,11 @@ class StoreService:
         for store_location in bulk_locations:
             es.index(index='stores', doc_type='locations', id=store_location.id, body=store_location)
 
+    # Todo: add logic to update store meta data
+    def update_store_metadata(self, store_data ):
+        pass
+
+
     def remove_locations(self, owner_uid, store_code, store_id):
         cache.delete_memoized('get_locations', owner_uid, store_code)
         StoreLocations.query.filter_by(store_id=store_id).delete()
