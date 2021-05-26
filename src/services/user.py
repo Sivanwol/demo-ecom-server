@@ -1,5 +1,6 @@
 from firebase_admin import auth
 
+from config.api import cache
 from config.database import db
 from src.models import User
 from src.schemas.user_schema import UserSchema
@@ -43,6 +44,7 @@ class UserService:
     def get_firebase_user(self, uid):
         return auth.get_user(uid)
 
+    @cache.memoize(50)
     def get_user(self, uid, return_schema=True):
         user = User.query.filter_by(uid=uid).first()
         if return_schema:

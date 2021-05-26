@@ -34,11 +34,9 @@ class Config:
 
     # redis config
     # --------------------------------------------------------------------
-    REDIS_HOST = "redis"  # docker network
-    REDIS_PORT = 6379
-    REDIS_DB = 0
+    REDIS_URL = "redis://localhost:6379/0"  # docker network
     REDIS_PASSWD = ''
-
+    CACHE_KEY_PREFIX= "db_cache"
     # sqlalchemy database config
     # --------------------------------------------------------------------
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')

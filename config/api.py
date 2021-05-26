@@ -2,6 +2,7 @@ import logging
 import os
 
 from flask import Flask
+from flask_cache import Cache
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 
@@ -29,3 +30,10 @@ def load_application():
 
 
 app = load_application()
+
+cache = Cache(app, config={
+    'CACHE_TYPE': 'redis',
+    'CACHE_KEY_PREFIX': settings[os.environ.get("FLASK_ENV", "development")].CACHE_KEY_PREFIX,
+    'CACHE_REDIS_URL': settings[os.environ.get("FLASK_ENV", "development")].REDIS_URL
+})
+cache.init_app(app)
