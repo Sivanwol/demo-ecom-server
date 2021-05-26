@@ -37,6 +37,11 @@ class Config:
     REDIS_URL = os.getenv('REDIS_URL')  # docker network
     REDIS_PASSWD = os.getenv('REDIS_PASSWD')
     CACHE_KEY_PREFIX = os.getenv('CACHE_KEY_PREFIX')
+
+    # elasticsearch config
+    # --------------------------------------------------------------------
+    ELASTICSEARCH_URL= os.getenv('ELASTICSEARCH_URL')
+
     # sqlalchemy database config
     # --------------------------------------------------------------------
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')

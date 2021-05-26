@@ -1,6 +1,7 @@
 import logging
 import os
 
+from elasticsearch import Elasticsearch
 from flask import Flask
 from flask_cache import Cache
 from flask_cors import CORS
@@ -37,3 +38,4 @@ cache = Cache(app, config={
     'CACHE_REDIS_URL': settings[os.environ.get("FLASK_ENV", "development")].REDIS_URL
 })
 cache.init_app(app)
+es = Elasticsearch(settings[os.environ.get("FLASK_ENV", "development")].ELASTICSEARCH_URL)
