@@ -28,15 +28,15 @@ class Config:
     FIREBASE_OWNER_ACCOUNT_UID = os.getenv('FIREBASE_OWNER_ACCOUNT_UID')
     # log file path
     # --------------------------------------------------------------------
-    enable_access_log = False
+    enable_access_log = True
     log_socket_host = "127.0.0.1"
     log_socket_port = 514
 
     # redis config
     # --------------------------------------------------------------------
-    REDIS_URL = "redis://localhost:6379/0"  # docker network
-    REDIS_PASSWD = ''
-    CACHE_KEY_PREFIX= "db_cache"
+    REDIS_URL = os.getenv('REDIS_URL')  # docker network
+    REDIS_PASSWD = os.getenv('REDIS_PASSWD')
+    CACHE_KEY_PREFIX = os.getenv('CACHE_KEY_PREFIX')
     # sqlalchemy database config
     # --------------------------------------------------------------------
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
@@ -67,7 +67,6 @@ class DevelopmentConfig(Config):
 
 
 class TestingConfig(Config):
-
     ENV = os.environ.get("FLASK_ENV", "testing")
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     DEBUG = True
