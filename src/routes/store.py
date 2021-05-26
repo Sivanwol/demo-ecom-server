@@ -39,9 +39,21 @@ def list_stores():
     return response_success(storeService.get_stores())
 
 
-# Todo: add logic to update store info
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/update"), methods=["PUT"])
-@check_role([RolesTypes.Support, RolesTypes.StoreOwner, RolesTypes.StoreAccount])
+# Todo: add logic to create store
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/create"), methods=["POST"])
+@check_role([RolesTypes.Accounts, RolesTypes.Owner])
+def update_store_info(uid):
+    currencies = {}
+    for currency in list(pycountry.currencies):
+        obj = {"{}".format(currency.alpha_3): currency.__dict__['_fields']}
+        currencies.update(obj)
+
+    return response_success(currencies)
+
+
+# Todo: add logic to delete store
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>"), methods=["DELETE"])
+@check_role([RolesTypes.Accounts, RolesTypes.Owner])
 def update_store_info(uid, store_code):
     currencies = {}
     for currency in list(pycountry.currencies):
@@ -55,7 +67,7 @@ def update_store_info(uid, store_code):
 @check_role([RolesTypes.Support, RolesTypes.StoreOwner, RolesTypes.StoreAccount])
 def update_store_support(uid, store_code):
     if request.is_json:
-        return response_error("Request Data must be in json format",request.data)
+        return response_error("Request Data must be in json format", request.data)
     if verify_uid(uid):
         store = storeService.get_store(uid, store_code)
         if store is None:
@@ -63,11 +75,10 @@ def update_store_support(uid, store_code):
         body = request.json()
         if not valid_currency(body['currency_code']):
             return response_error("Error on format of the params", {body: body})
-        data= StoreUpdate(**body)
+        data = StoreUpdate(**body)
         storeService.update_store_metadata(data)
         return response_success({})
     return response_error("Error on format of the params", {uid: uid})
-
 
 
 # Todo: add logic to create store location
