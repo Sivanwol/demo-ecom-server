@@ -7,9 +7,7 @@ from test.common.Basecase import BaseTestCase, Struct
 
 class FlaskTestCase(BaseTestCase):
     store_owner_user = "store+owner@store.com"
-
-    # todo: need add the store create and delete checks
-    def test_get_user_object(self):
+    def test_create_store(self):
         with self.client:
             user_object = self.login_user(self.firebase_owner_user, self.firebase_global_password)
             uid = user_object['uid']
@@ -21,12 +19,19 @@ class FlaskTestCase(BaseTestCase):
                 'description': 'store description',
                 'currency_code': currency_code
             }
-            response = self.request_post('/api/store/%s/create' % uid,token,post_data)
-            self.assertEqual(response.status_code, 200)
+            response = self.request_post('/api/store/%s/create' % uid, token, post_data)
+            self.assert200(response,'create store request failed')
+            store = self.storeService.get_store(uid, )
             response_data = Struct(response.json)
-            user = Struct(self.storeService.store(uid, True))
+            user = Struct(self.userService.get_user(uid, True))
             self.assertIsNotNone(user)
+            self.assertIsNotNone(store)
             self.assertIsNotNone(response_data)
+            self.assertEqual(response_data.store_code, store.store_code)
+            self.assertEqual(user.store_code, store.store_code)
+            self.assertEqual(response_data.name, post_data['name'])
+            self.assertEqual(response_data.default_currency_code, post_data['currency_code'])
+
 
 
 if __name__ == '__main__':

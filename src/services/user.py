@@ -55,7 +55,8 @@ class UserService:
         if not request.headers.get('authorization'):
             return response_error('No token provided', None, 400)
         try:
-            user = auth.verify_id_token(request.headers['authorization'])
+            token = request.headers['authorization'].replace('Bearer ', '')
+            user = auth.verify_id_token(token)
             request.uid = user["uid"]
         except:
             return response_error('Invalid token provided', None, 400)
@@ -84,7 +85,7 @@ class UserService:
                 has_roles('a', ('b', 'c'), d)
             Translates to:
                 User has role 'a' AND (role 'b' OR role 'c') AND role 'd'"""
-        user = self.get_user(uid, False)
+        user = self.get_user(uid, True)
         role_names = user['roles']
         for requirement in requirements_roles:
             if isinstance(requirement, (list, tuple)):

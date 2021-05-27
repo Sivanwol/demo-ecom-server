@@ -34,7 +34,7 @@ class FlaskTestCase(BaseTestCase):
                 '/api/user/%s' % uid,
                 data=dict(),
                 headers=dict(
-                    Authorization='Bearer ' + token
+                    Authorization='Bearer %s' + token
                 ),
                 content_type='application/json'
             )

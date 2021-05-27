@@ -95,7 +95,7 @@ class BaseTestCase(TestCase):
         roles = self.roleService.get_roles([RolesTypes.Accounts.value])
         self.userService.sync_firebase_user(self.firebase_owner_object.uid, roles, True)
 
-    def create_store_user(self, store_code,roles):
+    def create_store_user(self, store_code, roles):
         self.firebase_accounts_object = create_firebase_user(self.firebase_account_user, self.firebase_global_password)
         self.assertIsNotNone(self.firebase_accounts_object)
         if self.firebase_accounts_object is not None:
@@ -103,38 +103,47 @@ class BaseTestCase(TestCase):
         roles = self.roleService.get_roles(roles)
         self.userService.sync_firebase_user(self.firebase_owner_object.uid, roles, False, store_code)
 
-    def request_get(self, url , token):
-        headers = {'Content-Type': 'application/json', 'Authorization': token}
+    def request_get(self, url, token):
+        print('request get -> %s' % url)
+        headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token}
         return self.client.get(
             url,
             headers=headers
         )
 
     def request_put(self, url, token, data={}):
-        headers = {'Content-Type': 'application/json', 'Authorization': token}
+        print('request put -> %s' % url)
+        print('request put data-> %s' % json.dumps(data))
+        headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token}
         return self.client.put(
             url,
-            body=json.dumps(data),
+            data=json.dumps(data),
             headers=headers
         )
+
     def request_post(self, url, token, data={}):
-        headers = {'Content-Type': 'application/json', 'Authorization': token}
+        print('request post -> %s' % url)
+        print('request post data-> %s' % json.dumps(data))
+        headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token}
         return self.client.post(
             url,
-            body=json.dumps(data),
+            data=json.dumps(data),
             headers=headers
         )
+
     def request_delete(self, url, token):
-        headers = {'Content-Type': 'application/json', 'Authorization': token}
+        print('request delete -> %s' % url)
+        headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token}
         return self.client.delete(
             url,
             headers=headers
         )
 
+
 class Struct:
     def __init__(self, d):
         for a, b in d.items():
             if isinstance(b, (list, tuple)):
-               setattr(self, a, [Struct(x) if isinstance(x, dict) else x for x in b])
+                setattr(self, a, [Struct(x) if isinstance(x, dict) else x for x in b])
             else:
-               setattr(self, a, Struct(b) if isinstance(b, dict) else b)
+                setattr(self, a, Struct(b) if isinstance(b, dict) else b)
