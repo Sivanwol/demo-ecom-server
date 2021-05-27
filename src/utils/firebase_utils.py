@@ -26,7 +26,7 @@ def create_firebase_user(email, password):
     if user is None:
         try:
             user = firebase_admin.auth.create_user(email=email, password=password, email_verified=True,
-                                                   display_name="test user")
+                                                   display_name="test user %s" % email)
         except Exception as e:
             print(e)
             return None

@@ -95,7 +95,7 @@ def sync_store_user_create(uid, store_code):
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>"), methods=["POST"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
 def sync_platform_user_create(uid):
-    if request.is_json:
+    if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(uid):
         try:

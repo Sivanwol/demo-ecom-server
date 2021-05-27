@@ -6,9 +6,9 @@ from flask import jsonify
 def generic_response(code, data, message=None, params=None):
     return jsonify({
         "status": True if code == 200 else False,
-        "data": data if code == 200 else None,
-        "error_params": params if code != 200 else None,
-        "error": message if code != 200 else None
+        "data": data if code == 200 else {},
+        "error_params": params if code != 200 else {},
+        "error": message if code != 200 else {}
     }), code
 
 

@@ -42,12 +42,11 @@ def list_stores():
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/create"), methods=["POST"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
 def create_store(uid):
-    if request.is_json:
+    if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(uid):
-        body = request.json()
-        data = StoreCreate(**body)
-        store = storeService.create_store(data)
+        data = StoreCreate(**request.json)
+        store = storeService.create_store(uid,request.json)
         userService.update_user_store_owner(uid, store.store_code)
         return response_success(storeService.get_store(uid, store.store_code))
     return response_error("Error on format of the params", {uid: uid})
@@ -68,7 +67,7 @@ def delete_store(uid, store_code):
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/update"), methods=["PUT"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value, RolesTypes.StoreAccount.value])
 def update_store_support(uid, store_code):
-    if request.is_json:
+    if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(uid):
         store = storeService.get_store(uid, store_code)

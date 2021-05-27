@@ -2,6 +2,7 @@
 import json
 import unittest
 
+from src.utils.enums import RolesTypes
 from test.common.Basecase import BaseTestCase, Struct
 
 
@@ -9,7 +10,7 @@ class FlaskTestCase(BaseTestCase):
     # todo: need add the store create and delete checks
     def test_get_user_object(self):
         with self.client:
-            user_object = self.login_user(self.firebase_owner_user, self.firebase_global_password)
+            user_object = self.login_user(self.platform_owner_user)
             uid = user_object['uid']
             token = user_object['idToken']
             response = self.request_get('/api/user/%s' % uid, token)
@@ -24,10 +25,30 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.user_data.id, user.id)
             self.assertEqual(response_data.data.user_data.roles[0].id, user.roles[0].id)
 
+    def test_check_role_not_match(self):
+        self.create_store_user(self.store_owner_user, [RolesTypes.StoreOwner.value], True)
+        user_object = self.login_user(self.platform_support_user)
+        uid = user_object['uid']
+        token = user_object['idToken']
+        user = self.userService.get_user(uid, True)
+        has_store_code = False
+        if 'store_code' in user:
+            has_store_code = True
+        self.assertFalse(has_store_code)
+        store_name = self.fake.company()
+        currency_code = self.fake.currency_code()
+        post_data = {
+            'name': store_name,
+            'description': 'store description',
+            'currency_code': currency_code
+        }
+        response = self.request_post('/api/store/%s/create' % uid, token, post_data)
+        self.assert401(response, 'role checks request failed')
+
     # todo:  Ensure that Flask was set up correctly
     def test_sync_new_user(self):
         with self.client:
-            user_object = self.login_user(self.firebase_owner_user, self.firebase_global_password)
+            user_object = self.login_user(self.platform_owner_user)
             uid = user_object['uid']
             token = user_object['idToken']
             response = self.client.post(

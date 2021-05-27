@@ -22,13 +22,14 @@ class BaseTestCase(TestCase):
     roleService = RolesService()
     storeService = StoreService()
     TESTING = True
-    firebase_owner_user = "test+owner@user.com"
-    firebase_support_user = "test+support@user.com"
-    firebase_account_user = "test+account@user.com"
-    firebase_global_password = "password!0101"
-    firebase_owner_object = None
-    firebase_support_object = None
-    firebase_accounts_object = None
+    platform_owner_user = "test+owner@user.com"
+    platform_support_user = "test+support@user.com"
+    platform_account_user = "test+account@user.com"
+    store_owner_user = "store+owner@store.com"
+    platform_owner_object = None
+    platform_support_object = None
+    platform_accounts_object = None
+    global_password = "password!0101"
     firebase_client_object = None
     firebaseService = FirebaseService()
 
@@ -54,8 +55,8 @@ class BaseTestCase(TestCase):
         db.session.remove()
         db.drop_all()
 
-    def login_user(self, email, password):
-        user = login_user(self.firebase_owner_user, self.firebase_global_password)
+    def login_user(self, email):
+        user = login_user(email, self.global_password)
         self.assertFalse(is_json_key_present(user, 'error'))
         token = user['idToken']
         self.assertIsNotNone(token)
@@ -72,36 +73,38 @@ class BaseTestCase(TestCase):
         self.setup_support_user()
 
     def setup_owner_user(self):
-        self.firebase_owner_object = create_firebase_user(self.firebase_owner_user, self.firebase_global_password)
-        self.assertIsNotNone(self.firebase_owner_object)
-        if self.firebase_owner_object is not None:
-            self.assertNotEqual(self.firebase_owner_object.uid, '')
+        self.platform_owner_object = create_firebase_user(self.platform_owner_user, self.global_password)
+        self.assertIsNotNone(self.platform_owner_object)
+        if self.platform_owner_object is not None:
+            self.assertNotEqual(self.platform_owner_object.uid, '')
         roles = self.roleService.get_roles([RolesTypes.Owner.value])
-        self.userService.sync_firebase_user(self.firebase_owner_object.uid, roles, True)
+        self.userService.sync_firebase_user(self.platform_owner_object.uid, roles, True)
 
     def setup_support_user(self):
-        self.firebase_support_object = create_firebase_user(self.firebase_support_user, self.firebase_global_password)
-        self.assertIsNotNone(self.firebase_support_object)
-        if self.firebase_support_object is not None:
-            self.assertNotEqual(self.firebase_support_object.uid, '')
+        self.platform_support_object = create_firebase_user(self.platform_support_user, self.global_password)
+        self.assertIsNotNone(self.platform_support_object)
+        if self.platform_support_object is not None:
+            self.assertNotEqual(self.platform_support_object.uid, '')
         roles = self.roleService.get_roles([RolesTypes.Support.value])
-        self.userService.sync_firebase_user(self.firebase_owner_object.uid, roles, True)
+        self.userService.sync_firebase_user(self.platform_owner_object.uid, roles, True)
 
     def setup_account_user(self):
-        self.firebase_accounts_object = create_firebase_user(self.firebase_account_user, self.firebase_global_password)
-        self.assertIsNotNone(self.firebase_accounts_object)
-        if self.firebase_accounts_object is not None:
-            self.assertNotEqual(self.firebase_accounts_object.uid, '')
+        self.platform_accounts_object = create_firebase_user(self.platform_account_user, self.global_password)
+        self.assertIsNotNone(self.platform_accounts_object)
+        if self.platform_accounts_object is not None:
+            self.assertNotEqual(self.platform_accounts_object.uid, '')
         roles = self.roleService.get_roles([RolesTypes.Accounts.value])
-        self.userService.sync_firebase_user(self.firebase_owner_object.uid, roles, True)
+        self.userService.sync_firebase_user(self.platform_owner_object.uid, roles, True)
 
-    def create_store_user(self, store_code, roles):
-        self.firebase_accounts_object = create_firebase_user(self.firebase_account_user, self.firebase_global_password)
-        self.assertIsNotNone(self.firebase_accounts_object)
-        if self.firebase_accounts_object is not None:
-            self.assertNotEqual(self.firebase_accounts_object.uid, '')
+    def create_store_user(self,email, roles, inital_state=False, store_code=None):
+        user = create_firebase_user(email, self.global_password)
+        self.assertIsNotNone(user)
+        if user is not None:
+            self.assertNotEqual(user.uid, '')
         roles = self.roleService.get_roles(roles)
-        self.userService.sync_firebase_user(self.firebase_owner_object.uid, roles, False, store_code)
+        if inital_state:
+            store_code = None
+        self.userService.sync_firebase_user(user.uid, roles, inital_state, store_code)
 
     def request_get(self, url, token):
         print('request get -> %s' % url)
