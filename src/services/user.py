@@ -45,9 +45,9 @@ class UserService:
         return auth.get_user(uid)
 
     @cache.memoize(50)
-    def get_user(self, uid, return_schema=True):
+    def get_user(self, uid, return_model=True):
         user = User.query.filter_by(uid=uid).first()
-        if return_schema:
+        if not return_model:
             return self.user_schema.dump(user, many=False).data
         return user
 
@@ -62,12 +62,12 @@ class UserService:
             return response_error('Invalid token provided', None, 400)
 
     def update_user_store_owner(self, uid, store_code):
-        user = self.get_user(uid)
+        user = self.get_user(uid, True)
         user.store_code = store_code
         user.save()
 
     def mark_user_passed_tutorial(self, uid):
-        user = self.get_user(uid, False)
+        user = self.get_user(uid, True)
         user.is_pass_tutorial = True
         user.save()
 

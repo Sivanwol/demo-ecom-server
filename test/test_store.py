@@ -12,13 +12,11 @@ class FlaskTestCase(BaseTestCase):
         with self.client:
             self.create_store_user(self.store_owner_user, [RolesTypes.StoreOwner.value], True)
             user_object = self.login_user(self.platform_owner_user)
-            uid = user_object['uid']
+            store_user_object = self.login_user(self.store_owner_user)
+            uid = store_user_object['uid']
             token = user_object['idToken']
             user = self.userService.get_user(uid, True)
-            has_store_code = False
-            if 'store_code' in user:
-                has_store_code = True
-            self.assertFalse(has_store_code)
+            self.assertIsNone(user.store_code)
             store_name = self.fake.company()
             currency_code = self.fake.currency_code()
             post_data = {

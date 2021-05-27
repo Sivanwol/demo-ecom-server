@@ -107,17 +107,19 @@ class BaseTestCase(TestCase):
         self.userService.sync_firebase_user(user.uid, roles, inital_state, store_code)
 
     def request_get(self, url, token):
-        print('request get -> %s' % url)
         headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token}
+        print('request get -> %s' % url)
+        print('request headers -> %s' % json.dumps(headers))
         return self.client.get(
             url,
             headers=headers
         )
 
     def request_put(self, url, token, data={}):
-        print('request put -> %s' % url)
-        print('request put data-> %s' % json.dumps(data))
         headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token}
+        print('request put -> %s' % url)
+        print('request headers -> %s' % json.dumps(headers))
+        print('request put data-> %s' % json.dumps(data))
         return self.client.put(
             url,
             data=json.dumps(data),
@@ -125,9 +127,10 @@ class BaseTestCase(TestCase):
         )
 
     def request_post(self, url, token, data={}):
-        print('request post -> %s' % url)
-        print('request post data-> %s' % json.dumps(data))
         headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token}
+        print('request post -> %s' % url)
+        print('request headers -> %s' % json.dumps(headers))
+        print('request post data-> %s' % json.dumps(data))
         return self.client.post(
             url,
             data=json.dumps(data),
@@ -135,8 +138,9 @@ class BaseTestCase(TestCase):
         )
 
     def request_delete(self, url, token):
-        print('request delete -> %s' % url)
         headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token}
+        print('request delete -> %s' % url)
+        print('request headers -> %s' % json.dumps(headers))
         return self.client.delete(
             url,
             headers=headers
