@@ -24,8 +24,7 @@ class StoreLocations(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now())
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now(), onupdate=datetime.now())
 
-    move_to_location = db.relationship('StoreLocations', backref='StoreLocations', lazy='dynamic')
-    store = db.relationship('Store', backref='StoreLocations', lazy='dynamic')
+    store = db.relationship('Store', backref='stores')
 
     def __init__(self, store_id, address, city, country_code, lat=None, lng=None, is_close=None):
         self.store_id = store_id

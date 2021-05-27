@@ -16,5 +16,3 @@ class UserRoles(db.Model):
     def __repr__(self):
         return "<User_Role(user_id='{}', role_id='{}')>".format(self.user_id, self.role_id)
 
-    def to_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}

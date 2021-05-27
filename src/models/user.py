@@ -47,3 +47,14 @@ class User(db.Model):
             is_active=self.is_active,
             is_pass_tutorial=self.is_pass_tutorial,
             store_code=self.store_code)
+
+    def add_user_roles(self, roles):
+        for role in roles:
+            self.roles.append(role)
+        self.save()
+
+    def remove_user_roles(self, roles):
+        for role in roles:
+            for user_role in self.roles:
+                self.roles.filter(lambda user_role: role != user_role.name)
+        self.save()

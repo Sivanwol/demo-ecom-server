@@ -3,20 +3,24 @@ import os
 
 from firebase_admin.auth import UserNotFoundError
 from firebase_admin.exceptions import FirebaseError
+from flask import request
+
 from config import settings
 from config.api import app as current_app
 from src.middlewares.check_role import check_role
 from src.middlewares.check_token import check_token
-from src.schemas.user_schema import GetUserSchema, UserSchema, FirebaseUserSchema
-from src.services.roels import RolesService
+from src.schemas.user_schema import GetUserSchema, FirebaseUserSchema
+from src.serializers.create_platform_user import CreatePlatformUser
+from src.services.roles import RolesService
+from src.services.store import StoreService
 from src.services.user import UserService
 from src.utils.enums import RolesTypes
 from src.utils.responses import response_error, response_success
 from src.utils.common_methods import verify_uid
 
-
 roleSerivce = RolesService()
 userService = UserService()
+storeService = StoreService()
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>"))
@@ -76,14 +80,14 @@ def mark_user_passed_tutorial(uid, store_code):
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/<store_code>"), methods=["POST"])
 @check_token
-def sync_user_create(uid, store_code):
+def sync_store_user_create(uid, store_code):
     if verify_uid(uid):
         try:
-            response = {'user': json.dumps(userService.get_firebase_user(uid).__dict__['_data'], indent=4), 'extend_info': None}
-            roles = roleSerivce.get_roles(['customer'])
-            userService.sync_firebase_user(uid, roles, store_code)
-            response['extend_info'] = userService.get_user(uid).to_dict()
-            return response_success(response)
+            store = storeService.get_store(uid, store_code, True)
+            if store is None:
+                return response_error("Store not found", {store_code: store_code})
+            roles = roleSerivce.get_roles([RolesTypes.StoreCustomer])
+            return response_success(get_user_object(uid, roles, False))
         except ValueError:
             return response_error("Error on format of the params", {uid: uid})
         except UserNotFoundError:
@@ -95,17 +99,21 @@ def sync_user_create(uid, store_code):
     return response_error("Error on format of the params", {uid: uid})
 
 
-# Todo: add logic to create store
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/create_store/<uid>"), methods=["POST"])
-@check_role([RolesTypes.Owner, RolesTypes.Accounts])
-def create_store(uid):
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>"), methods=["POST"])
+@check_role([RolesTypes.Accounts, RolesTypes.Owner])
+def sync_platform_user_create(uid):
+    if request.is_json:
+        return response_error("Request Data must be in json format", request.data)
     if verify_uid(uid):
         try:
-            response = {'user': json.dumps(userService.get_firebase_user(uid).__dict__['_data'], indent=4), 'extend_info': None}
-            roles = roleSerivce.get_roles(['customer'])
-            userService.sync_firebase_user(uid, roles)
-            response['extend_info'] = userService.get_user(uid).to_dict()
-            return response_success(response)
+            body = request.json()
+            bodyObj = {"role_names": ', '.join(body['role_names'])}
+            data = CreatePlatformUser(**bodyObj)
+            if roleSerivce.check_roles(data.role_names):
+                return response_error("One or more of fields are invalid", request.data)
+
+            roles = roleSerivce.get_roles(data.role_names)
+            return response_success(get_user_object(uid, roles, True))
         except ValueError:
             return response_error("Error on format of the params", {uid: uid})
         except UserNotFoundError:
@@ -117,23 +125,9 @@ def create_store(uid):
     return response_error("Error on format of the params", {uid: uid})
 
 
-# Todo: add logic to Delete store
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/create_store/<uid>"), methods=["DELETE"])
-@check_role([RolesTypes.Owner, RolesTypes.Accounts])
-def delete_store(uid):
-    if verify_uid(uid):
-        try:
-            response = {'user': json.dumps(userService.get_firebase_user(uid).__dict__['_data'], indent=4), 'extend_info': None}
-            roles = roleSerivce.get_roles(['customer'])
-            userService.sync_firebase_user(uid, roles)
-            response['extend_info'] = userService.get_user(uid).to_dict()
-            return response_success(response)
-        except ValueError:
-            return response_error("Error on format of the params", {uid: uid})
-        except UserNotFoundError:
-            current_app.logger.error("User not found", {uid: uid})
-            return response_error("User not found", {uid: uid})
-        except FirebaseError as err:
-            current_app.logger.error("unknown error", err)
-            return response_error("unknown error", {err: err.cause})
-    return response_error("Error on format of the params", {uid: uid})
+def get_user_object(uid, role_names, is_platform_user):
+    response = {'user': json.dumps(userService.get_firebase_user(uid).__dict__['_data'], indent=4), 'extend_info': None}
+    roles = roleSerivce.get_roles(role_names)
+    userService.sync_firebase_user(uid, roles, is_platform_user)
+    response['extend_info'] = userService.get_user(uid)
+    return response

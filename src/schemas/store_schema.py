@@ -35,7 +35,7 @@ class StoreLocationSchema(SQLAlchemySchema):
     store = Nested(StoreSchema)
     address = auto_field()
     city = auto_field()
-    county_code = auto_field()
+    country_code = auto_field()
     is_close = auto_field()
     created_at = auto_field()
     updated_at = auto_field()

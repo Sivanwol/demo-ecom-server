@@ -42,7 +42,7 @@ def list_stores():
 # Todo: add logic to create store
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/create"), methods=["POST"])
 @check_role([RolesTypes.Accounts, RolesTypes.Owner])
-def update_store_info(uid):
+def create_store(uid):
     currencies = {}
     for currency in list(pycountry.currencies):
         obj = {"{}".format(currency.alpha_3): currency.__dict__['_fields']}
@@ -54,7 +54,7 @@ def update_store_info(uid):
 # Todo: add logic to delete store
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>"), methods=["DELETE"])
 @check_role([RolesTypes.Accounts, RolesTypes.Owner])
-def update_store_info(uid, store_code):
+def delete_store(uid, store_code):
     currencies = {}
     for currency in list(pycountry.currencies):
         obj = {"{}".format(currency.alpha_3): currency.__dict__['_fields']}

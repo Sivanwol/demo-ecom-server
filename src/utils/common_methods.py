@@ -2,7 +2,7 @@ from urllib.parse import urlparse
 from flask import request, url_for
 from validator import validate
 from src.exceptions.unable_create_owner_user import CommandUnableCreateOwnerUser
-from src.services.roels import RolesService
+from src.services.roles import RolesService
 from src.services.user import UserService
 from src.utils.enums import RolesTypes
 from src.utils.firebase_utils import check_user, create_firebase_user

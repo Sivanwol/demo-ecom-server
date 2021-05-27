@@ -4,7 +4,7 @@ this will the operation of the Ecom shop that with user base of firebase
 
 ### Virtual environments
 
-```
+```angular2html
 $ sudo apt-get install python-virtualenv
 $ python3 -m venv venv
 $ . venv/bin/activate
@@ -14,14 +14,14 @@ Install all project dependencies using:
 
 ```
 When need install the deps of the system
-```
+```angular2html
 $ pip install -r requirements.txt
 ```
 
 if ever need add a dep to the project please do as follow
 ```angular2html
 $ pip install packagename
-$ pip-compile requirements.txt # this will regenerate the requirements.txt
+$ pip freeze > requirements.txt # this will regenerate the requirements.txt
 ```
 ### Running
  
@@ -37,8 +37,8 @@ If you enable debug support the server will reload itself on code changes, and i
 
 If you have the debugger disabled or trust the users on your network, you can make the server publicly available simply by adding --host=0.0.0.0 to the command line:
 
-```
-flask run --host=0.0.0.0
+```angular2html
+$ flask run --host=0.0.0.0
 ```
 
 ### Developing and Testing
@@ -54,45 +54,45 @@ for change where the system will work need run this command:
 
 ###### Set up the auth system
 
-```
+```angular2html
 # mac / linux
-export FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
+$ export FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
 # windows
-set FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
+$ set FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
 ```
 ###### Set up the firestore system
 
-```
+```angular2html
 # mac / linux
-export FIRESTORE_EMULATOR_HOST=localhost:9099
+$ export FIRESTORE_EMULATOR_HOST=localhost:9099
 # windows
-set FIRESTORE_EMULATOR_HOST=localhost:9099
+$ set FIRESTORE_EMULATOR_HOST=localhost:9099
 ```
 
 ##### Command Lines
 
 ###### getting list of route on the system
-```
-python manage.py list_routes
+```angular2html
+$ python manage.py list_routes
 ```
 
 ###### set up of master account on Role of owner
-```
-python manage.py setup_owner email@domain.com password
+```angular2html
+$ python manage.py setup_owner email@domain.com password
 ```
 
 ###### set up of master account on Role of accounts
-```
-python manage.py setup_accounts email@domain.com password
+```angular2html
+$ python manage.py setup_accounts email@domain.com password
 ```
 
 ###### set up of master account on Role of support
-```
-python manage.py setup_support email@domain.com password
+```angular2html
+$ python manage.py setup_support email@domain.com password
 ```
 ###### getting id token from an account
-```
-python manage.py get_id_token email@domain.com password
+```angular2html
+$ python manage.py get_id_token email@domain.com password
 ```
 
 
@@ -100,27 +100,27 @@ python manage.py get_id_token email@domain.com password
 
 This app can be started using Flask Manager. It provides some useful commands and configurations, also, it can be customized with more functionalities.
 
-```
-python manage.py runserver
+```angular2html
+$ python manage.py runserver
 ```
 
 ### Alembic Migrations
 
 Use the following commands to create a new migration file and update the database with the last migrations version:
 
-```
-flask db revision --autogenerate -m "description here"
-flask db upgrade head
+```angular2html
+$ flask db revision --autogenerate -m "description here"
+$ flask db upgrade head
 ```
 
 This project also uses the customized manager command to perform migrations.
-```
-python manage.py db revision --autogenerate -m "description here"
-python manage.py db upgrade head
+```angular2html
+$ python manage.py db revision --autogenerate -m "description here"
+$ python manage.py db upgrade head
 ```
 
 To upgrade the database with the newest migrations version, use:
 
-```
-python manage.py db upgrade head
+```angular2html
+$ python manage.py db upgrade head
 ```

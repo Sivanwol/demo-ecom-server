@@ -3,7 +3,7 @@ import os
 
 from elasticsearch import Elasticsearch
 from flask import Flask
-from flask_cache import Cache
+from flask_caching import Cache
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 
@@ -32,10 +32,20 @@ def load_application():
 
 app = load_application()
 
-cache = Cache(app, config={
-    'CACHE_TYPE': 'redis',
-    'CACHE_KEY_PREFIX': settings[os.environ.get("FLASK_ENV", "development")].CACHE_KEY_PREFIX,
-    'CACHE_REDIS_URL': settings[os.environ.get("FLASK_ENV", "development")].REDIS_URL
-})
+
+# on level of testing we dont need redis also need disable the caching system
+if os.environ.get("FLASK_ENV", "development") == 'testing':
+    cache = Cache(app, config={
+        'CACHE_TYPE': 'NullCache'
+    })
+else:
+    cache = Cache(app, config={
+        'CACHE_TYPE': 'RedisCache',
+        'CACHE_KEY_PREFIX': settings[os.environ.get("FLASK_ENV", "development")].CACHE_KEY_PREFIX,
+        'CACHE_REDIS_HOST': settings[os.environ.get("FLASK_ENV", "development")].REDIS_HOST,
+        'CACHE_REDIS_PORT': settings[os.environ.get("FLASK_ENV", "development")].REDIS_PORT,
+        'CACHE_REDIS_DB': settings[os.environ.get("FLASK_ENV", "development")].REDIS_DB,
+        'CACHE_REDIS_PASSWORD': settings[os.environ.get("FLASK_ENV", "development")].REDIS_PASSWORD
+    })
 cache.init_app(app)
 es = Elasticsearch(settings[os.environ.get("FLASK_ENV", "development")].ELASTICSEARCH_URL)

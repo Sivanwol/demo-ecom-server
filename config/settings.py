@@ -34,8 +34,10 @@ class Config:
 
     # redis config
     # --------------------------------------------------------------------
-    REDIS_URL = os.getenv('REDIS_URL')  # docker network
-    REDIS_PASSWD = os.getenv('REDIS_PASSWD')
+    REDIS_HOST = os.getenv('REDIS_HOST')  # docker network
+    REDIS_PORT = os.getenv('REDIS_PORT')
+    REDIS_DB = os.getenv('REDIS_DB')
+    REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
     CACHE_KEY_PREFIX = os.getenv('CACHE_KEY_PREFIX')
 
     # elasticsearch config

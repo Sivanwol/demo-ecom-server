@@ -7,7 +7,7 @@ from config.database import db
 from src.services.firebase import FirebaseService
 from src.services.user import UserService
 from src.utils.enums import RolesTypes
-from src.utils.firebase_utils import create_firebase_user, setup_firebase_client
+from src.utils.firebase_utils import create_firebase_user, setup_firebase_client, login_user, is_json_key_present
 
 
 class BaseTestCase(TestCase):
@@ -42,6 +42,17 @@ class BaseTestCase(TestCase):
     def tearDown(self):
         db.session.remove()
         db.drop_all()
+
+    def login_user(self, email , password):
+        user = login_user(self.firebase_owner_user, self.firebase_global_password)
+        self.assertFalse(is_json_key_present(user, 'error'))
+        token = user['idToken']
+        self.assertIsNotNone(token)
+        self.assertNotEqual(token, '')
+        return {
+            'idToken': token,
+            'uid': user['localId']
+        }
 
     def init_unit_data(self):
         self.setup_owner_user()
