@@ -48,6 +48,9 @@ class User(db.Model):
             is_pass_tutorial=self.is_pass_tutorial,
             store_code=self.store_code)
 
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
     def add_user_roles(self, roles):
         for role in roles:
             self.roles.append(role)

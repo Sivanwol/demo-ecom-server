@@ -23,6 +23,9 @@ class Roles(db.Model):
         return "<Role(id='{id}', name='{name} , is_active={is_active}')>".format(id=self.id, name=self.name,
                                                                                  is_active=self.is_active)
 
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
     @staticmethod
     def insert_roles():
         roles = [

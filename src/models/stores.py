@@ -42,6 +42,9 @@ class Store(db.Model):
                                                                                                                     self.created_at,
                                                                                                                     self.updated_at)
 
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
     def update_hours(self, hours):
         pass
 

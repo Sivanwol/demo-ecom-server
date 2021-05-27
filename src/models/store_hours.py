@@ -6,7 +6,7 @@ from config.database import db
 from src.models import User
 
 
-class Store(db.Model):
+class StoreHours(db.Model):
     """
     This is a base user Model
     """
@@ -35,18 +35,12 @@ class Store(db.Model):
         self.is_maintenance = is_maintenance
 
     def __repr__(self):
-        return "<Store(id='{}', owner_id='{}', name='{}' is_maintenance={} created_at='{}' updated_at='{}'>".format(self.id,
+        return "<Store_Hours(id='{}', owner_id='{}', name='{}' is_maintenance={} created_at='{}' updated_at='{}'>".format(self.id,
                                                                                                                     self.owner_id,
                                                                                                                     self.name,
                                                                                                                     self.is_maintenance,
                                                                                                                     self.created_at,
                                                                                                                     self.updated_at)
 
-    def update_hours(self, hours):
-        pass
-
-    def update_locations(self, locations):
-        pass
-
-    def remove_locations(self, location_ids):
-        pass
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}

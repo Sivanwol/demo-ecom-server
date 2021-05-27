@@ -46,3 +46,6 @@ class StoreLocations(db.Model):
             self.country_code,
             self.created_at,
             self.updated_at)
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
