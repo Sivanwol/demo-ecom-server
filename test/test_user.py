@@ -12,14 +12,7 @@ class FlaskTestCase(BaseTestCase):
             user_object = self.login_user(self.firebase_owner_user, self.firebase_global_password)
             uid = user_object['uid']
             token = user_object['idToken']
-            response = self.client.get(
-                '/api/user/%s' % uid,
-                data=dict(),
-                headers=dict(
-                    Authorization='Bearer ' + token
-                ),
-                content_type='application/json'
-            )
+            response = self.request_get('/api/user/%s' % uid, token)
             self.assertEqual(response.status_code, 200)
             response_data = Struct(response.json)
             user = Struct(self.userService.get_user(uid, True))

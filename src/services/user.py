@@ -60,6 +60,11 @@ class UserService:
         except:
             return response_error('Invalid token provided', None, 400)
 
+    def update_user_store_owner(self, uid, store_code):
+        user = self.get_user(uid)
+        user.store_code = store_code
+        user.save()
+
     def mark_user_passed_tutorial(self, uid):
         user = self.get_user(uid, False)
         user.is_pass_tutorial = True

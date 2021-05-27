@@ -7,7 +7,7 @@ from config import settings
 from config.api import app as current_app
 from src.middlewares.check_role import check_role
 from src.middlewares.check_token import check_token
-from src.serializers.store_update import StoreUpdate
+from src.serializers.store import StoreUpdate, StoreCreate
 from src.services.store import StoreService
 from src.services.user import UserService
 from src.utils.common_methods import verify_uid
@@ -39,16 +39,18 @@ def list_stores():
     return response_success(storeService.get_stores())
 
 
-# Todo: add logic to create store
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/create"), methods=["POST"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
 def create_store(uid):
-    currencies = {}
-    for currency in list(pycountry.currencies):
-        obj = {"{}".format(currency.alpha_3): currency.__dict__['_fields']}
-        currencies.update(obj)
-
-    return response_success(currencies)
+    if request.is_json:
+        return response_error("Request Data must be in json format", request.data)
+    if verify_uid(uid):
+        body = request.json()
+        data = StoreCreate(**body)
+        store = storeService.create_store(data)
+        userService.update_user_store_owner(uid, store.store_code)
+        return response_success(storeService.get_store(uid, store.store_code))
+    return response_error("Error on format of the params", {uid: uid})
 
 
 # Todo: add logic to delete store

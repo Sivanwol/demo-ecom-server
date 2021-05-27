@@ -1,11 +1,14 @@
+import json
 import os
 
+from faker import Faker
 from flask_testing import TestCase
 
 from config.api import app
 from config.database import db
 from src.services.firebase import FirebaseService
 from src.services.roles import RolesService
+from src.services.store import StoreService
 from src.services.user import UserService
 from src.utils.enums import RolesTypes
 from src.utils.firebase_utils import create_firebase_user, setup_firebase_client, login_user, is_json_key_present
@@ -13,8 +16,11 @@ from src.utils.firebase_utils import create_firebase_user, setup_firebase_client
 
 class BaseTestCase(TestCase):
     """A base test case."""
+
+    fake = Faker()
     userService = UserService()
     roleService = RolesService()
+    storeService = StoreService()
     TESTING = True
     firebase_owner_user = "test+owner@user.com"
     firebase_support_user = "test+support@user.com"
@@ -42,6 +48,7 @@ class BaseTestCase(TestCase):
         self.roleService.insert_roles()
         print(self.roleService.get_all_roles())
         self.init_unit_data()
+        Faker.seed(0)
 
     def tearDown(self):
         db.session.remove()
@@ -88,6 +95,41 @@ class BaseTestCase(TestCase):
         roles = self.roleService.get_roles([RolesTypes.Accounts.value])
         self.userService.sync_firebase_user(self.firebase_owner_object.uid, roles, True)
 
+    def create_store_user(self, store_code,roles):
+        self.firebase_accounts_object = create_firebase_user(self.firebase_account_user, self.firebase_global_password)
+        self.assertIsNotNone(self.firebase_accounts_object)
+        if self.firebase_accounts_object is not None:
+            self.assertNotEqual(self.firebase_accounts_object.uid, '')
+        roles = self.roleService.get_roles(roles)
+        self.userService.sync_firebase_user(self.firebase_owner_object.uid, roles, False, store_code)
+
+    def request_get(self, url , token):
+        headers = {'Content-Type': 'application/json', 'Authorization': token}
+        return self.client.get(
+            url,
+            headers=headers
+        )
+
+    def request_put(self, url, token, data={}):
+        headers = {'Content-Type': 'application/json', 'Authorization': token}
+        return self.client.put(
+            url,
+            body=json.dumps(data),
+            headers=headers
+        )
+    def request_post(self, url, token, data={}):
+        headers = {'Content-Type': 'application/json', 'Authorization': token}
+        return self.client.post(
+            url,
+            body=json.dumps(data),
+            headers=headers
+        )
+    def request_delete(self, url, token):
+        headers = {'Content-Type': 'application/json', 'Authorization': token}
+        return self.client.delete(
+            url,
+            headers=headers
+        )
 
 class Struct:
     def __init__(self, d):

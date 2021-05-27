@@ -9,7 +9,7 @@ from config import settings
 from config.api import app as current_app
 from src.middlewares.check_role import check_role
 from src.middlewares.check_token import check_token
-from src.serializers.create_platform_user import CreatePlatformUser
+from src.serializers.user import CreatePlatformUser
 from src.services.roles import RolesService
 from src.services.store import StoreService
 from src.services.user import UserService

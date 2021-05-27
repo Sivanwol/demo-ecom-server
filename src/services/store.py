@@ -11,7 +11,6 @@ from src.utils.validations import valid_currency
 storeSchema = StoreSchema()
 storeLocationSchema = StoreLocationSchema()
 
-
 class StoreService:
     @cache.memoize(50)
     def get_stores(self, return_model=False):
@@ -77,14 +76,15 @@ class StoreService:
             es.delete(index='stores', doc_type='locations', id=location_id)
 
     def create_store(self, store_object):
-        if not valid_currency(store_object.default_currency_code):
-            raise ParamsNotMatchCreateStore(store_object.owner_id, store_object.name, store_object.default_currency_code, store_object.logo_id,
+        if not valid_currency(store_object.currency_code):
+            raise ParamsNotMatchCreateStore(store_object.owner_id, store_object.name, store_object.currency_code, store_object.logo_id,
                                             store_object.description)
         store_code = uuid.uuid4()
-        store = Store(store_code, store_object.owner_id, store_object.name, store_object.default_currency_code, store_object.logo_id, store_object.description)
+        store = Store(store_code, store_object.owner_id, store_object.name, store_object.currency_code, store_object.logo_id, store_object.description)
         db.session.add(store)
         es.index(index='stores', doc_type='metadata', id=store_code, body=store)
         db.session.commit()
+        return store
 
     def remove_store(self, store_code):
         Store.query.filter_by(store_code=store_code).delete()
