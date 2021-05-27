@@ -9,7 +9,7 @@ from config import settings
 from config.api import app as current_app
 from src.middlewares.check_role import check_role
 from src.middlewares.check_token import check_token
-from src.schemas.user_schema import GetUserSchema, FirebaseUserSchema
+from src.schemas.user_schema import FirebaseUserSchema
 from src.serializers.create_platform_user import CreatePlatformUser
 from src.services.roles import RolesService
 from src.services.store import StoreService
@@ -24,7 +24,6 @@ storeService = StoreService()
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>"))
-@check_token
 def get(uid):
     if verify_uid(uid):
         try:
@@ -32,7 +31,6 @@ def get(uid):
                 'user_meta': None,
                 'user_data': None
             }
-            getUserSchema = GetUserSchema()
             firebaseUserSchema = FirebaseUserSchema()
             firebase_response = {
                 'display_name': '',
@@ -45,7 +43,7 @@ def get(uid):
             response['user_meta'] = firebaseUserSchema.dump(firebase_response)
             response['user_data'] = userService.get_user(uid)
             # response['extend_info']['roles'] = role_schema.dump(user.roles)
-            return response_success(getUserSchema.dump(response))
+            return response_success(response)
         except ValueError:
             current_app.logger.error("User not found", {uid: uid})
             return response_error("Error on format of the params", {uid: uid})
@@ -86,7 +84,7 @@ def sync_store_user_create(uid, store_code):
             store = storeService.get_store(uid, store_code, True)
             if store is None:
                 return response_error("Store not found", {store_code: store_code})
-            roles = roleSerivce.get_roles([RolesTypes.StoreCustomer])
+            roles = roleSerivce.get_roles([RolesTypes.StoreCustomer.value])
             return response_success(get_user_object(uid, roles, False))
         except ValueError:
             return response_error("Error on format of the params", {uid: uid})
@@ -100,7 +98,7 @@ def sync_store_user_create(uid, store_code):
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>"), methods=["POST"])
-@check_role([RolesTypes.Accounts, RolesTypes.Owner])
+@check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
 def sync_platform_user_create(uid):
     if request.is_json:
         return response_error("Request Data must be in json format", request.data)

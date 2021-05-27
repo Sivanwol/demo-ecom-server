@@ -27,8 +27,3 @@ class UserSchema(SQLAlchemySchema):
 class FirebaseUserSchema(Schema):
     display_name = fields.String()
     disabled = fields.Boolean()
-
-
-class GetUserSchema(Schema):
-    user_meta = FirebaseUserSchema()
-    user_data = UserSchema()

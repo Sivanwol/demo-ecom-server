@@ -51,10 +51,8 @@ class User(db.Model):
     def add_user_roles(self, roles):
         for role in roles:
             self.roles.append(role)
-        self.save()
 
     def remove_user_roles(self, roles):
         for role in roles:
             for user_role in self.roles:
                 self.roles.filter(lambda user_role: role != user_role.name)
-        self.save()

@@ -5,6 +5,9 @@ from sqlalchemy.sql import or_
 
 class RolesService:
 
+    def get_all_roles(self):
+        return Roles.query.all()
+
     def get_roles(self, roles_names=None):
         if roles_names is None:
             roles_names = []
@@ -17,3 +20,6 @@ class RolesService:
         if roles.count() == 0 or roles.count() != len(roles_names):
             return False
         return True
+
+    def insert_roles(self):
+        Roles.insert_roles()

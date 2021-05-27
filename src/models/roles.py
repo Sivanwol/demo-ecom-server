@@ -22,3 +22,27 @@ class Roles(db.Model):
     def __repr__(self):
         return "<Role(id='{id}', name='{name} , is_active={is_active}')>".format(id=self.id, name=self.name,
                                                                                  is_active=self.is_active)
+
+    @staticmethod
+    def insert_roles():
+        roles = [
+            {'name': 'owner', 'is_active': True},
+            {'name': 'reports', 'is_active': True},
+            {'name': 'accounts', 'is_active': True},
+            {'name': 'store_owner', 'is_active': True},
+            {'name': 'store_account', 'is_active': True},
+            {'name': 'store_customer', 'is_active': True},
+            {'name': 'store_reports', 'is_active': True},
+            {'name': 'store_support', 'is_active': True},
+            {'name': 'support', 'is_active': True},
+        ]
+
+        for r in roles:
+            role = Roles.query.filter_by(name=r['name']).first()
+            if role is None:
+                role = Roles(r['name'], r['is_active'])
+            # role.reset_permissions()
+            # for perm in roles[r]:
+            #     role.add_permission(perm)
+            db.session.add(role)
+        db.session.commit()

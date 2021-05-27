@@ -12,7 +12,7 @@ class FlaskTestCase(BaseTestCase):
             user_object = self.login_user(self.firebase_owner_user, self.firebase_global_password)
             uid = user_object['uid']
             token = user_object['idToken']
-            response = self.client.post(
+            response = self.client.get(
                 '/api/user/%s' % uid,
                 data=dict(),
                 headers=dict(
@@ -21,8 +21,13 @@ class FlaskTestCase(BaseTestCase):
                 content_type='application/json'
             )
             self.assertEqual(response.status_code, 200)
+            data = response.json()
             user = self.userService.get_user(uid, True)
             self.assertIsNotNone(user)
+            self.assertEqual(data.uid , user.uid)
+            self.assertEqual(data.is_pass_tutorial , user.is_pass_tutorial)
+            self.assertEqual(data.id , user.id)
+            self.assertEqual(data.roles[0].id , user.roles[0].id)
 
 
     # todo:  Ensure that Flask was set up correctly

@@ -34,14 +34,14 @@ def get_store_info(uid, store_code):
 
 # Todo: add logic to update store info
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/list"))
-@check_role([RolesTypes.Support, RolesTypes.Owner, RolesTypes.Accounts, RolesTypes.Reports])
+@check_role([RolesTypes.Support.value, RolesTypes.Owner.value, RolesTypes.Accounts.value, RolesTypes.Reports.value])
 def list_stores():
     return response_success(storeService.get_stores())
 
 
 # Todo: add logic to create store
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/create"), methods=["POST"])
-@check_role([RolesTypes.Accounts, RolesTypes.Owner])
+@check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
 def create_store(uid):
     currencies = {}
     for currency in list(pycountry.currencies):
@@ -53,7 +53,7 @@ def create_store(uid):
 
 # Todo: add logic to delete store
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>"), methods=["DELETE"])
-@check_role([RolesTypes.Accounts, RolesTypes.Owner])
+@check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
 def delete_store(uid, store_code):
     currencies = {}
     for currency in list(pycountry.currencies):
@@ -64,7 +64,7 @@ def delete_store(uid, store_code):
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/update"), methods=["PUT"])
-@check_role([RolesTypes.Support, RolesTypes.StoreOwner, RolesTypes.StoreAccount])
+@check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value, RolesTypes.StoreAccount.value])
 def update_store_support(uid, store_code):
     if request.is_json:
         return response_error("Request Data must be in json format", request.data)
@@ -83,7 +83,7 @@ def update_store_support(uid, store_code):
 
 # Todo: add logic to create store location
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/location"), methods=["POST"])
-@check_role([RolesTypes.Support, RolesTypes.StoreOwner, RolesTypes.StoreAccount])
+@check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value, RolesTypes.StoreAccount.value])
 def add_store_location(uid, store_code):
     currencies = {}
     for currency in list(pycountry.currencies):
@@ -95,7 +95,7 @@ def add_store_location(uid, store_code):
 # Todo: add logic to delete store location
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/location/<location_id>"),
                    methods=["DELETE"])
-@check_role([RolesTypes.Support, RolesTypes.StoreOwner, RolesTypes.StoreAccount])
+@check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value, RolesTypes.StoreAccount.value])
 def delete_store_location(uid, store_code, location_id):
     currencies = {}
     for currency in list(pycountry.currencies):
@@ -107,7 +107,7 @@ def delete_store_location(uid, store_code, location_id):
 # Todo: add logic to create opening hours
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/hours/<location_id>"),
                    methods=["POST"])
-@check_role([RolesTypes.Support, RolesTypes.StoreOwner, RolesTypes.StoreAccount])
+@check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value, RolesTypes.StoreAccount.value])
 def add_store_hours(uid, store_code, location_id):
     currencies = {}
     for currency in list(pycountry.currencies):
@@ -119,7 +119,7 @@ def add_store_hours(uid, store_code, location_id):
 # Todo: add logic to delete opening hours
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/hours/<location_id>"),
                    methods=["DELETE"])
-@check_role([RolesTypes.Support, RolesTypes.StoreOwner, RolesTypes.StoreAccount])
+@check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value, RolesTypes.StoreAccount.value])
 def delete_store_hours(uid, store_code, location_id):
     currencies = {}
     for currency in list(pycountry.currencies):
