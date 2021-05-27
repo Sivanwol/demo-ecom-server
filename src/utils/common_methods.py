@@ -36,7 +36,7 @@ def setup_user(email, password, roles):
     user_data = user.__dict__['_data']
     print('owner user {} => {}, {}'.format(email, password, user_data))
     uid = user_data['localId']
-    userService.sync_user(uid, roles)
+    userService.sync_firebase_user(uid, roles)
     print('owner user create {} => {}'.format(email, uid))
 
 

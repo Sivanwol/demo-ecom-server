@@ -81,7 +81,7 @@ def sync_user_create(uid, store_code):
         try:
             response = {'user': json.dumps(userService.get_firebase_user(uid).__dict__['_data'], indent=4), 'extend_info': None}
             roles = roleSerivce.get_roles(['customer'])
-            userService.sync_user(uid, roles, store_code)
+            userService.sync_firebase_user(uid, roles, store_code)
             response['extend_info'] = userService.get_user(uid).to_dict()
             return response_success(response)
         except ValueError:
@@ -103,7 +103,7 @@ def create_store(uid):
         try:
             response = {'user': json.dumps(userService.get_firebase_user(uid).__dict__['_data'], indent=4), 'extend_info': None}
             roles = roleSerivce.get_roles(['customer'])
-            userService.sync_user(uid, roles)
+            userService.sync_firebase_user(uid, roles)
             response['extend_info'] = userService.get_user(uid).to_dict()
             return response_success(response)
         except ValueError:
@@ -125,7 +125,7 @@ def delete_store(uid):
         try:
             response = {'user': json.dumps(userService.get_firebase_user(uid).__dict__['_data'], indent=4), 'extend_info': None}
             roles = roleSerivce.get_roles(['customer'])
-            userService.sync_user(uid, roles)
+            userService.sync_firebase_user(uid, roles)
             response['extend_info'] = userService.get_user(uid).to_dict()
             return response_success(response)
         except ValueError:

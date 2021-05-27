@@ -13,7 +13,7 @@ class FlaskTestCase(BaseTestCase):
     def test_register_user(self):
         print("Case User Reg")
         with self.client:
-            user = login_user(self.firebase_user, self.firebase_password)
+            user = login_user(self.firebase_owner_user, self.firebase_global_password)
             self.assertFalse(is_json_key_present(user, 'error'))
             token = user['idToken']
             self.assertIsNotNone(token)
