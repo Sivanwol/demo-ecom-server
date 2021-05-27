@@ -22,8 +22,3 @@ class UserSchema(SQLAlchemySchema):
     country = auto_field()
     currency = auto_field()
     roles = Nested(RoleSchema, many=True, exclude=('user',))
-
-
-class FirebaseUserSchema(Schema):
-    display_name = fields.String()
-    disabled = fields.Boolean()

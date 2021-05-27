@@ -9,7 +9,6 @@ from config import settings
 from config.api import app as current_app
 from src.middlewares.check_role import check_role
 from src.middlewares.check_token import check_token
-from src.schemas.user_schema import FirebaseUserSchema
 from src.serializers.create_platform_user import CreatePlatformUser
 from src.services.roles import RolesService
 from src.services.store import StoreService
@@ -27,11 +26,6 @@ storeService = StoreService()
 def get(uid):
     if verify_uid(uid):
         try:
-            response = {
-                'user_meta': None,
-                'user_data': None
-            }
-            firebaseUserSchema = FirebaseUserSchema()
             firebase_response = {
                 'display_name': '',
                 'disabled': False
@@ -39,9 +33,10 @@ def get(uid):
             firebase_user_object = userService.get_firebase_user(uid)
             firebase_response['display_name'] = firebase_user_object.display_name
             firebase_response['disabled'] = firebase_user_object.disabled
-
-            response['user_meta'] = firebaseUserSchema.dump(firebase_response)
-            response['user_data'] = userService.get_user(uid)
+            response = {
+                'user_meta': firebase_response,
+                'user_data': userService.get_user(uid)
+            }
             # response['extend_info']['roles'] = role_schema.dump(user.roles)
             return response_success(response)
         except ValueError:

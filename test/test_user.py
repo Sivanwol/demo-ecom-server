@@ -1,8 +1,8 @@
 # tests/test_basic.py
-
+import json
 import unittest
 
-from test.common.Basecase import BaseTestCase
+from test.common.Basecase import BaseTestCase, Struct
 
 
 class FlaskTestCase(BaseTestCase):
@@ -21,14 +21,15 @@ class FlaskTestCase(BaseTestCase):
                 content_type='application/json'
             )
             self.assertEqual(response.status_code, 200)
-            data = response.json()
-            user = self.userService.get_user(uid, True)
+            response_data = Struct(response.json)
+            user = Struct(self.userService.get_user(uid, True))
             self.assertIsNotNone(user)
-            self.assertEqual(data.uid , user.uid)
-            self.assertEqual(data.is_pass_tutorial , user.is_pass_tutorial)
-            self.assertEqual(data.id , user.id)
-            self.assertEqual(data.roles[0].id , user.roles[0].id)
-
+            self.assertIsNotNone(response_data)
+            self.assertEqual(response_data.data.user_meta.display_name, user_object['display_name'])
+            self.assertEqual(response_data.data.user_data.uid, user.uid)
+            self.assertEqual(response_data.data.user_data.is_pass_tutorial, user.is_pass_tutorial)
+            self.assertEqual(response_data.data.user_data.id, user.id)
+            self.assertEqual(response_data.data.user_data.roles[0].id, user.roles[0].id)
 
     # todo:  Ensure that Flask was set up correctly
     def test_sync_new_user(self):

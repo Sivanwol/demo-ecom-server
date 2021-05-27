@@ -25,7 +25,7 @@ $ pip freeze > requirements.txt # this will regenerate the requirements.txt
 ```
 ### Running
  
-```
+```angular2html
 $ export FLASK_APP=app.py
 $ export FLASK_ENV=development
 $ python -m flask run

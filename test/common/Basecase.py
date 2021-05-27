@@ -55,7 +55,8 @@ class BaseTestCase(TestCase):
         self.assertNotEqual(token, '')
         return {
             'idToken': token,
-            'uid': user['localId']
+            'uid': user['localId'],
+            'display_name': user['displayName']
         }
 
     def init_unit_data(self):
@@ -86,3 +87,12 @@ class BaseTestCase(TestCase):
             self.assertNotEqual(self.firebase_accounts_object.uid, '')
         roles = self.roleService.get_roles([RolesTypes.Accounts.value])
         self.userService.sync_firebase_user(self.firebase_owner_object.uid, roles, True)
+
+
+class Struct:
+    def __init__(self, d):
+        for a, b in d.items():
+            if isinstance(b, (list, tuple)):
+               setattr(self, a, [Struct(x) if isinstance(x, dict) else x for x in b])
+            else:
+               setattr(self, a, Struct(b) if isinstance(b, dict) else b)
