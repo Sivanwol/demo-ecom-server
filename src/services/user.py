@@ -51,6 +51,13 @@ class UserService:
             return self.user_schema.dump(user, many=False).data
         return user
 
+    @cache.memoize(50)
+    def user_exists(self, uid):
+        user = User.query.filter_by(uid=uid).first()
+        if user is None:
+            return False
+        return True
+
     def check_user_auth(self, request):
         if not request.headers.get('authorization'):
             return response_error('No token provided', None, 400)
@@ -70,6 +77,12 @@ class UserService:
     def mark_user_passed_tutorial(self, uid):
         user = self.get_user(uid, False)
         user.is_pass_tutorial = True
+        db.session.merge(user)
+        db.session.commit()
+
+    def toggle_freeze_user(self, uid):
+        user = self.get_user(uid, True)
+        user.is_active = not user.is_active
         db.session.merge(user)
         db.session.commit()
 

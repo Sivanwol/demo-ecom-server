@@ -44,6 +44,40 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.name, post_data['name'])
             self.assertEqual(response_data.data.default_currency_code, post_data['currency_code'])
 
+    def test_freeze_store(self):
+        with self.client:
+            user_owner = 'store2.owner@store.user'
+            self.create_store_user(user_owner, [RolesTypes.StoreOwner.value], True)
+            user_object = self.login_user(self.platform_owner_user)
+            store_user_object = self.login_user(user_owner)
+            uid = store_user_object['uid']
+            token = user_object['idToken']
+            user = self.userService.get_user(uid, True)
+            self.assertIsNone(user.store_code)
+            store_name = self.fake.company()
+            currency_code = self.fake.currency_code()
+            post_data = {
+                'name': store_name,
+                'description': 'store description',
+                'currency_code': currency_code
+            }
+            response = self.request_post('/api/store/%s/create' % uid, token, post_data)
+            self.assert200(response, 'create store request failed')
+            response_data = Struct(response.json)
+            self.assertIsNotNone(response_data)
+            self.assertTrue(response_data.status)
+            self.assertNotEqual(response_data.data.store_code, '')
+            store = self.storeService.get_store(uid, response_data.data.store_code, True)
+            self.assertIsNotNone(store)
+            self.assertIsNotNone(response_data.data)
+            self.assertEqual(user.store_code, store.store_code)
+            response = self.request_delete('/api/store/{}/{}'.format(uid, user.store_code), token)
+            self.assert200(response, 'create store request failed')
+            store = self.storeService.get_store(uid, response_data.data.store_code, True)
+            user = self.userService.get_user(uid, True)
+            self.assertTrue(store.is_maintenance)
+            self.assertFalse(user.is_active)
+
 
 if __name__ == '__main__':
     unittest.main()
