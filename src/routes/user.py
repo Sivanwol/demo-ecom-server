@@ -103,7 +103,7 @@ def sync_platform_user_create(uid):
             body = request.json()
             bodyObj = {"role_names": ', '.join(body['role_names'])}
             try:
-                data = CreatePlatformUser.load(bodyObj)
+                data = CreatePlatformUser.load(**bodyObj)
             except ValidationError as e:
                 return response_error("Error on format of the params", {'params': request.json})
             if roleSerivce.check_roles(data.role_names):

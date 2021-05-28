@@ -47,7 +47,7 @@ def create_store(uid):
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(uid):
         try:
-            data = RequestStoreCreate.load(request.json)
+            data = RequestStoreCreate.load(**request.json)
         except ValidationError as e:
             return response_error("Error on format of the params", {'params': request.json})
 
