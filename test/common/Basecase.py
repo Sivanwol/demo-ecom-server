@@ -10,8 +10,9 @@ from src.services.firebase import FirebaseService
 from src.services.roles import RolesService
 from src.services.store import StoreService
 from src.services.user import UserService
+from src.utils.common_methods import is_json_key_present
 from src.utils.enums import RolesTypes
-from src.utils.firebase_utils import create_firebase_user, setup_firebase_client, login_user, is_json_key_present
+from src.utils.firebase_utils import create_firebase_user as create_fb_user, setup_firebase_client, login_user
 
 
 class BaseTestCase(TestCase):
@@ -25,7 +26,6 @@ class BaseTestCase(TestCase):
     platform_owner_user = "test+owner@user.com"
     platform_support_user = "test+support@user.com"
     platform_account_user = "test+account@user.com"
-    store_owner_user = "store+owner@store.com"
     platform_owner_object = None
     platform_support_object = None
     platform_accounts_object = None
@@ -73,7 +73,7 @@ class BaseTestCase(TestCase):
         self.setup_support_user()
 
     def setup_owner_user(self):
-        self.platform_owner_object = create_firebase_user(self.platform_owner_user, self.global_password)
+        self.platform_owner_object = create_fb_user(self.platform_owner_user, self.global_password)
         self.assertIsNotNone(self.platform_owner_object)
         if self.platform_owner_object is not None:
             self.assertNotEqual(self.platform_owner_object.uid, '')
@@ -81,7 +81,7 @@ class BaseTestCase(TestCase):
         self.userService.sync_firebase_user(self.platform_owner_object.uid, roles, True)
 
     def setup_support_user(self):
-        self.platform_support_object = create_firebase_user(self.platform_support_user, self.global_password)
+        self.platform_support_object = create_fb_user(self.platform_support_user, self.global_password)
         self.assertIsNotNone(self.platform_support_object)
         if self.platform_support_object is not None:
             self.assertNotEqual(self.platform_support_object.uid, '')
@@ -89,7 +89,7 @@ class BaseTestCase(TestCase):
         self.userService.sync_firebase_user(self.platform_owner_object.uid, roles, True)
 
     def setup_account_user(self):
-        self.platform_accounts_object = create_firebase_user(self.platform_account_user, self.global_password)
+        self.platform_accounts_object = create_fb_user(self.platform_account_user, self.global_password)
         self.assertIsNotNone(self.platform_accounts_object)
         if self.platform_accounts_object is not None:
             self.assertNotEqual(self.platform_accounts_object.uid, '')
@@ -97,7 +97,7 @@ class BaseTestCase(TestCase):
         self.userService.sync_firebase_user(self.platform_owner_object.uid, roles, True)
 
     def create_store_user(self,email, roles, inital_state=False, store_code=None):
-        user = create_firebase_user(email, self.global_password)
+        user = create_fb_user(email, self.global_password)
         self.assertIsNotNone(user)
         if user is not None:
             self.assertNotEqual(user.uid, '')

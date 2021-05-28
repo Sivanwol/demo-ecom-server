@@ -1,4 +1,3 @@
-from config import app
 from src.exceptions.error import Error
 
 
@@ -12,4 +11,3 @@ class ParamsNotMatchCreateStore(Error):
 
     def __init__(self, name , owner_id , currency_code , description):
         self.message = 'failed create store one of the params not match params: [{},{},{},{}]'.format(name , owner_id , currency_code , description)
-        app.logger.error(self.message)

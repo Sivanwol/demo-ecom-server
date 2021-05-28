@@ -27,13 +27,14 @@ def get_store_info(store_code):
     if store is None:
         response_error("error store not existed", {store_code: store_code})
 
-    return response_success(store)
+    return response_success(store.data)
 
 # Todo: add logic to update store info
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/list"))
 @check_role([RolesTypes.Support.value, RolesTypes.Owner.value, RolesTypes.Accounts.value, RolesTypes.Reports.value])
 def list_stores():
-    return response_success(storeService.get_stores())
+    stores = storeService.get_stores()
+    return response_success(stores.data)
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/create"), methods=["POST"])
@@ -49,8 +50,8 @@ def create_store(uid):
             return response_error("Error on format of the params", {'params': request.json, 'errors': e.messages})
 
         store = storeService.create_store(uid, data.data)
-        userService.update_user_store_owner(uid, store.store_code)
-        return response_success(storeService.get_store(uid, store.store_code))
+        userService.update_user_store_owner(uid, store.data['store_code'])
+        return response_success(store.data)
     return response_error("Error on format of the params", {'uid': uid})
 
 
