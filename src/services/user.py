@@ -64,12 +64,14 @@ class UserService:
     def update_user_store_owner(self, uid, store_code):
         user = self.get_user(uid, True)
         user.store_code = store_code
-        user.save()
+        db.session.merge(user)
+        db.session.commit()
 
     def mark_user_passed_tutorial(self, uid):
         user = self.get_user(uid, True)
         user.is_pass_tutorial = True
-        user.save()
+        db.session.merge(user)
+        db.session.commit()
 
     def check_user_roles(self, uid, *requirements_roles):
         """ Return True if the user has all of the specified roles. Return False otherwise.
@@ -86,16 +88,16 @@ class UserService:
             Translates to:
                 User has role 'a' AND (role 'b' OR role 'c') AND role 'd'"""
         user = self.get_user(uid, True)
-        role_names = user['roles']
+        role_names = user.roles
         for requirement in requirements_roles:
             if isinstance(requirement, (list, tuple)):
                 # this is a tuple_of_role_names requirement
                 tuple_of_role_names = requirement
                 authorized = False
                 for role_object in role_names:
-                    if role_object['name'] in tuple_of_role_names[0]:
+                    if role_object.name in tuple_of_role_names[0]:
                         # tuple_of_role_names requirement was met: break out of loop
-                        if role_object['is_active']:
+                        if role_object.is_active:
                             authorized = True
                             break
                 if not authorized:
@@ -103,9 +105,9 @@ class UserService:
             else:
                 # the user must have this role
                 for role_object in role_names:
-                    if not role_object['is_active']:
+                    if not role_object.is_active:
                         return False
-                    if role_object['name'] in requirements_roles:
+                    if role_object.name in requirements_roles:
                         return False  # role_name requirement failed: return False
 
             # All requirements have been met: return True

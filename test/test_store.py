@@ -4,10 +4,12 @@ import unittest
 
 from src.utils.enums import RolesTypes
 from test.common.Basecase import BaseTestCase, Struct
+from elasticmock import elasticmock
 
 
 class FlaskTestCase(BaseTestCase):
 
+    @elasticmock
     def test_create_store(self):
         with self.client:
             self.create_store_user(self.store_owner_user, [RolesTypes.StoreOwner.value], True)
@@ -26,8 +28,9 @@ class FlaskTestCase(BaseTestCase):
             }
             response = self.request_post('/api/store/%s/create' % uid, token, post_data)
             self.assert200(response, 'create store request failed')
-            store = self.storeService.get_store(uid, )
             response_data = Struct(response.json)
+            self.assertNotEqual(response_data.store_code, '')
+            store = self.storeService.get_store(uid, response_data.store_code, True)
             user = Struct(self.userService.get_user(uid, True))
             self.assertIsNotNone(user)
             self.assertIsNotNone(store)
