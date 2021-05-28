@@ -47,11 +47,12 @@ def create_store(uid):
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(uid):
         try:
-            data = RequestStoreCreate.load(**request.json)
+            schema = RequestStoreCreate()
+            data = schema.load(request.json)
         except ValidationError as e:
-            return response_error("Error on format of the params", {'params': request.json})
+            return response_error("Error on format of the params", {'params': request.json, 'errors': e.messages})
 
-        store = storeService.create_store(uid, data.dict())
+        store = storeService.create_store(uid, data.data)
         userService.update_user_store_owner(uid, store.store_code)
         return response_success(storeService.get_store(uid, store.store_code))
     return response_error("Error on format of the params", {uid: uid})
@@ -79,7 +80,8 @@ def update_store_support(uid, store_code):
         if store is None:
             response_error("error store not existed", {uid: uid, store_code: store_code})
         try:
-            data = RequestStoreCreate.load(request.json)
+            schema = RequestStoreCreate()
+            data = schema.load(**request.json)
         except ValidationError as e:
             return response_error("Error on format of the params", {'params': request.json})
         if not valid_currency(data.currency_code):
