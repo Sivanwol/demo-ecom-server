@@ -37,6 +37,17 @@ class StoreService:
         return store
 
     @cache.memoize(50)
+    def get_store_by_status_code(self, store_code, return_model=False):
+        if not return_model:
+            res = es.get(index="stores", doc_type='metadata', id=store_code)
+            return res['_source']
+
+        store = Store.query.filter_by(store_code=store_code).first()
+        if store is None:
+            return None
+        return store
+
+    @cache.memoize(50)
     def store_exists(self, owner_uid, store_code):
         store = Store.query.filter_by(owner_id=owner_uid, store_code=store_code).first()
         if store is None:
@@ -94,14 +105,14 @@ class StoreService:
         return store
 
     def freeze_store(self, uid, store_code):
-        store = self.get_store(uid,store_code, True)
+        store = self.get_store(uid, store_code, True)
         store.is_maintenance = True
         db.session.merge(store)
         db.session.commit()
         es.delete(index='stores', doc_type='metadata', id=store_code)
 
     def toggle_maintenance_store(self, uid, store_code):
-        store = self.get_store(uid,store_code, True)
+        store = self.get_store(uid, store_code, True)
         store.is_maintenance = not store.is_maintenance
         db.session.merge(store)
         db.session.commit()
