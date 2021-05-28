@@ -21,17 +21,13 @@ userService = UserService()
 
 
 # Todo: add logic to get store info
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/info"))
-@check_token
-def get_store_info(uid, store_code):
-    if verify_uid(uid):
-        store = storeService.get_store(uid, store_code)
-        if store is None:
-            response_error("error store not existed", {uid: uid, store_code: store_code})
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<store_code>/info"))
+def get_store_info(store_code):
+    store = storeService.get_store_by_status_code(store_code)
+    if store is None:
+        response_error("error store not existed", {store_code: store_code})
 
-        return response_success(store)
-    return response_error("Error on format of the params", {uid: uid})
-
+    return response_success(store)
 
 # Todo: add logic to update store info
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/list"))
