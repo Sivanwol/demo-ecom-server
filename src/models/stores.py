@@ -19,6 +19,7 @@ class Store(db.Model):
     name = db.Column(String(100), nullable=False)
     description = db.Column(String(255), nullable=True)
     default_currency_code = db.Column(String(3), nullable=False)
+    # Note only owner able set this on or off
     is_maintenance = db.Column(Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now())
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now(), onupdate=datetime.now())

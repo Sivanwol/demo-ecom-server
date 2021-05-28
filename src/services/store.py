@@ -37,6 +37,13 @@ class StoreService:
         return store
 
     @cache.memoize(50)
+    def store_exists(self, owner_uid, store_code):
+        store = Store.query.filter_by(owner_id=owner_uid, store_code=store_code).first()
+        if store is None:
+            return True
+        return False
+
+    @cache.memoize(50)
     def get_locations(self, owner_uid, store_code):
         store = self.get_store(owner_uid, store_code, True)
         search_param = {'query': {'match': {'store_id': store.id}}}
@@ -86,9 +93,19 @@ class StoreService:
         es.index(index='stores', doc_type='metadata', id=store_code, body=store.to_dict())
         return store
 
-    def remove_store(self, store_code):
-        Store.query.filter_by(store_code=store_code).delete()
+    def freeze_store(self, uid, store_code):
+        store = self.get_store(uid,store_code, True)
+        store.is_maintenance = True
+        db.session.merge(store)
+        db.session.commit()
         es.delete(index='stores', doc_type='metadata', id=store_code)
+
+    def toggle_maintenance_store(self, uid, store_code):
+        store = self.get_store(uid,store_code, True)
+        store.is_maintenance = not store.is_maintenance
+        db.session.merge(store)
+        db.session.commit()
+        es.update(index='stores', doc_type='metadata', id=store_code, body=store.to_dict())
 
     def clear_stores_cache(self):
         stores = self.get_stores()

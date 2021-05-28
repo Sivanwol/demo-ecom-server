@@ -16,7 +16,7 @@ def verify_uid(uid):
     rules = {"uid": "required|min:10"}
     result = validate({"uid": uid}, rules)  # True
     if result:
-        return True
+        return userService.user_exists(uid)
     else:
         return False
 

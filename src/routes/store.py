@@ -55,19 +55,20 @@ def create_store(uid):
         store = storeService.create_store(uid, data.data)
         userService.update_user_store_owner(uid, store.store_code)
         return response_success(storeService.get_store(uid, store.store_code))
-    return response_error("Error on format of the params", {uid: uid})
+    return response_error("Error on format of the params", {'uid': uid})
 
 
-# Todo: add logic to delete store
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>"), methods=["DELETE"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
 def delete_store(uid, store_code):
-    currencies = {}
-    for currency in list(pycountry.currencies):
-        obj = {"{}".format(currency.alpha_3): currency.__dict__['_fields']}
-        currencies.update(obj)
+    if verify_uid(uid):
+        if not storeService.store_exists(uid, store_code):
+            response_error("store not exist", {uid: uid, store_code: store_code})
 
-    return response_success(currencies)
+        storeService.freeze_store(uid, store_code)
+        userService.toggle_freeze_user(uid)
+        return response_success({})
+    return response_error("Error on format of the params", {uid: uid})
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/update"), methods=["PUT"])
