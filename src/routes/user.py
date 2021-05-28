@@ -4,12 +4,13 @@ import os
 from firebase_admin.auth import UserNotFoundError
 from firebase_admin.exceptions import FirebaseError
 from flask import request
+from marshmallow import ValidationError
 
 from config import settings
 from config.api import app as current_app
 from src.middlewares.check_role import check_role
 from src.middlewares.check_token import check_token
-from src.serializers.user import CreatePlatformUser
+from src.schemas.requests.user import CreatePlatformUser
 from src.services.roles import RolesService
 from src.services.store import StoreService
 from src.services.user import UserService
@@ -101,7 +102,10 @@ def sync_platform_user_create(uid):
         try:
             body = request.json()
             bodyObj = {"role_names": ', '.join(body['role_names'])}
-            data = CreatePlatformUser(**bodyObj)
+            try:
+                data = CreatePlatformUser.load(bodyObj)
+            except ValidationError as e:
+                return response_error("Error on format of the params", {'params': request.json})
             if roleSerivce.check_roles(data.role_names):
                 return response_error("One or more of fields are invalid", request.data)
 

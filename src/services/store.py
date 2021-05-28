@@ -29,7 +29,7 @@ class StoreService:
     def get_store(self, owner_uid, store_code, return_model=False):
         if not return_model:
             res = es.get(index="stores", doc_type='metadata', id=store_code)
-            return storeSchema.dumps(res['_source'])
+            return res['_source']
 
         store = Store.query.filter_by(owner_id=owner_uid, store_code=store_code).first()
         if store is None:

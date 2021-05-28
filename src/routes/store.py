@@ -2,12 +2,13 @@ import os
 
 import pycountry
 from flask import request
+from marshmallow import ValidationError
 
 from config import settings
 from config.api import app as current_app
 from src.middlewares.check_role import check_role
 from src.middlewares.check_token import check_token
-from src.serializers.store import StoreUpdate, StoreCreate
+from src.schemas.requests.store import RequestStoreCreate, RequestStoreUpdate
 from src.services.store import StoreService
 from src.services.user import UserService
 from src.utils.common_methods import verify_uid
@@ -28,7 +29,7 @@ def get_store_info(uid, store_code):
         if store is None:
             response_error("error store not existed", {uid: uid, store_code: store_code})
 
-        return response_success(storeService.get_store(uid, store_code))
+        return response_success(store)
     return response_error("Error on format of the params", {uid: uid})
 
 
@@ -45,8 +46,12 @@ def create_store(uid):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(uid):
-        data = StoreCreate(**request.json)
-        store = storeService.create_store(uid,request.json)
+        try:
+            data = RequestStoreCreate.load(request.json)
+        except ValidationError as e:
+            return response_error("Error on format of the params", {'params': request.json})
+
+        store = storeService.create_store(uid, data.dict())
         userService.update_user_store_owner(uid, store.store_code)
         return response_success(storeService.get_store(uid, store.store_code))
     return response_error("Error on format of the params", {uid: uid})
@@ -70,13 +75,15 @@ def update_store_support(uid, store_code):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(uid):
-        store = storeService.get_store(uid, store_code)
+        store = storeService.get_store(uid, store_code, True)
         if store is None:
             response_error("error store not existed", {uid: uid, store_code: store_code})
-        body = request.json()
-        if not valid_currency(body['currency_code']):
-            return response_error("Error on format of the params", {body: body})
-        data = StoreUpdate(**body)
+        try:
+            data = RequestStoreCreate.load(request.json)
+        except ValidationError as e:
+            return response_error("Error on format of the params", {'params': request.json})
+        if not valid_currency(data.currency_code):
+            return response_error("Error on format of the params", {'params': request.json})
         storeService.update_store_metadata(data)
         return response_success({})
     return response_error("Error on format of the params", {uid: uid})

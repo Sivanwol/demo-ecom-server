@@ -15,6 +15,7 @@ click==7.1.2
 colorama==0.4.4
 dataclasses==0.6
 dnspython==2.1.0
+ElasticMock==1.8.0
 elasticsearch==7.13.0
 email-validator==1.1.2
 Faker==8.4.0
@@ -64,6 +65,7 @@ Mako==1.1.4
 MarkupSafe==1.1.1
 marshmallow==2.21.0
 marshmallow-sqlalchemy==0.25.0
+mock==4.0.3
 msgpack==1.0.2
 oauth2client==3.0.0
 packaging==20.9
@@ -83,7 +85,6 @@ pycountry==20.7.3
 pycparser==2.20
 pycryptodome==3.4.3
 pycryptodomex==3.10.1
-pydantic==1.6.1
 PyJWT==2.1.0
 pyparsing==2.4.7
 pyrsistent==0.17.3
