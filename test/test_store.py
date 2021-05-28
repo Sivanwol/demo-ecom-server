@@ -18,10 +18,7 @@ class FlaskTestCase(BaseTestCase):
             uid = user_object['uid']
             token = user_object['idToken']
             user = self.userService.get_user(uid, True)
-            has_store_code = False
-            if 'store_code' in user:
-                has_store_code = True
-            self.assertFalse(has_store_code)
+            self.assertIsNone(user.store_code)
             store_name = self.fake.company()
             currency_code = self.fake.currency_code()
             post_data = {
