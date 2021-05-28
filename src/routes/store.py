@@ -49,8 +49,8 @@ def create_store(uid):
             return response_error("Error on format of the params", {'params': request.json, 'errors': e.messages})
 
         store = storeService.create_store(uid, data.data)
-        userService.update_user_store_owner(uid, store.store_code)
-        return response_success(storeService.get_store(uid, store.store_code))
+        userService.update_user_store_owner(uid, store['store_code'])
+        return response_success(store)
     return response_error("Error on format of the params", {'uid': uid})
 
 
