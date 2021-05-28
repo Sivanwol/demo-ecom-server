@@ -11,4 +11,3 @@ class CommandUnableCreateOwnerUser(Error):
 
     def __init__(self, email):
         self.message = 'failed create owner user under this email: {} please check firebase console'.format(email)
-        logger.error(self.message)

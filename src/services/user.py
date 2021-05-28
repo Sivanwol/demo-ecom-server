@@ -4,11 +4,9 @@ from config.api import cache
 from config.database import db
 from src.models import User
 from src.schemas.user_schema import UserSchema
-from src.services.store import StoreService
 from src.utils.responses import response_error
 from src.utils.singleton import singleton
 
-storeService = StoreService()
 
 
 @singleton

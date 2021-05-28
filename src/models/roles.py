@@ -13,7 +13,7 @@ class Roles(db.Model):
     name = db.Column(String(100), nullable=False)
     is_active = db.Column(Boolean, nullable=False)
     # Define the relationship to Role via UserRoles
-    user = db.relationship('User', secondary='user_roles')
+    user = db.relationship('User', secondary='user_roles', viewonly=True)
 
     def __init__(self, name, is_active):
         self.name = name
