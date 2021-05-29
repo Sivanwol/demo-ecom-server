@@ -8,7 +8,7 @@ from config import settings
 from config.api import app as current_app
 from src.middlewares.check_role import check_role
 from src.middlewares.check_token import check_token
-from src.schemas.requests.store import RequestStoreCreate, RequestStoreUpdate
+from src.schemas.requests.store import RequestStoreCreate, RequestStoreUpdate, RequestStoreLocationSchema
 from src.services.store import StoreService
 from src.services.user import UserService
 from src.utils.common_methods import verify_uid
@@ -105,25 +105,24 @@ def update_store_support(uid, store_code):
 # Todo: add logic to create store location
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/location"), methods=["POST"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value, RolesTypes.StoreAccount.value])
-def add_store_location(uid, store_code):
-    currencies = {}
-    for currency in list(pycountry.currencies):
-        obj = {"{}".format(currency.alpha_3): currency.__dict__['_fields']}
-        currencies.update(obj)
-    return response_success(currencies)
+def update_store_location(uid, store_code):
 
-
-# Todo: add logic to delete store location
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/location/<location_id>"),
-                   methods=["DELETE"])
-@check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value, RolesTypes.StoreAccount.value])
-def delete_store_location(uid, store_code, location_id):
-    currencies = {}
-    for currency in list(pycountry.currencies):
-        obj = {"{}".format(currency.alpha_3): currency.__dict__['_fields']}
-        currencies.update(obj)
-    return response_success(currencies)
-
+    if not request.is_json:
+        return response_error("Request Data must be in json format", request.data)
+    if verify_uid(uid):
+        store = storeService.get_store(uid, store_code, True)
+        if store is None:
+            response_error("error store not existed", {uid: uid, store_code: store_code})
+        try:
+            schema = RequestStoreLocationSchema()
+            data = schema.load(**request.json)
+        except ValidationError as e:
+            return response_error("Error on format of the params", {'params': request.json})
+        if not valid_currency(data.currency_code):
+            return response_error("Error on format of the params", {'params': request.json})
+        storeService.update_locations(uid, store_code, data)
+        return response_success({})
+    return response_error("Error on format of the params", {uid: uid})
 
 # Todo: add logic to create opening hours
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/hours/<location_id>"),

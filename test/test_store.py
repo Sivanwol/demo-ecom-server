@@ -1,7 +1,9 @@
 # tests/test_basic.py
 import unittest
+
+from src.utils.common_methods import Struct
 from src.utils.enums import RolesTypes
-from test.common.Basecase import BaseTestCase, Struct
+from test.common.Basecase import BaseTestCase
 
 
 class FlaskTestCase(BaseTestCase):
