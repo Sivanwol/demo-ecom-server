@@ -30,8 +30,5 @@
       "enabled": true,
       "host": "0.0.0.0"
     }
-  },
-  "remoteconfig": {
-    "template": "remoteconfig.template.json"
   }
 }

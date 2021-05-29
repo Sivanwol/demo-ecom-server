@@ -1,11 +1,8 @@
 from functools import wraps
-
-from firebase_admin import auth
 from flask import request
 
 from config import app
 from src.exceptions.unknown_roles import UnknownRolesOrNotMatched
-from src.services.roels import RolesService
 from src.services.user import UserService
 from src.utils.common_methods import verify_response
 from src.utils.responses import response_error
