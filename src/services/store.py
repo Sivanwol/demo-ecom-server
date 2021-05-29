@@ -60,7 +60,7 @@ class StoreService:
         cache.delete_memoized('get_locations', owner_uid, store_code)
         self.remove_locations(owner_uid, store_code)
         bulk_locations = []
-        for store_location in data.locations:
+        for store_location in store_locations.locations:
             bulk_locations.append(StoreLocations(store_location.store_id,
                                                  store_location.address,
                                                  store_location.city,
@@ -71,9 +71,17 @@ class StoreService:
         db.session.bulk_save_objects(bulk_locations, return_defaults=True)
         db.session.commit()
 
-    # Todo: add logic to update store meta data
-    def update_store_metadata(self, store_data):
-        pass
+    def update_store_metadata(self, owner_uid, store_code, store_object):
+        if not valid_currency(store_object.currency_code):
+            raise ParamsNotMatchCreateStore(owner_uid, store_object.name, store_object.currency_code, None, store_object.description)
+        store = self.get_store(owner_uid, store_code)
+        store.name = store_object.name
+        store.description = store_object.description
+        store.default_currency_code = store_object.currency_code
+        db.session.merge(store)
+        db.session.commit()
+        self.clear_store_cache(owner_uid, store_code)
+        return storeSchema.dump(store)
 
     def remove_locations(self, owner_uid, store_code, store_id):
         cache.delete_memoized('get_locations', owner_uid, store_code)

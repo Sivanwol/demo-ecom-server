@@ -8,7 +8,7 @@ class RequestStoreCreate(Schema):
 
 
 class RequestStoreUpdate(RequestStoreCreate):
-    store_code = fields.Str(required=True, dump_only=True, validate=validate.Length(min=10, max=100, error='field store_code not valid'))
+    pass
 
 
 class RequestStoreLocationSchema(Schema):

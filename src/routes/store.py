@@ -7,11 +7,10 @@ from marshmallow import ValidationError
 from config import settings
 from config.api import app as current_app
 from src.middlewares.check_role import check_role
-from src.middlewares.check_token import check_token
 from src.schemas.requests.store import RequestStoreCreate, RequestStoreUpdate, RequestStoreLocationSchema
 from src.services.store import StoreService
 from src.services.user import UserService
-from src.utils.common_methods import verify_uid
+from src.utils.common_methods import verify_uid, Struct
 from src.utils.enums import RolesTypes
 from src.utils.responses import response_success, response_error
 from src.utils.validations import valid_currency
@@ -91,14 +90,15 @@ def update_store_support(uid, store_code):
         if store is None:
             response_error("error store not existed", {uid: uid, store_code: store_code})
         try:
-            schema = RequestStoreCreate()
+            schema = RequestStoreUpdate()
             data = schema.load(**request.json)
         except ValidationError as e:
             return response_error("Error on format of the params", {'params': request.json})
         if not valid_currency(data.currency_code):
             return response_error("Error on format of the params", {'params': request.json})
-        storeService.update_store_metadata(data)
-        return response_success({})
+        data = Struct(data.data)
+        store = storeService.update_store_metadata(data)
+        return response_success(store)
     return response_error("Error on format of the params", {uid: uid})
 
 
@@ -120,6 +120,7 @@ def update_store_location(uid, store_code):
             return response_error("Error on format of the params", {'params': request.json})
         if not valid_currency(data.currency_code):
             return response_error("Error on format of the params", {'params': request.json})
+        data = Struct(data.data)
         storeService.update_locations(uid, store_code, data)
         return response_success({})
     return response_error("Error on format of the params", {uid: uid})
