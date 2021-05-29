@@ -75,6 +75,38 @@ class FlaskTestCase(BaseTestCase):
             self.assertTrue(store.is_maintenance)
             self.assertFalse(user.is_active)
 
+    def test_toggle_store_maintenance(self):
+        with self.client:
+            self.create_store_user(self.user_owner, [RolesTypes.StoreOwner.value], True)
+            user_object = self.login_user(self.platform_owner_user)
+            store_user_object = self.login_user(self.user_owner)
+            uid = store_user_object['uid']
+            token = user_object['idToken']
+            user = self.userService.get_user(uid, True)
+            self.assertIsNone(user.store_code)
+            store_name = self.fake.company()
+            currency_code = self.fake.currency_code()
+            post_data = {
+                'name': store_name,
+                'description': 'store description',
+                'currency_code': currency_code
+            }
+            response = self.request_post('/api/store/%s/create' % uid, token, post_data)
+            self.assert200(response, 'create store request failed')
+            response_data = Struct(response.json)
+            self.assertIsNotNone(response_data)
+            self.assertTrue(response_data.status)
+            self.assertNotEqual(response_data.data.store_code, '')
+            store = self.storeService.get_store(uid, response_data.data.store_code, True)
+            self.assertIsNotNone(store)
+            self.assertIsNotNone(response_data.data)
+            self.assertFalse(store.is_maintenance)
+            self.assertEqual(user.store_code, store.store_code)
+            response = self.request_put('/api/store/{}/{}/toggle/maintenance'.format(uid, user.store_code), token)
+            self.assert200(response, 'toggle maintenance store request failed')
+            store = self.storeService.get_store(uid, response_data.data.store_code, True)
+            self.assertTrue(store.is_maintenance)
+
     def test_get_store_info(self):
         with self.client:
             self.create_store_user(self.user_owner, [RolesTypes.StoreOwner.value], True)

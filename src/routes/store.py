@@ -68,6 +68,19 @@ def delete_store(uid, store_code):
     return response_error("Error on format of the params", {uid: uid})
 
 
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/toggle/maintenance"), methods=["PUT"])
+@check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
+def toggle_store_maintenance(uid, store_code):
+    if verify_uid(uid):
+        if not storeService.store_exists(uid, store_code):
+            response_error("store not exist", {uid: uid, store_code: store_code})
+
+        storeService.toggle_maintenance_store(uid, store_code)
+        stores = storeService.get_stores()
+        return response_success(stores.data)
+    return response_error("Error on format of the params", {uid: uid})
+
+
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/update"), methods=["PUT"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value, RolesTypes.StoreAccount.value])
 def update_store_support(uid, store_code):
