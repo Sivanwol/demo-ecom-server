@@ -1,16 +1,13 @@
 # tests/test_basic.py
-import json
 import unittest
-
 from src.utils.enums import RolesTypes
 from test.common.Basecase import BaseTestCase, Struct
-from elasticmock import elasticmock
 
 
 class FlaskTestCase(BaseTestCase):
     user_owner = 'store2.owner@store.user'
     store_owner_user = 'store.owner@store.user'
-    @elasticmock
+
     def test_create_store(self):
         with self.client:
             self.create_store_user(self.store_owner_user, [RolesTypes.StoreOwner.value], True)
