@@ -5,13 +5,15 @@ from config.database import db
 import uuid
 
 from src.exceptions.params_not_match_create_store import ParamsNotMatchCreateStore
+from src.models.store_hours import StoreHours
 from src.models.store_locations import StoreLocations
 from src.models.stores import Store
-from src.schemas.store_schema import StoreSchema, StoreLocationSchema
+from src.schemas.store_schema import StoreSchema, StoreLocationSchema, StoreHourSchema
 from src.utils.validations import valid_currency
 
 storeSchema = StoreSchema()
 storeLocationSchema = StoreLocationSchema()
+storeHourSchema = StoreHourSchema()
 
 
 class StoreService:
@@ -26,11 +28,12 @@ class StoreService:
     @cache.memoize(50)
     def get_store(self, owner_uid, store_code, return_model=False):
         store = Store.query.filter_by(owner_id=owner_uid, store_code=store_code).first()
-        store_locations = StoreLocations.query.filter_by(store_id=store.id).all()
+        store_data = self.get_store_data(store)
         if not return_model:
             return {
                 'info': storeSchema.dump(store).data,
-                'locations': storeLocationSchema.dump(store_locations, many=True).data
+                'locations': storeLocationSchema.dump(store_data['locations'], many=True).data,
+                'hours': storeHourSchema.dump(store_data['hours'], many=True).data
             }
 
         if store is None:
@@ -40,11 +43,12 @@ class StoreService:
     @cache.memoize(50)
     def get_store_by_status_code(self, store_code, return_model=False):
         store = Store.query.filter_by(store_code=store_code).first()
-        store_locations = StoreLocations.query.filter_by(store_id=store.id).all()
+        store_data = self.get_store_data(store)
         if not return_model:
             return {
                 'info': storeSchema.dump(store).data,
-                'locations': storeLocationSchema.dump(store_locations, many=True).data
+                'locations': storeLocationSchema.dump(store_data['locations'], many=True).data,
+                'hours': storeHourSchema.dump(store_data['hours'], many=True).data
             }
         if store is None:
             return None
@@ -58,9 +62,16 @@ class StoreService:
         return False
 
     @cache.memoize(50)
-    def get_locations(self, store_id):
-        store_locations = StoreLocations.query.filter_by(store_id=store_id).all()
+    def get_locations(self, owner_uid, store_code):
+        store = self.get_store(owner_uid, store_code, True)
+        store_locations = StoreLocations.query.filter_by(store_id=store.id).all()
         return store_locations
+
+    def location_exist(self, store_location_id):
+        object = StoreLocations.query.filter_by(id=store_location_id).first()
+        if object is None:
+            return True
+        return False
 
     def update_locations(self, owner_uid, store_code, store_locations):
         cache.delete_memoized(self.get_locations, owner_uid, store_code)
@@ -80,24 +91,27 @@ class StoreService:
         return self.get_store(owner_uid, store_code)
 
     @cache.memoize(50)
-    def get_hours(self, store_id):
-        store_locations = StoreLocations.query.filter_by(store_id=store_id).all()
-        return store_locations
+    def get_hours(self, owner_uid, store_code):
+        store = self.get_store(owner_uid, store_code, True)
+        list = StoreHours.query.filter_by(store_id=store.id).all()
+        return list
 
     def update_hours(self, owner_uid, store_code, store_hours):
-        cache.delete_memoized(self.get_hours, owner_uid, store_code)
-        self.remove_locations(owner_uid, store_code)
-        bulk_locations = []
+        self.remove_hours(owner_uid, store_code)
+        bulk = []
         store = self.get_store(owner_uid, store_code, True)
         for store_hour in store_hours.hours:
-            bulk_locations.append(StoreLocations(store.id,
-                                                 store_location.address,
-                                                 store_location.city,
-                                                 store_location.country_code,
-                                                 store_location.lat,
-                                                 store_location.lng,
-                                                 store_location.is_close))
-        db.session.bulk_save_objects(bulk_locations, return_defaults=True)
+            location_id = None
+            if self.location_exist(store_hour.location_id):
+                location_id = store_hour.location_id
+            bulk.append(StoreHours(store.id,
+                                   store_hour.day,
+                                   location_id,
+                                   store_hour.from_time,
+                                   store_hour.to_time,
+                                   store_hour.is_open_24,
+                                   store_hour.is_close))
+        db.session.bulk_save_objects(bulk, return_defaults=True)
         db.session.commit()
         return self.get_store(owner_uid, store_code)
 
@@ -117,6 +131,11 @@ class StoreService:
         cache.delete_memoized(self.get_locations, owner_uid, store_code)
         store = self.get_store(owner_uid, store_code, True)
         StoreLocations.query.filter_by(store_id=store.id).delete()
+
+    def remove_hours(self, owner_uid, store_code):
+        cache.delete_memoized(self.get_hours, owner_uid, store_code)
+        store = self.get_store(owner_uid, store_code, True)
+        StoreHours.query.filter_by(store_id=store.id).delete()
 
     def create_store(self, owner_id, store_object):
         if not valid_currency(store_object['currency_code']):
@@ -152,3 +171,11 @@ class StoreService:
         cache.delete_memoized(self.get_store, owner_uid, store_code)
         cache.delete_memoized(self.get_locations, owner_uid, store_code)
         cache.delete_memoized(self.get_hours, owner_uid, store_code)
+
+    def get_store_data(self, store):
+        store_locations = StoreLocations.query.filter_by(store_id=store.id).all()
+        store_hours = StoreHours.query.filter_by(store_id=store.id).all()
+        return {
+            'locations': store_locations,
+            'hours': store_hours
+        }

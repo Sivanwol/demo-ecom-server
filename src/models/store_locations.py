@@ -21,8 +21,6 @@ class StoreLocations(db.Model):
     city = db.Column(String(255), nullable=False)
     country_code = db.Column(String(3), nullable=False)
     is_close = db.Column(Boolean, nullable=False, default=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now())
-    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now(), onupdate=datetime.now())
 
     store = db.relationship('Store', backref='stores')
 
@@ -36,16 +34,14 @@ class StoreLocations(db.Model):
         self.is_close = is_close
 
     def __repr__(self):
-        return "<Store_Location(id='{}',store_id='{}', lat='{}', lng='{}' address='{}' city='{}' country_code='{}' created_at='{}' updated_at='{}'>".format(
+        return "<Store_Location(id='{}',store_id='{}', lat='{}', lng='{}' address='{}' city='{}' country_code='{}'>".format(
             self.id,
             self.store_id,
             self.lat,
             self.lng,
             self.address,
             self.city,
-            self.country_code,
-            self.created_at,
-            self.updated_at)
+            self.country_code)
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}

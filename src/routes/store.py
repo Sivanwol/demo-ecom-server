@@ -7,7 +7,7 @@ from marshmallow import ValidationError
 from config import settings
 from config.api import app as current_app
 from src.middlewares.check_role import check_role
-from src.schemas.requests.store import RequestStoreCreate, RequestStoreUpdate, RequestStoreLocationSchema
+from src.schemas.requests.store import RequestStoreCreate, RequestStoreUpdate, RequestStoreLocationSchema, RequestStoreHourSchema
 from src.services.store import StoreService
 from src.services.user import UserService
 from src.utils.common_methods import verify_uid
@@ -129,12 +129,22 @@ def update_store_location(uid, store_code):
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/hours/<location_id>"),
                    methods=["POST"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value, RolesTypes.StoreAccount.value])
-def add_store_hours(uid, store_code, location_id):
-    currencies = {}
-    for currency in list(pycountry.currencies):
-        obj = {"{}".format(currency.alpha_3): currency.__dict__['_fields']}
-        currencies.update(obj)
-    return response_success(currencies)
+def update_store_hours(uid, store_code):
+    if not request.is_json:
+        return response_error("Request Data must be in json format", request.data)
+    if verify_uid(uid):
+        has_store = storeService.store_exists(uid, store_code)
+        if has_store is None:
+            response_error("error store not existed", {uid: uid, store_code: store_code})
+        try:
+            schema = RequestStoreHourSchema()
+            data = schema.load(request.json, many=True)
+        except ValidationError as e:
+            return response_error("Error on format of the params", {'params': request.json})
+        data = Struct({'hours': data.data})
+        store = storeService.update_hours(uid, store_code, data)
+        return response_success(store)
+    return response_error("Error on format of the params", {uid: uid})
 
 
 # Todo: add logic to delete opening hours

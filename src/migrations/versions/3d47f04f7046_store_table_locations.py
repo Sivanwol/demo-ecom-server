@@ -27,8 +27,6 @@ def upgrade():
                     sa.Column('country_code', sa.String(length=3), nullable=True, index=False),
                     sa.Column('city', sa.String(length=255), nullable=False, default=False),
                     sa.Column('is_close', sa.Boolean(), nullable=False, default=False),
-                    sa.Column('create_at', sa.DateTime(), default=sa.func.current_timestamp()),
-                    sa.Column('update_at', sa.DateTime(), onupdate=sa.ColumnDefault(sa.func.current_timestamp), default=sa.func.current_timestamp()),
                     sa.PrimaryKeyConstraint('id')
                     )
     # ### end Alembic commands ###
