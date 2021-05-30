@@ -22,10 +22,10 @@ def upgrade():
                     sa.Column('id', sa.Integer(), nullable=False),
                     sa.Column('store_id', sa.Integer(), sa.ForeignKey('stores.id')),
                     sa.Column('store_location_id', sa.Integer(), sa.ForeignKey('stores_locations.id')),
-                    sa.Column('day', sa.Integer(), index=True, nullable=True),
-                    sa.Column('from_time', sa.String(length=255), nullable=True),
-                    sa.Column('to_time', sa.String(length=3), nullable=False),
-                    sa.Column('is_open_24', sa.String(length=100), nullable=True),
+                    sa.Column('day', sa.Integer(), index=True, nullable=False),
+                    sa.Column('from_time', sa.Integer(), nullable=True),
+                    sa.Column('to_time', sa.Integer(), nullable=True),
+                    sa.Column('is_open_24', sa.Boolean(), nullable=False, default=False),
                     sa.Column('is_close', sa.Boolean(), nullable=False, default=False),
                     sa.PrimaryKeyConstraint('id')
                     )

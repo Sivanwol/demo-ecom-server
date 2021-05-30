@@ -4,43 +4,48 @@ from sqlalchemy import Integer, String, Boolean
 
 from config.database import db
 from src.models import User
+from src.models.store_locations import StoreLocations
+from src.models.stores import Store
 
 
 class StoreHours(db.Model):
     """
     This is a base user Model
     """
-    __tablename__ = 'stores'
+    __tablename__ = 'stores_hours'
 
     id = db.Column(Integer, primary_key=True)
-    store_code = db.Column(String(100), nullable=False)
-    owner_id = db.Column(Integer, db.ForeignKey(User.id))
-    logo_id = db.Column(Integer, nullable=True)
-    name = db.Column(String(100), nullable=False)
-    description = db.Column(String(255), nullable=True)
-    default_currency_code = db.Column(String(3), nullable=False)
-    is_maintenance = db.Column(Boolean, nullable=False, default=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now())
-    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now(), onupdate=datetime.now())
+    store_id = db.Column(Integer, db.ForeignKey(Store.id))
+    store_location_id = db.Column(Integer, db.ForeignKey(StoreLocations.id))
+    day = db.Column(Integer, nullable=False)
+    from_time = db.Column(Integer, nullable=True)
+    to_time = db.Column(Integer, nullable=True)
+    is_open_24 = db.Column(Boolean, nullable=False, default=False)
+    is_close = db.Column(Boolean, nullable=False, default=False)
 
-    owner = db.relationship(User, uselist=False)
+    store = db.relationship(Store, uselist=False)
+    location = db.relationship(StoreLocations, uselist=False)
 
-    def __init__(self, store_code, owner_id, name, default_currency_code, logo_id=None, description=None, is_maintenance=False):
-        self.store_code = store_code
-        self.owner_id = owner_id
-        self.name = name
-        self.default_currency_code = default_currency_code
-        self.logo_id = logo_id
-        self.description = description
-        self.is_maintenance = is_maintenance
+
+    def __init__(self, store_id, day, store_location_id=None, from_time=None, to_time=None, is_open_24=False, is_close=False):
+        self.store_id = store_id
+        self.day = day
+        self.store_location_id = store_location_id
+        self.from_time = from_time
+        self.to_time = to_time
+        self.is_open_24 = is_open_24
+        self.is_close = is_close
 
     def __repr__(self):
-        return "<Store_Hours(id='{}', owner_id='{}', name='{}' is_maintenance={} created_at='{}' updated_at='{}'>".format(self.id,
-                                                                                                                    self.owner_id,
-                                                                                                                    self.name,
-                                                                                                                    self.is_maintenance,
-                                                                                                                    self.created_at,
-                                                                                                                    self.updated_at)
+        return "<Store_Hours(id='{}', store_id='{}', day='{}' store_location_id={} from_time='{}' to_time='{}' is_open_24='{}' is_close='{}'>".format(
+            self.id,
+            self.store_id,
+            self.day,
+            self.store_location_id,
+            self.from_time,
+            self.to_time,
+            self.is_open_24,
+            self.is_close)
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}

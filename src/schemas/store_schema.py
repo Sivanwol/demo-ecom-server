@@ -2,6 +2,7 @@ from marshmallow import Schema, fields
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 from marshmallow_sqlalchemy.fields import Nested
 
+from src.models.store_hours import StoreHours
 from src.models.store_locations import StoreLocations
 from src.models.stores import Store
 from src.schemas.user_schema import UserSchema
@@ -37,8 +38,21 @@ class StoreLocationSchema(SQLAlchemySchema):
     city = auto_field()
     country_code = auto_field()
     is_close = auto_field()
-    created_at = auto_field()
-    updated_at = auto_field()
+
+
+class StoreHourSchema(SQLAlchemySchema):
+    class Meta:
+        model = StoreHours
+        include_fk = True
+        load_instance = True
+
+    store = Nested(StoreSchema)
+    location = Nested(StoreLocationSchema)
+    day = auto_field()
+    from_time = auto_field()
+    to_time = auto_field()
+    is_open_24 = auto_field()
+    is_close = auto_field()
 
 
 class ResponseStoreData(Schema):

@@ -20,5 +20,18 @@ class RequestStoreLocationSchema(Schema):
     is_close = fields.Bool(required=True)
 
 
+class RequestStoreHourSchema(Schema):
+    location_id = fields.Int(missing=None, allow_none=True)
+    day = fields.Int(required=True, validate=validate.Range(max=7, min=1, error='field day not valid'))
+    from_time = fields.Int(missing=None, allow_none=True, validate=validate.Range(max=23, min=0, error='field from_time not valid'))
+    to_time = fields.Int(missing=None, allow_none=True, validate=validate.Range(max=23, min=0, error='field to_time not valid'))
+    is_open_24 = fields.Bool(required=True)
+    is_close = fields.Bool(required=True)
+
+
 class RequestStoreLocationsUpdate(Schema):
     locations = fields.Nested(RequestStoreLocationSchema())
+
+
+class RequestStoreHoursUpdate(Schema):
+    hours = fields.Nested(RequestStoreHourSchema())
