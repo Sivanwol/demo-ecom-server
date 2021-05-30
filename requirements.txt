@@ -15,6 +15,7 @@ click==7.1.2
 colorama==0.4.4
 dataclasses==0.6
 dnspython==2.1.0
+dparse==0.5.1
 elasticsearch==7.13.0
 email-validator==1.1.2
 Faker==8.4.0
@@ -90,17 +91,18 @@ pycryptodomex==3.10.1
 PyJWT==2.1.0
 pyparsing==2.4.7
 pyrsistent==0.17.3
-pytest==6.2.4
 pytest-elasticsearch==2.1.0
 python-dateutil==2.8.1
 python-dotenv==0.17.1
 python-editor==1.0.4
 python-jwt==2.0.1
 pytz==2020.1
+PyYAML==5.4.1
 redis==3.5.3
 requests==2.22.0
 requests-toolbelt==0.7.0
 rsa==4.7.2
+safety==1.10.3
 schwifty==2020.9.0
 six==1.16.0
 speaklater==1.3
