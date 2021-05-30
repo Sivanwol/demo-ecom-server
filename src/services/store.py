@@ -79,6 +79,28 @@ class StoreService:
         db.session.commit()
         return self.get_store(owner_uid, store_code)
 
+    @cache.memoize(50)
+    def get_hours(self, store_id):
+        store_locations = StoreLocations.query.filter_by(store_id=store_id).all()
+        return store_locations
+
+    def update_hours(self, owner_uid, store_code, store_hours):
+        cache.delete_memoized(self.get_hours, owner_uid, store_code)
+        self.remove_locations(owner_uid, store_code)
+        bulk_locations = []
+        store = self.get_store(owner_uid, store_code, True)
+        for store_hour in store_hours.hours:
+            bulk_locations.append(StoreLocations(store.id,
+                                                 store_location.address,
+                                                 store_location.city,
+                                                 store_location.country_code,
+                                                 store_location.lat,
+                                                 store_location.lng,
+                                                 store_location.is_close))
+        db.session.bulk_save_objects(bulk_locations, return_defaults=True)
+        db.session.commit()
+        return self.get_store(owner_uid, store_code)
+
     def update_store_info(self, owner_uid, store_code, store_object):
         if not valid_currency(store_object.currency_code):
             raise ParamsNotMatchCreateStore(owner_uid, store_object.name, store_object.currency_code, None, store_object.description)
@@ -129,3 +151,4 @@ class StoreService:
     def clear_store_cache(self, owner_uid, store_code):
         cache.delete_memoized(self.get_store, owner_uid, store_code)
         cache.delete_memoized(self.get_locations, owner_uid, store_code)
+        cache.delete_memoized(self.get_hours, owner_uid, store_code)
