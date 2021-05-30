@@ -23,8 +23,8 @@ class StoreHours(db.Model):
     is_open_24 = db.Column(Boolean, nullable=False, default=False)
     is_close = db.Column(Boolean, nullable=False, default=False)
 
-    store = db.relationship('Store', backref='stores')
-    location = db.relationship('StoreLocations', backref='stores_locations')
+    store = db.relationship(Store, uselist=False)
+    location = db.relationship(StoreLocations, uselist=False)
 
 
     def __init__(self, store_id, day, store_location_id=None, from_time=None, to_time=None, is_open_24=False, is_close=False):

@@ -1,9 +1,6 @@
-from datetime import datetime
-
 from sqlalchemy import Integer, String, Boolean
 
 from config.database import db
-from src.models import User
 from src.models.stores import Store
 
 
@@ -22,7 +19,7 @@ class StoreLocations(db.Model):
     country_code = db.Column(String(3), nullable=False)
     is_close = db.Column(Boolean, nullable=False, default=False)
 
-    store = db.relationship('Store', backref='stores')
+    store = db.relationship(Store, uselist=False)
 
     def __init__(self, store_id, address, city, country_code, lat=None, lng=None, is_close=None):
         self.store_id = store_id

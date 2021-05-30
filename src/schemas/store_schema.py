@@ -50,7 +50,7 @@ class StoreHourSchema(SQLAlchemySchema):
     location = Nested(StoreLocationSchema)
     day = auto_field()
     from_time = auto_field()
-    to_date = auto_field()
+    to_time = auto_field()
     is_open_24 = auto_field()
     is_close = auto_field()
 
