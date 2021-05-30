@@ -17,6 +17,7 @@ class RequestStoreLocationSchema(Schema):
     address = fields.Str(required=True, validate=validate.Length(max=255, error='field address not valid'))
     city = fields.Str(required=True, validate=validate.Length(max=255, error='field city not valid'))
     country_code = fields.Str(required=True, validate=validate.Length(min=2, max=3, error='field country_code not valid'))
+    is_close = fields.Bool(required=True)
 
 
 class RequestStoreLocationsUpdate(Schema):
