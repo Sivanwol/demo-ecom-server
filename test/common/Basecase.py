@@ -67,6 +67,13 @@ class BaseTestCase(TestCase):
             'display_name': user['displayName']
         }
 
+    def login_failed_user(self, email):
+        user = login_user(email, self.global_password)
+        self.assertFalse(is_json_key_present(user, 'error'))
+        token = user['idToken']
+        self.assertIsNone(token)
+        self.assertEqual(token, '')
+
     def init_unit_data(self):
         self.setup_owner_user()
         self.setup_account_user()

@@ -51,6 +51,23 @@ def get(uid):
     return response_error("Error on format of the params", {uid: uid})
 
 
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/toggle_active"), methods=["PUT"])
+def user_toggle_active(uid):
+    if verify_uid(uid):
+        try:
+            userService.toggle_freeze_user(uid)
+            return response_success({})
+        except ValueError:
+            current_app.logger.error("User not found", {uid: uid})
+            return response_error("Error on format of the params", {uid: uid})
+        except UserNotFoundError:
+            return response_error("User not found", {uid: uid}, 404)
+        except FirebaseError as err:
+            current_app.logger.error("unknown error", err)
+            return response_error("unknown error", {err: err.cause})
+    return response_error("Error on format of the params", {uid: uid})
+
+
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/passed_tutorial/<uid>/<store_code>"), methods=["PUT"])
 @check_token
 def mark_user_passed_tutorial(uid, store_code):

@@ -50,8 +50,25 @@ class UserService:
         return user
 
     @cache.memoize(50)
+    def get_users(self, filter_active=False, return_model=True):
+        query = User.query
+        if filter_active:
+            query = query.filter_by(is_active=True)
+        users = query.all()
+        if not return_model:
+            return self.user_schema.dump(users, many=True).data
+        return users
+
+    @cache.memoize(50)
+    def get_active_user(self, uid, return_model=True):
+        user = User.query.filter_by(uid=uid, is_active=True).first()
+        if not return_model:
+            return self.user_schema.dump(user, many=False).data
+        return user
+
+    @cache.memoize(50)
     def user_exists(self, uid):
-        user = User.query.filter_by(uid=uid).first()
+        user = User.query.filter_by(uid=uid, is_active=True).first()
         if user is None:
             return False
         return True
@@ -61,8 +78,12 @@ class UserService:
             return response_error('No token provided', None, 400)
         try:
             token = request.headers['authorization'].replace('Bearer ', '')
-            user = auth.verify_id_token(token)
-            request.uid = user["uid"]
+            firebase_obj = auth.verify_id_token(token)
+            uid = firebase_obj["uid"]
+            user_exist = self.user_exists(uid)
+            if not user_exist:
+                return response_error('user not active', None, 400)
+            request.uid = firebase_obj["uid"]
         except:
             return response_error('Invalid token provided', None, 400)
 
@@ -83,6 +104,7 @@ class UserService:
         user.is_active = not user.is_active
         db.session.merge(user)
         db.session.commit()
+        auth.update_user(uid,  disabled=user.is_active)
 
     def check_user_roles(self, uid, *requirements_roles):
         """ Return True if the user has all of the specified roles. Return False otherwise.
