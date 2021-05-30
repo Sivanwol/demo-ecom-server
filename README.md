@@ -23,6 +23,16 @@ if ever need add a dep to the project please do as follow
 $ pip install packagename
 $ pip freeze > requirements.txt # this will regenerate the requirements.txt
 ```
+
+### Testing
+see: [here](https://docs.python.org/3/library/unittest.htm)
+<p>
+for run use this command:
+</p>
+
+```angular2html
+$ python -m unittest
+```
 ### Running
  
 ```angular2html

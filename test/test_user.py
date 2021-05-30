@@ -20,9 +20,12 @@ class FlaskTestCase(BaseTestCase):
             user_object = self.login_user(self.platform_owner_user)
             uid = user_object['uid']
             token = user_object['idToken']
-            response = self.request_get('/api/user/%s' % uid, token)
-            self.assertEqual(response.status_code, 200)
+            response = self.request_get('/api/user/{}'.format(uid), token)
+            self.assert200(response, 'get user request failed')
             response_data = Struct(response.json)
+            self.assertTrue(response_data.status)
+            self.assertIsNotNone(response_data)
+            self.assertIsNotNone(response_data.data)
             user = Struct(self.userService.get_user(uid, True))
             self.assertIsNotNone(user)
             self.assertIsNotNone(response_data)
@@ -33,24 +36,25 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.user_data.roles[0].id, user.roles[0].id)
 
     def test_check_role_not_match(self):
-        self.create_store_user(self.store_owner_user, [RolesTypes.StoreOwner.value], True)
-        user_object = self.login_user(self.platform_support_user)
-        uid = user_object['uid']
-        token = user_object['idToken']
-        user = self.userService.get_user(uid, True)
-        has_store_code = False
-        if 'store_code' in user:
-            has_store_code = True
-        self.assertFalse(has_store_code)
-        store_name = self.fake.company()
-        currency_code = self.fake.currency_code()
-        post_data = {
-            'name': store_name,
-            'description': 'store description',
-            'currency_code': currency_code
-        }
-        response = self.request_post('/api/store/%s/create' % uid, token, post_data)
-        self.assert401(response, 'role checks request failed')
+
+        with self.client:
+            self.create_store_user(self.platform_owner_user, [RolesTypes.StoreOwner.value], True)
+            user_object = self.login_user(self.platform_support_user)
+            uid = user_object['uid']
+            token = user_object['idToken']
+            user = self.userService.get_user(uid, True)
+            self.assertIsNone(user.store_code)
+            store_name = self.fake.company()
+            currency_code = self.fake.currency_code()
+            post_data = {
+                'name': store_name,
+                'description': 'store description',
+                'currency_code': currency_code
+            }
+            response = self.request_post('/api/store/%s/create' % uid, token, post_data)
+            self.assert401(response, 'role checks request not failed')
+            response_data = Struct(response.json)
+            self.assertFalse(response_data.status)
 
     # todo:  Ensure that Flask was set up correctly
     def test_sync_new_user(self):
