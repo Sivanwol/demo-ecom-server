@@ -92,13 +92,13 @@ def update_store_support(uid, store_code):
             response_error("error store not existed", {uid: uid, store_code: store_code})
         try:
             schema = RequestStoreUpdate()
-            data = schema.load(**request.json)
+            data = schema.load(request.json)
         except ValidationError as e:
             return response_error("Error on format of the params", {'params': request.json})
-        if not valid_currency(data.currency_code):
+        if not valid_currency(data.default_currency_code):
             return response_error("Error on format of the params", {'params': request.json})
         data = Struct(data.data)
-        store = storeService.update_store_metadata(data)
+        store = storeService.update_store_info(data)
         return response_success(store)
     return response_error("Error on format of the params", {uid: uid})
 

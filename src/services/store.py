@@ -79,7 +79,7 @@ class StoreService:
         db.session.commit()
         return self.get_store(owner_uid, store_code)
 
-    def update_store_metadata(self, owner_uid, store_code, store_object):
+    def update_store_info(self, owner_uid, store_code, store_object):
         if not valid_currency(store_object.currency_code):
             raise ParamsNotMatchCreateStore(owner_uid, store_object.name, store_object.currency_code, None, store_object.description)
         self.clear_stores_cache()
