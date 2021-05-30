@@ -8,4 +8,17 @@ class RequestStoreCreate(Schema):
 
 
 class RequestStoreUpdate(RequestStoreCreate):
-    store_code = fields.Str(required=True, dump_only=True, validate=validate.Length(min=10, max=100, error='field store_code not valid'))
+    pass
+
+
+class RequestStoreLocationSchema(Schema):
+    lat = fields.Int(missing=None, allow_none=True)
+    lng = fields.Int(missing=None, allow_none=True)
+    address = fields.Str(required=True, validate=validate.Length(max=255, error='field address not valid'))
+    city = fields.Str(required=True, validate=validate.Length(max=255, error='field city not valid'))
+    country_code = fields.Str(required=True, validate=validate.Length(min=2, max=3, error='field country_code not valid'))
+    is_close = fields.Bool(required=True)
+
+
+class RequestStoreLocationsUpdate(Schema):
+    locations = fields.Nested(RequestStoreLocationSchema())

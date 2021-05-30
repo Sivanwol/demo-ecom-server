@@ -70,12 +70,3 @@ def scan_routes(app):
 
     for line in sorted(output):
         print(line)
-
-def is_json_key_present(json, key):
-    try:
-        buf = json[key]
-    except KeyError:
-        return False
-
-    return True
-

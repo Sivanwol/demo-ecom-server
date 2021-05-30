@@ -1,7 +1,6 @@
 import logging
 import os
 
-from elasticsearch import Elasticsearch
 from flask import Flask
 from flask_caching import Cache
 from flask_cors import CORS
@@ -48,4 +47,3 @@ else:
         'CACHE_REDIS_PASSWORD': settings[os.environ.get("FLASK_ENV", "development")].REDIS_PASSWORD
     })
 cache.init_app(app)
-es = Elasticsearch(settings[os.environ.get("FLASK_ENV", "development")].ELASTICSEARCH_URL)
