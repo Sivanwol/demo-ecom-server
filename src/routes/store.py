@@ -95,8 +95,6 @@ def update_store_support(uid, store_code):
             data = schema.load(request.json)
         except ValidationError as e:
             return response_error("Error on format of the params", {'params': request.json})
-        if not valid_currency(data.default_currency_code):
-            return response_error("Error on format of the params", {'params': request.json})
         data = Struct(data.data)
         store = storeService.update_store_info(data)
         return response_success(store)
