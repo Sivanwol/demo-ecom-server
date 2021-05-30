@@ -66,7 +66,7 @@ class StoreService:
         cache.delete_memoized(self.get_locations, owner_uid, store_code)
         self.remove_locations(owner_uid, store_code)
         bulk_locations = []
-        store = self.get_store(owner_uid, store_code,True)
+        store = self.get_store(owner_uid, store_code, True)
         for store_location in store_locations.locations:
             bulk_locations.append(StoreLocations(store.id,
                                                  store_location.address,
@@ -83,7 +83,7 @@ class StoreService:
         if not valid_currency(store_object.currency_code):
             raise ParamsNotMatchCreateStore(owner_uid, store_object.name, store_object.currency_code, None, store_object.description)
         self.clear_stores_cache()
-        store = self.get_store(owner_uid, store_code)
+        store = self.get_store(owner_uid, store_code, True)
         store.name = store_object.name
         store.description = store_object.description
         store.default_currency_code = store_object.currency_code
@@ -93,7 +93,7 @@ class StoreService:
 
     def remove_locations(self, owner_uid, store_code):
         cache.delete_memoized(self.get_locations, owner_uid, store_code)
-        store = self.get_store(owner_uid, store_code,True)
+        store = self.get_store(owner_uid, store_code, True)
         StoreLocations.query.filter_by(store_id=store.id).delete()
 
     def create_store(self, owner_id, store_object):

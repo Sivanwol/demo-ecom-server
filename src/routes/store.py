@@ -29,6 +29,7 @@ def get_store_info(store_code):
 
     return response_success(store)
 
+
 # Todo: add logic to update store info
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/list"))
 @check_role([RolesTypes.Support.value, RolesTypes.Owner.value, RolesTypes.Accounts.value, RolesTypes.Reports.value])
@@ -95,8 +96,10 @@ def update_store_support(uid, store_code):
             data = schema.load(request.json)
         except ValidationError as e:
             return response_error("Error on format of the params", {'params': request.json})
+        if not valid_currency(data.data['currency_code']):
+            return response_error("Error on format of the params", {'params': request.json})
         data = Struct(data.data)
-        store = storeService.update_store_info(data)
+        store = storeService.update_store_info(uid, store_code, data)
         return response_success(store)
     return response_error("Error on format of the params", {uid: uid})
 
@@ -105,7 +108,6 @@ def update_store_support(uid, store_code):
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/locations"), methods=["POST"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value, RolesTypes.StoreAccount.value])
 def update_store_location(uid, store_code):
-
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(uid):
@@ -121,6 +123,7 @@ def update_store_location(uid, store_code):
         store = storeService.update_locations(uid, store_code, data)
         return response_success(store)
     return response_error("Error on format of the params", {uid: uid})
+
 
 # Todo: add logic to create opening hours
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/hours/<location_id>"),
