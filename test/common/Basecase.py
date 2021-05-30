@@ -2,6 +2,7 @@ import json
 import os
 
 from faker import Faker
+from firebase_admin import auth
 from flask_testing import TestCase
 
 from config.api import app
@@ -69,10 +70,8 @@ class BaseTestCase(TestCase):
 
     def login_failed_user(self, email):
         user = login_user(email, self.global_password)
-        self.assertFalse(is_json_key_present(user, 'error'))
-        token = user['idToken']
-        self.assertIsNone(token)
-        self.assertEqual(token, '')
+        self.assertTrue(is_json_key_present(user, 'error'))
+        self.assertFalse(is_json_key_present(user, 'idToken'))
 
     def init_unit_data(self):
         self.setup_owner_user()
@@ -107,7 +106,8 @@ class BaseTestCase(TestCase):
         user = create_fb_user(email, self.global_password)
         self.assertIsNotNone(user)
         if user is not None:
-            self.assertNotEqual(user.uid, '')
+            auth.delete_user(user.uid) # we need make sure this user will be delete no point keep at as there a lot of tests
+            user = create_fb_user(email, self.global_password)
         roles = self.roleService.get_roles(roles)
         if inital_state:
             store_code = None

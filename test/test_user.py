@@ -20,9 +20,9 @@ class FlaskTestCase(BaseTestCase):
             user_not_active = "noactive@user.com"
             self.create_store_user(user_not_active, [RolesTypes.Support.value], True)
             user_object = self.login_user(self.platform_owner_user)
-            uid = user_object['uid']
-            token = user_object['idToken']
-            user = self.userService.get_user(uid, True)
+            owner_uid = user_object['uid']
+            owner_token = user_object['idToken']
+            user = self.userService.get_user(owner_uid, True)
             self.assertIsNone(user.store_code)
             store_name = self.fake.company()
             currency_code = self.fake.currency_code()
@@ -31,7 +31,7 @@ class FlaskTestCase(BaseTestCase):
                 'description': 'store description',
                 'currency_code': currency_code
             }
-            response = self.request_post('/api/store/%s/create' % uid, token, post_data)
+            response = self.request_post('/api/store/%s/create' % owner_uid, owner_token, post_data)
             self.assert200(response, 'create store request failed')
             response_data = Struct(response.json)
             self.assertIsNotNone(response_data)
@@ -43,7 +43,7 @@ class FlaskTestCase(BaseTestCase):
             user_object = self.login_user(user_not_active)
             uid = user_object['uid']
             token = user_object['idToken']
-            response = self.request_put('/api/user/%s/toggle_active' % uid, token, {})
+            response = self.request_put('/api/user/%s/toggle_active' % uid, owner_token, {})
             self.assert200(response, 'toggle active state of user request failed')
             response_data = Struct(response.json)
             self.assertIsNotNone(response_data)
@@ -53,9 +53,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertIsNotNone(user)
             self.assertFalse(user.is_active)
 
-            user_object = self.login_user(user_not_active)
-            uid = user_object['uid']
-            token = user_object['idToken']
+            self.login_failed_user(user_not_active)
 
 
 

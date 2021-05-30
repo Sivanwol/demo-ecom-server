@@ -52,6 +52,7 @@ def get(uid):
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/toggle_active"), methods=["PUT"])
+@check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
 def user_toggle_active(uid):
     if verify_uid(uid):
         try:

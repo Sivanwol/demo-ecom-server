@@ -1,3 +1,4 @@
+import firebase_admin
 from firebase_admin import auth
 
 from config.api import cache
@@ -102,9 +103,10 @@ class UserService:
     def toggle_freeze_user(self, uid):
         user = self.get_user(uid, True)
         user.is_active = not user.is_active
+        firebase_admin.auth.update_user(uid,  disabled=not user.is_active)
         db.session.merge(user)
         db.session.commit()
-        auth.update_user(uid,  disabled=user.is_active)
+        auth.revoke_refresh_tokens(uid)
 
     def check_user_roles(self, uid, *requirements_roles):
         """ Return True if the user has all of the specified roles. Return False otherwise.
