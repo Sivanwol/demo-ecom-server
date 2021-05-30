@@ -10,9 +10,9 @@ from src.services.firebase import FirebaseService
 from src.services.roles import RolesService
 from src.services.store import StoreService
 from src.services.user import UserService
-from src.utils.common_methods import is_json_key_present
 from src.utils.enums import RolesTypes
 from src.utils.firebase_utils import create_firebase_user as create_fb_user, setup_firebase_client, login_user
+from src.utils.general import is_json_key_present
 
 
 class BaseTestCase(TestCase):
@@ -40,7 +40,7 @@ class BaseTestCase(TestCase):
         app.app_context().push()
         return app
 
-    def setUp(self):
+    def testSetUp(self):
         self.app_context = self.app.app_context()
         self.app_context.push()
         self.client = self.app.test_client()
@@ -51,7 +51,7 @@ class BaseTestCase(TestCase):
         self.init_unit_data()
         Faker.seed(0)
 
-    def tearDown(self):
+    def testTearDown(self):
         db.session.remove()
         db.drop_all()
 
@@ -86,7 +86,7 @@ class BaseTestCase(TestCase):
         if self.platform_support_object is not None:
             self.assertNotEqual(self.platform_support_object.uid, '')
         roles = self.roleService.get_roles([RolesTypes.Support.value])
-        self.userService.sync_firebase_user(self.platform_owner_object.uid, roles, True)
+        self.userService.sync_firebase_user(self.platform_support_object.uid, roles, True)
 
     def setup_account_user(self):
         self.platform_accounts_object = create_fb_user(self.platform_account_user, self.global_password)
@@ -94,7 +94,7 @@ class BaseTestCase(TestCase):
         if self.platform_accounts_object is not None:
             self.assertNotEqual(self.platform_accounts_object.uid, '')
         roles = self.roleService.get_roles([RolesTypes.Accounts.value])
-        self.userService.sync_firebase_user(self.platform_owner_object.uid, roles, True)
+        self.userService.sync_firebase_user(self.platform_accounts_object.uid, roles, True)
 
     def create_store_user(self,email, roles, inital_state=False, store_code=None):
         user = create_fb_user(email, self.global_password)

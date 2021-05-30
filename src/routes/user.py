@@ -77,9 +77,9 @@ def mark_user_passed_tutorial(uid, store_code):
 def sync_store_user_create(uid, store_code):
     if verify_uid(uid):
         try:
-            store = storeService.get_store(uid, store_code, True)
-            if store is None:
-                return response_error("Store not found", {store_code: store_code})
+            has_store = storeService.store_exists(uid, store_code)
+            if has_store is None:
+                response_error("error store not existed", {uid: uid, store_code: store_code})
             roles = roleSerivce.get_roles([RolesTypes.StoreCustomer.value])
             return response_success(get_user_object(uid, roles, False))
         except ValueError:

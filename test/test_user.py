@@ -2,10 +2,18 @@
 import unittest
 
 from src.utils.enums import RolesTypes
-from test.common.Basecase import BaseTestCase, Struct
+from src.utils.general import Struct
+from test.common.Basecase import BaseTestCase
 
 
 class FlaskTestCase(BaseTestCase):
+
+    def setUp(self):
+        self.testSetUp()
+
+    def tearDown(self):
+        self.testTearDown()
+
     # todo: need add the store create and delete checks
     def test_get_user_object(self):
         with self.client:
