@@ -81,5 +81,5 @@ jobs:
                     pip install -r requirements.txt
             -   name: Lint with pylint
                 run: |
-                chmod +x ./scripts/lint.sh
-                ./scripts/lint.sh all
+                    chmod +x ./scripts/lint.sh
+                    ./scripts/lint.sh all
