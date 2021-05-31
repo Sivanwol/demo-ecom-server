@@ -45,8 +45,10 @@ jobs:
             -   name: log file paths
                 shell: bash
                 run: |
-                    echo "Firebase Config Path $( echo ${{ steps.firebase_config_path.path }})"
-                    echo "Firebase Admin Config Path $( echo ${{ steps.firebase_admin_config_path.path }})"
+                    echo "Firebase Config Path"
+                    echo ${{ steps.firebase_config_path.path }}
+                    echo "Firebase Admin Config Path"
+                    echo ${{ steps.firebase_admin_config_path.path }}
             -   name: create firebase config file
                 uses: schdck/create-env-json@v1
                 with:
