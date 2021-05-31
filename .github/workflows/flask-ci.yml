@@ -28,16 +28,21 @@ jobs:
                     python -m pip install flake8 pytest
                     if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-            -   name: create firebase files
+            -   name: create firebase firebase-config
                 run: |
-                    echo $FIREBASE_ENV_FILE >> ./firebase-config.json
+                    echo $FILE >> ./firebase-config.json
                     cat ./firebase-config.json
-                    echo $FIREBASE_ADMIN_ENV_FILE >> ./service-account-file.json
+                shell: bash
+                env:
+                    FILE: ${{secrets.FIREBASE_CERT}}
+
+            -   name: create firebase service-account-file
+                run: |
+                    echo $FILE >> ./service-account-file.json
                     cat ./service-account-file.json
                 shell: bash
                 env:
-                    FIREBASE_ENV_FILE: ${{secrets.FIREBASE_CERT}}
-                    FIREBASE_ADMIN_ENV_FILE: ${{secrets.FIREBASE_ADMIN_CERT}}
+                    FILE: ${{secrets.FIREBASE_ADMIN_CERT}}
             -   name: Make envfile
                 uses: SpicyPizza/create-envfile@v1
                 with:
