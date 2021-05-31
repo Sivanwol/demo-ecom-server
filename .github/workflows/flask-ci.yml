@@ -46,7 +46,7 @@ jobs:
             -   name: create firebase config file
                 uses: schdck/create-env-json@v1
                 with:
-                    file-name: ${{ steps.firebase_config_path}}
+                    file-name: ${{ steps.firebase_config_path }}
                     apiKey: ${{ secrets.FIREBASE_API }}
                     authDomain: "10.0.0.31:9099"
                     databaseURL: "https://10.0.0.31:8080"
@@ -58,7 +58,7 @@ jobs:
             -   name: create firebase admin config file
                 uses: schdck/create-env-json@v1
                 with:
-                    file-name: ${{ steps.firebase_admin_config_path}}
+                    file-name: ${{ steps.firebase_admin_config_path }}
                     type": "service_account"
                     project_id": ${{ secrets.FIREBASE_PROJECT_ID }}
                     private_key_id": ${{ secrets.FIREBASE_ADMIN_CERT_ID }}
@@ -80,8 +80,8 @@ jobs:
                     REDIS_PASSWORD: ""
                     CACHE_KEY_PREFIX: "db_cache"
                     FIREBASE_APIKEY: ${{ secrets.FIREBASE_API }}
-                    FIREBASE_SERVICE_CONFIG_FILE: ${{ steps.firebase_admin_config_path}}
-                    FIREBASE_CONFIG_FILE: ${{ steps.extract_branch.firebase_config_path}}
+                    FIREBASE_SERVICE_CONFIG_FILE: ${{ steps.firebase_admin_config_path }}
+                    FIREBASE_CONFIG_FILE: ${{ steps.firebase_config_path }}
                     file_name: .env.testing
             -   name: "Check file existence"
                 uses: andstor/file-existence-action@v1
