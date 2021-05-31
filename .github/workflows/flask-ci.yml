@@ -32,12 +32,12 @@ jobs:
             -   name: Set up Node.js 10
                 uses: actions/setup-node@v1
             -   name: create firebase firebase-config
-                run: |
-                    echo $FILE > ./firebase-config.json
-                    cat ./firebase-config.json
                 shell: bash
                 env:
                     FILE: ${{secrets.FIREBASE_CERT}}
+                run: |
+                    echo '$FILE' >> ./firebase-config.json
+                    cat ./firebase-config.json
             -   name: Read package.json
                 uses: juliangruber/read-file-action@v1
                 with:
@@ -45,12 +45,12 @@ jobs:
             -   name: Echo firebase-config.json
                 run: echo "${{ steps.package.outputs.content }}"
             -   name: create firebase service-account-file
-                run: |
-                    echo $FILE > ./service-account-file.json
-                    cat ./service-account-file.json
                 shell: bash
                 env:
                     FILE: ${{secrets.FIREBASE_ADMIN_CERT}}
+                run: |
+                    echo '$FILE' >> ./service-account-file.json
+                    cat ./service-account-file.json
             -   name: Read service-account-file.json
                 uses: juliangruber/read-file-action@v1
                 with:
