@@ -45,7 +45,6 @@ jobs:
                 env:
                     FILE: ${{secrets.FIREBASE_CERT}}
             -   name: Read package.json
-                id: package
                 uses: juliangruber/read-file-action@v1
                 with:
                     path: ./firebase-config.json
@@ -59,7 +58,6 @@ jobs:
                 env:
                     FILE: ${{secrets.FIREBASE_ADMIN_CERT}}
             -   name: Read service-account-file.json
-                id: package
                 uses: juliangruber/read-file-action@v1
                 with:
                     path: ./service-account-file.json
