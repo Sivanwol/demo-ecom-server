@@ -43,14 +43,13 @@ jobs:
                     messagingSenderId: "521026165800"
                     appId: "1:521026165800:web:cc1afe28976024ea47291d"
                     measurementId: "G-N2DK47GTE1"
-
             -   name: create firebase admin config file
                 uses: schdck/create-env-json@v1
                 with:
                     file-name: './service-account-file.json'
-                    type": "service_account",
-                    project_id": ${{ secrets.FIREBASE_PROJECT_ID }},
-                    private_key_id": ${{ secrets.FIREBASE_ADMIN_CERT_ID }},
+                    type": "service_account"
+                    project_id": ${{ secrets.FIREBASE_PROJECT_ID }}
+                    private_key_id": ${{ secrets.FIREBASE_ADMIN_CERT_ID }}
                     private_key": ${{ secrets.FIREBASE_ADMIN_CERT }}
                     client_email": "firebase-adminsdk-4kri0@bmi-calc-project.iam.gserviceaccount.com"
                     client_id": "110978043869639656704"
