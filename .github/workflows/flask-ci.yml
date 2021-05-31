@@ -80,4 +80,6 @@ jobs:
                     python -m pip install --upgrade pip
                     pip install -r requirements.txt
             -   name: Lint with pylint
-                run: ./scripts/lint.sh all
+                run: |
+                chmod +x ./scripts/lint.sh
+                ./scripts/lint.sh all
