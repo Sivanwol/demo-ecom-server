@@ -52,15 +52,15 @@ jobs:
                 FIREBASE_SERVICE_CONFIG_FILE: './service-account-file.json'
                 FIREBASE_CONFIG_FILE: './firebase-config.json'
                 file_name: .env.testing
-            -   name: Run integration tests against emulator
-                env:
-                    FLASK_ENV: 'testing'
-                    FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099'
-                    FIRESTORE_EMULATOR_HOST: 'localhost:8080'
-                    FIRESTORE_STORAGE_EMULATOR_HOST: 'localhost:9199'
-                run: |
-                    npm install -g firebase-tools
-                    firebase emulators:exec --only auth,firestore --project fake-project-id 'python -m unittest'
+            - name: Run integration tests against emulator
+              env:
+                FLASK_ENV: 'testing'
+                FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099'
+                FIRESTORE_EMULATOR_HOST: 'localhost:8080'
+                FIRESTORE_STORAGE_EMULATOR_HOST: 'localhost:9199'
+              run: |
+                npm install -g firebase-tools
+                firebase emulators:exec --only auth,firestore --project fake-project-id 'python -m unittest'
 
 #    lint:
 #        runs-on: ubuntu-latest
