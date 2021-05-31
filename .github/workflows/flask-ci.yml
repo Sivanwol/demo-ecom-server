@@ -35,18 +35,18 @@ jobs:
                     node-version: 12
             -   name: Getting firebase config path
                 shell: bash
-                run: echo "$(echo ${HOME})/firebase-config.json"
+                run: echo "::set-output name=path::$(echo ${HOME})/firebase-config.json"
                 id: firebase_config_path
 
             -   name: Getting firebase admin config path
                 shell: bash
-                run: echo "$(echo ${HOME})/service-account-file.json"
+                run: echo "::set-output name=path::$(echo ${HOME})/service-account-file.json"
                 id: firebase_admin_config_path
 
             -   name: create firebase config file
                 uses: schdck/create-env-json@v1
                 with:
-                    file-name: ${{ steps.firebase_config_path }}
+                    file-name: ${{ steps.firebase_config_path.path }}
                     apiKey: ${{ secrets.FIREBASE_API }}
                     authDomain: "10.0.0.31:9099"
                     databaseURL: "https://10.0.0.31:8080"
@@ -58,7 +58,7 @@ jobs:
             -   name: create firebase admin config file
                 uses: schdck/create-env-json@v1
                 with:
-                    file-name: ${{ steps.firebase_admin_config_path }}
+                    file-name: ${{ steps.firebase_admin_config_path.path }}
                     type": "service_account"
                     project_id": ${{ secrets.FIREBASE_PROJECT_ID }}
                     private_key_id": ${{ secrets.FIREBASE_ADMIN_CERT_ID }}
