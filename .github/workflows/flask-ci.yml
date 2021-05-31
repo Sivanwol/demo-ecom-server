@@ -27,6 +27,31 @@ jobs:
                     python -m pip install --upgrade pip
                     python -m pip install flake8 pytest
                     if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+            
+            - name: create firebase files
+              run: |
+                  echo $FIREBASE_ENV_FILE >> ./firebase-config.json
+                  cat ./firebase-config.json
+                  echo $FIREBASE_ADMIN_ENV_FILE >> ./service-account-file.json
+                  cat ./service-account-file.json
+              shell: bash
+              env:
+                FIREBASE_ENV_FILE : ${{secrets.FIREBASE_CERT}}
+                FIREBASE_ADMIN_ENV_FILE : ${{secrets.FIREBASE_ADMIN_CERT}}
+            - name: Make envfile
+              uses: SpicyPizza/create-envfile@v1
+              with:
+                SECRET_KEY: "123456abcdef"
+                DATABASE_URL: "postgresql://localhost:5432/postgres"
+                REDIS_HOST: "localhost"
+                REDIS_PORT: 6379
+                REDIS_DB: 0
+                REDIS_PASSWORD: ""
+                CACHE_KEY_PREFIX: "db_cache"
+                FIREBASE_APIKEY: ${{ secrets.FIREBASE_API }}
+                FIREBASE_SERVICE_CONFIG_FILE: './service-account-file.json'
+                FIREBASE_CONFIG_FILE: './firebase-config.json'
+                file_name: .env.testing
             -   name: Run integration tests against emulator
                 env:
                     FLASK_ENV: 'testing'
