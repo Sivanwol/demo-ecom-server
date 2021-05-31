@@ -15,6 +15,15 @@ jobs:
                 python-version: [ 3.9 ]
 
         steps:
+            - name: echo-default-env-variables
+              run: |
+                  echo "Home: ${HOME}"
+                  echo "GITHUB_WORKFLOW: ${GITHUB_WORKFLOW}"
+                  echo "GITHUB_ACTIONS: ${GITHUB_ACTIONS}"
+                  echo "GITHUB_ACTOR: ${GITHUB_ACTOR}"
+                  echo "GITHUB_REPOSITORY: ${GITHUB_REPOSITORY}"
+                  echo "GITHUB_EVENT_NAME: ${GITHUB_EVENT_NAME}"
+                  echo "GITHUB_WORKSPACE: ${GITHUB_WORKSPACE}"
             -   uses: actions/checkout@v2
             -   name: Set up Python ${{ matrix.python-version }}
                 uses: actions/setup-python@v2
@@ -35,7 +44,13 @@ jobs:
                 shell: bash
                 env:
                     FILE: ${{secrets.FIREBASE_CERT}}
-
+            -   name: Read package.json
+                id: package
+                uses: juliangruber/read-file-action@v1
+                with:
+                    path: ./firebase-config.json
+            -   name: Echo firebase-config.json
+                run: echo "${{ steps.package.outputs.content }}"
             -   name: create firebase service-account-file
                 run: |
                     echo $FILE >> ./service-account-file.json
@@ -43,6 +58,13 @@ jobs:
                 shell: bash
                 env:
                     FILE: ${{secrets.FIREBASE_ADMIN_CERT}}
+            -   name: Read service-account-file.json
+                id: package
+                uses: juliangruber/read-file-action@v1
+                with:
+                    path: ./service-account-file.json
+            -   name: Echo service-account-file.json
+                run: echo "${{ steps.package.outputs.content }}"
             -   name: Make envfile
                 uses: SpicyPizza/create-envfile@v1
                 with:
