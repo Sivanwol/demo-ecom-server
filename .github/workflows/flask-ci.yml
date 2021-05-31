@@ -33,26 +33,24 @@ jobs:
                 uses: actions/setup-node@v1
                 with:
                     node-version: 12
-            -   name: Getting firebase config path
+            -   name: Getting firebase configs path
                 shell: bash
-                run: echo "::set-output name=path::$(echo ${GITHUB_WORKSPACE})/firebase-config.json"
-                id: firebase_config_path
+                run: |
+                    echo "::set-output name=client::$(echo ${GITHUB_WORKSPACE})/firebase-config.json"
+                    echo "::set-output name=admin::$(echo ${GITHUB_WORKSPACE})/service-account-file.json"
+                id: firebase_config
 
-            -   name: Getting firebase admin config path
-                shell: bash
-                run: echo "::set-output name=path::$(echo ${GITHUB_WORKSPACE})/service-account-file.json"
-                id: firebase_admin_config_path
             -   name: log file paths
                 shell: bash
                 run: |
                     echo "Firebase Config Path"
-                    echo ${{ steps.firebase_config_path.path }}
+                    echo ${{ steps.firebase_config.outputs.client }}
                     echo "Firebase Admin Config Path"
-                    echo ${{ steps.firebase_admin_config_path.path }}
+                    echo ${{ steps.firebase_config.outputs.admin }}
             -   name: create firebase config file
                 uses: schdck/create-env-json@v1
                 with:
-                    file-name: 'firebase-config.json'
+                    file-name: ${{ steps.firebase_config.outputs.client }}
                     apiKey: ${{ secrets.FIREBASE_API }}
                     authDomain: "10.0.0.31:9099"
                     databaseURL: "https://10.0.0.31:8080"
@@ -64,7 +62,7 @@ jobs:
             -   name: create firebase admin config file
                 uses: schdck/create-env-json@v1
                 with:
-                    file-name: 'service-account-file.json'
+                    file-name: ${{ steps.firebase_config.outputs.admin }}
                     type": "service_account"
                     project_id": ${{ secrets.FIREBASE_PROJECT_ID }}
                     private_key_id": ${{ secrets.FIREBASE_ADMIN_CERT_ID }}
@@ -86,8 +84,8 @@ jobs:
                     REDIS_PASSWORD: ""
                     CACHE_KEY_PREFIX: "db_cache"
                     FIREBASE_APIKEY: ${{ secrets.FIREBASE_API }}
-                    FIREBASE_SERVICE_CONFIG_FILE: ${{ steps.firebase_admin_config_path.path }}
-                    FIREBASE_CONFIG_FILE: ${{ steps.firebase_config_path.path }}
+                    FIREBASE_SERVICE_CONFIG_FILE: ${{ steps.firebase_config.outputs.admin }}
+                    FIREBASE_CONFIG_FILE: ${{ steps.firebase_config.outputs.client }}
                     file_name: .env.testing
             -   name: "Check file existence"
                 uses: andstor/file-existence-action@v1
