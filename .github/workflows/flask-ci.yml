@@ -106,4 +106,4 @@ jobs:
                     FIRESTORE_STORAGE_EMULATOR_HOST: 'localhost:9199'
                 run: |
                     npm install -g firebase-tools
-                    firebase emulators:exec --only auth,firestore --project ${{ secrets.FIREBASE_PROJECT_ID }} "python -m unittest"
+                    firebase emulators:exec --only auth,firestore --project $(echo ${{ secrets.FIREBASE_PROJECT_ID }}) "python -m unittest"
