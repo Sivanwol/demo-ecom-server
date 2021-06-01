@@ -48,7 +48,7 @@ jobs:
                     echo "Firebase Admin Config Path"
                     echo ${{ steps.firebase_config.outputs.admin }}
             -   name: create firebase config file
-                uses: schdck/create-env-json@v1
+                uses: jsdaniell/create-json@1.1.2
                 with:
                     file-name: 'firebase-config.json'
                     apiKey: ${{ secrets.FIREBASE_API }}
@@ -60,7 +60,7 @@ jobs:
                     appId: "1:521026165800:web:cc1afe28976024ea47291d"
                     measurementId: "G-N2DK47GTE1"
             -   name: create firebase admin config file
-                uses: schdck/create-env-json@v1
+                uses: jsdaniell/create-json@1.1.2
                 with:
                     file-name: 'service-account-file.json'
                     type: "service_account"
