@@ -6,6 +6,7 @@ from flask.cli import load_dotenv
 
 APP_ROOT = os.path.join(os.path.dirname(__file__), '../src', '..')  # refers to application_top
 dotenv_path = os.path.join(APP_ROOT, '.env.' + os.environ.get("FLASK_ENV", "development"))
+print("Dot Env File %s" % dotenv_path)
 load_dotenv(dotenv_path)
 
 
@@ -42,7 +43,7 @@ class Config:
 
     # elasticsearch config
     # --------------------------------------------------------------------
-    ELASTICSEARCH_URL= os.getenv('ELASTICSEARCH_URL')
+    ELASTICSEARCH_URL = os.getenv('ELASTICSEARCH_URL')
 
     # sqlalchemy database config
     # --------------------------------------------------------------------
