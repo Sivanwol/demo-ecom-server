@@ -51,28 +51,12 @@ jobs:
                 uses: jsdaniell/create-json@1.1.2
                 with:
                     name: 'firebase-config.json'
-                    apiKey: ${{ secrets.FIREBASE_API }}
-                    authDomain: "10.0.0.31:9099"
-                    databaseURL: "https://10.0.0.31:8080"
-                    projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
-                    storageBucket: "bmi-calc-project.appspot.com"
-                    messagingSenderId: "521026165800"
-                    appId: "1:521026165800:web:cc1afe28976024ea47291d"
-                    measurementId: "G-N2DK47GTE1"
+                    json: ${{ secrets.FIREBASE_CERT_JSON }}
             -   name: create firebase admin config file
                 uses: jsdaniell/create-json@1.1.2
                 with:
                     name: 'service-account-file.json'
-                    type: "service_account"
-                    project_id": ${{ secrets.FIREBASE_PROJECT_ID }}
-                    private_key_id": ${{ secrets.FIREBASE_ADMIN_CERT_ID }}
-                    private_key": ${{ secrets.FIREBASE_ADMIN_CERT }}
-                    client_email": "firebase-adminsdk-4kri0@bmi-calc-project.iam.gserviceaccount.com"
-                    client_id": "110978043869639656704"
-                    auth_uri": "https://accounts.google.com/o/oauth2/auth"
-                    token_uri": "https://oauth2.googleapis.com/token"
-                    auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs"
-                    client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-4kri0%40bmi-calc-project.iam.gserviceaccount.com"
+                    json: ${{ secrets.FIREBASE_ADMIN_CERT_JSON }}
             -   name: Make envfile
                 uses: SpicyPizza/create-envfile@v1
                 with:
