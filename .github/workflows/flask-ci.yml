@@ -48,11 +48,13 @@ jobs:
                     echo "Firebase Admin Config Path"
                     echo ${{ steps.firebase_config.outputs.admin }}
             -   name: create firebase config file
+                id: firebase-config
                 uses: jsdaniell/create-json@1.1.2
                 with:
                     name: 'firebase-config.json'
                     json: ${{ secrets.FIREBASE_CERT_JSON }}
             -   name: create firebase admin config file
+                id: service-account-file
                 uses: jsdaniell/create-json@1.1.2
                 with:
                     name: 'service-account-file.json'
