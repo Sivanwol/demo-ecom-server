@@ -91,11 +91,11 @@ jobs:
                 uses: andstor/file-existence-action@v1
                 with:
                     files: ".env.testing, firebase-config.json, service-account-file.json"
-            -   name: Read package.json
+            -   name: Read service-account-file.json
                 id: package
                 uses: juliangruber/read-file-action@v1
                 with:
-                    path: ./service-account-file.json
+                    path: ${{ steps.firebase_config.outputs.admin }}
             -   name: Echo service-account-file.json
                 run: echo "${{ steps.package.outputs.content }}"
             -   name: Install dependencies
