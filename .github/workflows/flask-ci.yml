@@ -76,9 +76,7 @@ jobs:
                 with:
                     files: ".env.testing, firebase-config.json, service-account-file.json"
             -   name: Show folder list
-                run: |
-                    npm install -g @jpwilliams/gitree
-                    gitree
+                run: ls -ga
             -   name: Install dependencies
                 run: |
                     python -m pip install --upgrade pip
