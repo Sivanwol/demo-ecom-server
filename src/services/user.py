@@ -5,9 +5,9 @@ from config.api import cache
 from config.database import db
 from src.models import User
 from src.schemas.user_schema import UserSchema
+from src.utils.firebase_utils import create_firebase_user
 from src.utils.responses import response_error
 from src.utils.singleton import singleton
-
 
 
 @singleton
@@ -103,11 +103,19 @@ class UserService:
     def toggle_freeze_user(self, uid):
         user = self.get_user(uid, True)
         user.is_active = not user.is_active
-        firebase_admin.auth.update_user(uid,  disabled=not user.is_active)
+        firebase_admin.auth.update_user(uid, disabled=not user.is_active)
         db.session.merge(user)
         db.session.commit()
         auth.revoke_refresh_tokens(uid)
 
+    def create_user(self, email, password, roles, is_platform_user, store_code=None, is_new_user=True):
+        user = create_firebase_user(email, password)
+        uid = user['localId']
+        self.sync_firebase_user(uid, roles, is_platform_user, store_code, is_new_user)
+        return uid
+
+    def remove_user(self, uid):
+        pass
     def check_user_roles(self, uid, *requirements_roles):
         """ Return True if the user has all of the specified roles. Return False otherwise.
             has_roles() accepts a list of requirements:

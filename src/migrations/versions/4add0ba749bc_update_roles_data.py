@@ -22,19 +22,20 @@ def upgrade():
     roles = sa.table('roles',
                      sa.Column('id', sa.Integer()),
                      sa.Column('name', sa.String()),
+                     sa.Column('is_global', sa.Boolean()),
                      sa.Column('is_active', sa.Boolean())
                      )
 
     op.bulk_insert(roles, [
-        {'name': 'owner', 'is_active': True},
-        {'name': 'reports', 'is_active': True},
-        {'name': 'accounts', 'is_active': True},
-        {'name': 'store_owner', 'is_active': True},
-        {'name': 'store_account', 'is_active': True},
-        {'name': 'store_customer', 'is_active': True},
-        {'name': 'store_reports', 'is_active': True},
-        {'name': 'store_support', 'is_active': True},
-        {'name': 'support', 'is_active': True},
+        {'name': 'owner', 'is_global': True, 'is_active': True},
+        {'name': 'reports', 'is_global': True, 'is_active': True},
+        {'name': 'accounts', 'is_global': True, 'is_active': True},
+        {'name': 'store_owner', 'is_global': False, 'is_active': True},
+        {'name': 'store_account', 'is_global': False, 'is_active': True},
+        {'name': 'store_customer', 'is_global': False, 'is_active': True},
+        {'name': 'store_reports', 'is_global': False, 'is_active': True},
+        {'name': 'store_support', 'is_global': False, 'is_active': True},
+        {'name': 'support', 'is_global': True, 'is_active': True},
     ])
     # ### end Alembic commands ###
 
