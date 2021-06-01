@@ -50,7 +50,7 @@ jobs:
             -   name: create firebase config file
                 uses: jsdaniell/create-json@1.1.2
                 with:
-                    name: ${{ steps.firebase_config.outputs.client }}
+                    name: 'firebase-config.json'
                     apiKey: ${{ secrets.FIREBASE_API }}
                     authDomain: "10.0.0.31:9099"
                     databaseURL: "https://10.0.0.31:8080"
@@ -62,7 +62,7 @@ jobs:
             -   name: create firebase admin config file
                 uses: jsdaniell/create-json@1.1.2
                 with:
-                    name: ${{ steps.firebase_config.outputs.admin }}
+                    name: 'service-account-file.json'
                     type: "service_account"
                     project_id": ${{ secrets.FIREBASE_PROJECT_ID }}
                     private_key_id": ${{ secrets.FIREBASE_ADMIN_CERT_ID }}
@@ -91,13 +91,14 @@ jobs:
                 uses: andstor/file-existence-action@v1
                 with:
                     files: ".env.testing, firebase-config.json, service-account-file.json"
-            -   name: Read service-account-file.json
-                id: package
-                uses: juliangruber/read-file-action@v1
+            -   uses: pCYSl5EDgo/cat@master
+                id: debug
                 with:
                     path: ${{ steps.firebase_config.outputs.admin }}
-            -   name: Echo service-account-file.json
-                run: echo "${{ steps.package.outputs.content }}"
+
+            -   run: echo $debug
+                env:
+                    TEXT: ${{ steps.debug.outputs.text }}
             -   name: Install dependencies
                 run: |
                     python -m pip install --upgrade pip
