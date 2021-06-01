@@ -50,7 +50,7 @@ jobs:
             -   name: create firebase config file
                 uses: jsdaniell/create-json@1.1.2
                 with:
-                    file-name: 'firebase-config.json'
+                    name: 'firebase-config.json'
                     apiKey: ${{ secrets.FIREBASE_API }}
                     authDomain: "10.0.0.31:9099"
                     databaseURL: "https://10.0.0.31:8080"
@@ -62,7 +62,7 @@ jobs:
             -   name: create firebase admin config file
                 uses: jsdaniell/create-json@1.1.2
                 with:
-                    file-name: 'service-account-file.json'
+                    name: 'service-account-file.json'
                     type: "service_account"
                     project_id": ${{ secrets.FIREBASE_PROJECT_ID }}
                     private_key_id": ${{ secrets.FIREBASE_ADMIN_CERT_ID }}
