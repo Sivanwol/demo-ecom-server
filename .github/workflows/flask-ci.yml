@@ -104,6 +104,14 @@ jobs:
                     FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099'
                     FIRESTORE_EMULATOR_HOST: 'localhost:8080'
                     FIRESTORE_STORAGE_EMULATOR_HOST: 'localhost:9199'
+                    SECRET_KEY: "123456abcdef"
+                    DATABASE_URL: "postgresql://localhost:5432/postgres"
+                    REDIS_HOST: "localhost"
+                    REDIS_PORT: 6379
+                    REDIS_DB: 0
+                    REDIS_PASSWORD: ""
+                    CACHE_KEY_PREFIX: "db_cache"
+                    FIREBASE_APIKEY: ${{ secrets.FIREBASE_API }}
                     FIREBASE_SERVICE_CONFIG_FILE: ${{ steps.firebase_config.outputs.admin }}
                     FIREBASE_CONFIG_FILE: ${{ steps.firebase_config.outputs.client }}
                 run: |
