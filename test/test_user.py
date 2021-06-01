@@ -68,7 +68,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertTrue(response_data.status)
             self.assertIsNotNone(response_data)
             self.assertIsNotNone(response_data.data)
-            user = Struct(self.userService.get_user(uid, True))
+            user = self.userService.get_user(uid, True)
             self.assertIsNotNone(user)
             self.assertIsNotNone(response_data)
             self.assertEqual(response_data.data.user_meta.display_name, user_object['display_name'])
@@ -76,7 +76,6 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.user_data.is_pass_tutorial, user.is_pass_tutorial)
             self.assertEqual(response_data.data.user_data.id, user.id)
             self.assertEqual(response_data.data.user_data.roles[0].id, user.roles[0].id)
-            self.assertTrue(response_data.data.user_data.is_active)
 
     def test_check_role_not_match(self):
         with self.client:

@@ -1,108 +1,108 @@
-# This workflow will upload a Python Package using Twine when a release is created
-# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
-name: Python application
-on:
-    push:
-        branches: [ master ]
-#   pull_request:
-#     branches: [ master ]
-jobs:
-    build:
-        runs-on: ubuntu-latest
-        strategy:
-            fail-fast: false
-            matrix:
-                python-version: [ 3.9 ]
-
-        steps:
-            -   name: echo-default-env-variables
-                run: |
-                    echo "Home: ${HOME}"
-                    echo "GITHUB_WORKFLOW: ${GITHUB_WORKFLOW}"
-                    echo "GITHUB_ACTIONS: ${GITHUB_ACTIONS}"
-                    echo "GITHUB_ACTOR: ${GITHUB_ACTOR}"
-                    echo "GITHUB_REPOSITORY: ${GITHUB_REPOSITORY}"
-                    echo "GITHUB_EVENT_NAME: ${GITHUB_EVENT_NAME}"
-                    echo "GITHUB_WORKSPACE: ${GITHUB_WORKSPACE}"
-            -   uses: actions/checkout@v2
-            -   name: Set up Python ${{ matrix.python-version }}
-                uses: actions/setup-python@v2
-                with:
-                    python-version: ${{ matrix.python-version }}
-            -   name: Use Node v12
-                uses: actions/setup-node@v1
-                with:
-                    node-version: 12
-            -   name: Getting firebase configs path
-                shell: bash
-                run: |
-                    echo "::set-output name=client::$(echo ${GITHUB_WORKSPACE})/firebase-config.json"
-                    echo "::set-output name=admin::$(echo ${GITHUB_WORKSPACE})/service-account-file.json"
-                id: firebase_config
-
-            -   name: log file paths
-                shell: bash
-                run: |
-                    echo "Firebase Config Path"
-                    echo ${{ steps.firebase_config.outputs.client }}
-                    echo "Firebase Admin Config Path"
-                    echo ${{ steps.firebase_config.outputs.admin }}
-            -   name: create firebase config file
-                id: firebase-config
-                uses: jsdaniell/create-json@1.1.2
-                with:
-                    name: 'firebase-config.json'
-                    json: ${{ secrets.FIREBASE_CERT_JSON }}
-            -   name: create firebase admin config file
-                id: service-account-file
-                uses: jsdaniell/create-json@1.1.2
-                with:
-                    name: 'service-account-file.json'
-                    json: ${{ secrets.FIREBASE_ADMIN_CERT_JSON }}
-            -   name: Make envfile
-                uses: SpicyPizza/create-envfile@v1
-                with:
-                    SECRET_KEY: "123456abcdef"
-                    DATABASE_URL: "postgresql://localhost:5432/postgres"
-                    REDIS_HOST: "localhost"
-                    REDIS_PORT: 6379
-                    REDIS_DB: 0
-                    REDIS_PASSWORD: ""
-                    CACHE_KEY_PREFIX: "db_cache"
-                    FIREBASE_APIKEY: ${{ secrets.FIREBASE_API }}
-                    FIREBASE_SERVICE_CONFIG_FILE: ${{ steps.firebase_config.outputs.admin }}
-                    FIREBASE_CONFIG_FILE: ${{ steps.firebase_config.outputs.client }}
-                    file_name: .env.testing
-            -   name: "Check file existence"
-                uses: andstor/file-existence-action@v1
-                with:
-                    files: ".env.testing, firebase-config.json, service-account-file.json"
-            -   name: Show folder list
-                run: ls -ga
-            -   name: Install dependencies
-                run: |
-                    python -m pip install --upgrade pip
-                    python -m pip install flake8 pytest
-                    if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-
-            -   name: Run integration tests against emulator
-                env:
-                    FLASK_ENV: 'testing'
-                    FLASK_APP: app.py
-                    FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099'
-                    FIRESTORE_EMULATOR_HOST: 'localhost:8080'
-                    FIRESTORE_STORAGE_EMULATOR_HOST: 'localhost:9199'
-                    SECRET_KEY: "123456abcdef"
-                    DATABASE_URL: "postgresql://localhost:5432/postgres"
-                    REDIS_HOST: "localhost"
-                    REDIS_PORT: 6379
-                    REDIS_DB: 0
-                    REDIS_PASSWORD: ""
-                    CACHE_KEY_PREFIX: "db_cache"
-                    FIREBASE_APIKEY: ${{ secrets.FIREBASE_API }}
-                    FIREBASE_SERVICE_CONFIG_FILE: ${{ steps.firebase_config.outputs.admin }}
-                    FIREBASE_CONFIG_FILE: ${{ steps.firebase_config.outputs.client }}
-                run: |
-                    npm install -g firebase-tools @jpwilliams/gitree
-                    gitree
-                    firebase emulators:exec --only auth,firestore --project bmi-calc-project "python -m unittest"
+## This workflow will upload a Python Package using Twine when a release is created
+## For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+#name: Python application
+#on:
+#    push:
+#        branches: [ master ]
+##   pull_request:
+##     branches: [ master ]
+#jobs:
+#    build:
+#        runs-on: ubuntu-latest
+#        strategy:
+#            fail-fast: false
+#            matrix:
+#                python-version: [ 3.9 ]
+#
+#        steps:
+#            -   name: echo-default-env-variables
+#                run: |
+#                    echo "Home: ${HOME}"
+#                    echo "GITHUB_WORKFLOW: ${GITHUB_WORKFLOW}"
+#                    echo "GITHUB_ACTIONS: ${GITHUB_ACTIONS}"
+#                    echo "GITHUB_ACTOR: ${GITHUB_ACTOR}"
+#                    echo "GITHUB_REPOSITORY: ${GITHUB_REPOSITORY}"
+#                    echo "GITHUB_EVENT_NAME: ${GITHUB_EVENT_NAME}"
+#                    echo "GITHUB_WORKSPACE: ${GITHUB_WORKSPACE}"
+#            -   uses: actions/checkout@v2
+#            -   name: Set up Python ${{ matrix.python-version }}
+#                uses: actions/setup-python@v2
+#                with:
+#                    python-version: ${{ matrix.python-version }}
+#            -   name: Use Node v12
+#                uses: actions/setup-node@v1
+#                with:
+#                    node-version: 12
+#            -   name: Getting firebase configs path
+#                shell: bash
+#                run: |
+#                    echo "::set-output name=client::$(echo ${GITHUB_WORKSPACE})/firebase-config.json"
+#                    echo "::set-output name=admin::$(echo ${GITHUB_WORKSPACE})/service-account-file.json"
+#                id: firebase_config
+#
+#            -   name: log file paths
+#                shell: bash
+#                run: |
+#                    echo "Firebase Config Path"
+#                    echo ${{ steps.firebase_config.outputs.client }}
+#                    echo "Firebase Admin Config Path"
+#                    echo ${{ steps.firebase_config.outputs.admin }}
+#            -   name: create firebase config file
+#                id: firebase-config
+#                uses: jsdaniell/create-json@1.1.2
+#                with:
+#                    name: 'firebase-config.json'
+#                    json: ${{ secrets.FIREBASE_CERT_JSON }}
+#            -   name: create firebase admin config file
+#                id: service-account-file
+#                uses: jsdaniell/create-json@1.1.2
+#                with:
+#                    name: 'service-account-file.json'
+#                    json: ${{ secrets.FIREBASE_ADMIN_CERT_JSON }}
+#            -   name: Make envfile
+#                uses: SpicyPizza/create-envfile@v1
+#                with:
+#                    SECRET_KEY: "123456abcdef"
+#                    DATABASE_URL: "postgresql://localhost:5432/postgres"
+#                    REDIS_HOST: "localhost"
+#                    REDIS_PORT: 6379
+#                    REDIS_DB: 0
+#                    REDIS_PASSWORD: ""
+#                    CACHE_KEY_PREFIX: "db_cache"
+#                    FIREBASE_APIKEY: ${{ secrets.FIREBASE_API }}
+#                    FIREBASE_SERVICE_CONFIG_FILE: ${{ steps.firebase_config.outputs.admin }}
+#                    FIREBASE_CONFIG_FILE: ${{ steps.firebase_config.outputs.client }}
+#                    file_name: .env.testing
+#            -   name: "Check file existence"
+#                uses: andstor/file-existence-action@v1
+#                with:
+#                    files: ".env.testing, firebase-config.json, service-account-file.json"
+#            -   name: Show folder list
+#                run: ls -ga
+#            -   name: Install dependencies
+#                run: |
+#                    python -m pip install --upgrade pip
+#                    python -m pip install flake8 pytest
+#                    if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+#
+#            -   name: Run integration tests against emulator
+#                env:
+#                    FLASK_ENV: 'testing'
+#                    FLASK_APP: app.py
+#                    FIREBASE_AUTH_EMULATOR_HOST: 'localhost:9099'
+#                    FIRESTORE_EMULATOR_HOST: 'localhost:8080'
+#                    FIRESTORE_STORAGE_EMULATOR_HOST: 'localhost:9199'
+#                    SECRET_KEY: "123456abcdef"
+#                    DATABASE_URL: "postgresql://localhost:5432/postgres"
+#                    REDIS_HOST: "localhost"
+#                    REDIS_PORT: 6379
+#                    REDIS_DB: 0
+#                    REDIS_PASSWORD: ""
+#                    CACHE_KEY_PREFIX: "db_cache"
+#                    FIREBASE_APIKEY: ${{ secrets.FIREBASE_API }}
+#                    FIREBASE_SERVICE_CONFIG_FILE: ${{ steps.firebase_config.outputs.admin }}
+#                    FIREBASE_CONFIG_FILE: ${{ steps.firebase_config.outputs.client }}
+#                run: |
+#                    npm install -g firebase-tools @jpwilliams/gitree
+#                    gitree
+#                    firebase emulators:exec --only auth,firestore --project bmi-calc-project "python -m unittest"

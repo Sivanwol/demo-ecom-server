@@ -38,7 +38,6 @@ def get(uid):
                 'user_meta': firebase_response,
                 'user_data': userService.get_user(uid)
             }
-            # response['extend_info']['roles'] = role_schema.dump(user.roles)
             return response_success(response)
         except ValueError:
             current_app.logger.error("User not found", {uid: uid})

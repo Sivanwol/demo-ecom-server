@@ -44,27 +44,27 @@ class UserService:
         return auth.get_user(uid)
 
     @cache.memoize(50)
-    def get_user(self, uid, return_model=True):
+    def get_user(self, uid, return_model=False):
         user = User.query.filter_by(uid=uid).first()
         if not return_model:
-            return self.user_schema.dump(user, many=False).data
+            return self.user_schema.dump(user, many=False)
         return user
 
     @cache.memoize(50)
-    def get_users(self, filter_active=False, return_model=True):
+    def get_users(self, filter_active=False, return_model=False):
         query = User.query
         if filter_active:
             query = query.filter_by(is_active=True)
         users = query.all()
         if not return_model:
-            return self.user_schema.dump(users, many=True).data
+            return self.user_schema.dump(users, many=True)
         return users
 
     @cache.memoize(50)
-    def get_active_user(self, uid, return_model=True):
+    def get_active_user(self, uid, return_model=False):
         user = User.query.filter_by(uid=uid, is_active=True).first()
         if not return_model:
-            return self.user_schema.dump(user, many=False).data
+            return self.user_schema.dump(user, many=False)
         return user
 
     @cache.memoize(50)

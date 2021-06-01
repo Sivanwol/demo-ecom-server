@@ -31,9 +31,9 @@ class StoreService:
         store_data = self.get_store_data(store)
         if not return_model:
             return {
-                'info': storeSchema.dump(store).data,
-                'locations': storeLocationSchema.dump(store_data['locations'], many=True).data,
-                'hours': storeHourSchema.dump(store_data['hours'], many=True).data
+                'info': storeSchema.dump(store),
+                'locations': storeLocationSchema.dump(store_data['locations'], many=True),
+                'hours': storeHourSchema.dump(store_data['hours'], many=True)
             }
 
         if store is None:
@@ -46,9 +46,9 @@ class StoreService:
         store_data = self.get_store_data(store)
         if not return_model:
             return {
-                'info': storeSchema.dump(store).data,
-                'locations': storeLocationSchema.dump(store_data['locations'], many=True).data,
-                'hours': storeHourSchema.dump(store_data['hours'], many=True).data
+                'info': storeSchema.dump(store),
+                'locations': storeLocationSchema.dump(store_data['locations'], many=True),
+                'hours': storeHourSchema.dump(store_data['hours'], many=True)
             }
         if store is None:
             return None

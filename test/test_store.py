@@ -304,8 +304,8 @@ class FlaskTestCase(BaseTestCase):
             self.assertIsNotNone(response_data)
             self.assertTrue(response_data.status)
             self.assertIsNotNone(response_data.data)
-            self.assertEqual(len(stores.data), len(response_data.data))
-            self.assertListEqual(response.json['data'], stores.data)
+            self.assertEqual(len(stores), len(response_data.data))
+            self.assertListEqual(response.json['data'], stores)
 
     def test_update_zero_locations(self):
         with self.client:

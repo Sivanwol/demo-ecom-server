@@ -32,7 +32,7 @@ def get_store_info(store_code):
 @check_role([RolesTypes.Support.value, RolesTypes.Owner.value, RolesTypes.Accounts.value, RolesTypes.Reports.value])
 def list_stores():
     stores = storeService.get_stores()
-    return response_success(stores.data)
+    return response_success(stores)
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/create"), methods=["POST"])
@@ -47,7 +47,7 @@ def create_store(uid):
         except ValidationError as e:
             return response_error("Error on format of the params", {'params': request.json, 'errors': e.messages})
 
-        store = storeService.create_store(uid, data.data)
+        store = storeService.create_store(uid, data)
         userService.update_user_store_owner(uid, store['info']['store_code'])
         return response_success(store)
     return response_error("Error on format of the params", {'uid': uid})
@@ -75,7 +75,7 @@ def toggle_store_maintenance(uid, store_code):
 
         storeService.toggle_maintenance_store(uid, store_code)
         stores = storeService.get_stores()
-        return response_success(stores.data)
+        return response_success(stores)
     return response_error("Error on format of the params", {uid: uid})
 
 
@@ -93,9 +93,9 @@ def update_store_support(uid, store_code):
             data = schema.load(request.json)
         except ValidationError as e:
             return response_error("Error on format of the params", {'params': request.json})
-        if not valid_currency(data.data['currency_code']):
+        if not valid_currency(data['currency_code']):
             return response_error("Error on format of the params", {'params': request.json})
-        data = Struct(data.data)
+        data = Struct(data)
         store = storeService.update_store_info(uid, store_code, data)
         return response_success(store)
     return response_error("Error on format of the params", {uid: uid})
@@ -115,7 +115,7 @@ def update_store_location(uid, store_code):
             data = schema.load(request.json, many=True)
         except ValidationError as e:
             return response_error("Error on format of the params", {'params': request.json})
-        data = Struct({'locations': data.data})
+        data = Struct({'locations': data})
         store = storeService.update_locations(uid, store_code, data)
         return response_success(store)
     return response_error("Error on format of the params", {uid: uid})
@@ -135,7 +135,7 @@ def update_store_hours(uid, store_code):
             data = schema.load(request.json, many=True)
         except ValidationError as e:
             return response_error("Error on format of the params", {'params': request.json})
-        data = Struct({'hours': data.data})
+        data = Struct({'hours': data})
         store = storeService.update_hours(uid, store_code, data)
         return response_success(store)
     return response_error("Error on format of the params", {uid: uid})
