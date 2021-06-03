@@ -10,11 +10,12 @@ from config import settings
 from config.api import app as current_app
 from src.middlewares.check_role import check_role
 from src.middlewares.check_token import check_token_register_firebase_user, check_token_of_user
-from src.schemas.requests.user import CreatePlatformUser
+from src.schemas.requests.user import CreatePlatformUser, CreateStoreStaffUser
 from src.services.roles import RolesService
 from src.services.store import StoreService
 from src.services.user import UserService
 from src.utils.enums import RolesTypes
+from src.utils.general import Struct
 from src.utils.responses import response_error, response_success
 from src.utils.common_methods import verify_uid
 
@@ -87,6 +88,34 @@ def mark_user_passed_tutorial(uid, store_code):
             current_app.logger.error("unknown error", err)
             return response_error("unknown error", {err: err.cause})
     return response_error("Error on format of the params", {uid: uid})
+
+
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/staff/<store_code>"), methods=["POST"])
+@check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value])
+def create_store_stuff(store_code):
+    if not request.is_json:
+        return response_error("Request Data must be in json format", request.data)
+    try:
+        body = request.json()
+        try:
+            schema = CreateStoreStaffUser()
+            data = schema.load(body)
+        except ValidationError as e:
+            return response_error("Error on format of the params", {'params': request.json})
+        data = Struct(data)
+        if roleSerivce.check_roles([data.role]):
+            return response_error("One or more of fields are invalid", request.data)
+
+        roles = roleSerivce.get_roles([data.role])
+        return response_success(userService.create_user(data.email, data.password, roles, store_code))
+    except ValueError:
+        return response_error("Error on format of the params", request.data)
+    except UserNotFoundError:
+        current_app.logger.error("User not found", request.data)
+        return response_error("User not found", request.data)
+    except FirebaseError as err:
+        current_app.logger.error("unknown error", err)
+        return response_error("unknown error", {err: err.cause})
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>"), methods=["POST"])

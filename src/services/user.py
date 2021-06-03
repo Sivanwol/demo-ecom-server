@@ -109,14 +109,16 @@ class UserService:
         db.session.commit()
         auth.revoke_refresh_tokens(uid)
 
-    def create_user(self, email, password, roles, is_platform_user, store_code=None, is_new_user=True):
-        user = create_firebase_user(email, password)
-        uid = user['localId']
-        self.sync_firebase_user(uid, roles, is_platform_user, store_code, is_new_user)
-        return uid
+    ''' Will create staff user for the store (this will not for customer as he work on different workflow'''
+    def create_user(self, email, password, roles, store_code):
+        user_obj = create_firebase_user(email, password)
+        uid = user_obj['localId']
+        self.sync_firebase_user(uid, roles, True, store_code, True)
+        return self.get_user(uid)
 
     def remove_user(self, uid):
         pass
+
     def check_user_roles(self, uid, *requirements_roles):
         """ Return True if the user has all of the specified roles. Return False otherwise.
             has_roles() accepts a list of requirements:
