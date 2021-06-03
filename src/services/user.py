@@ -74,16 +74,17 @@ class UserService:
             return False
         return True
 
-    def check_user_auth(self, request):
+    def check_user_auth(self, request, existed_on_system):
         if not request.headers.get('authorization'):
             return response_error('No token provided', None, 400)
         try:
             token = request.headers['authorization'].replace('Bearer ', '')
             firebase_obj = auth.verify_id_token(token)
-            uid = firebase_obj["uid"]
-            user_exist = self.user_exists(uid)
-            if not user_exist:
-                return response_error('user not active', None, 400)
+            if existed_on_system:
+                uid = firebase_obj["uid"]
+                user_exist = self.user_exists(uid)
+                if not user_exist:
+                    return response_error('user not active', None, 400)
             request.uid = firebase_obj["uid"]
         except:
             return response_error('Invalid token provided', None, 400)

@@ -31,7 +31,7 @@ class FlaskTestCase(BaseTestCase):
                 'description': 'store description',
                 'currency_code': currency_code
             }
-            response = self.request_post('/api/store/%s/create' % uid, token, post_data)
+            response = self.request_post('/api/store/%s/create' % uid, token, None, post_data)
             self.assert200(response, 'create store request failed')
             response_data = Struct(response.json)
             self.assertIsNotNone(response_data)
@@ -68,7 +68,7 @@ class FlaskTestCase(BaseTestCase):
                 'description': 'store description',
                 'currency_code': currency_code
             }
-            response = self.request_post('/api/store/%s/create' % uid, token, post_data)
+            response = self.request_post('/api/store/%s/create' % uid, token, None, post_data)
             self.assert200(response, 'create store request failed')
             response_data = Struct(response.json)
             self.assertIsNotNone(response_data)
@@ -106,7 +106,7 @@ class FlaskTestCase(BaseTestCase):
                 'description': 'store description',
                 'currency_code': currency_code
             }
-            response = self.request_post('/api/store/%s/create' % uid, token, post_data)
+            response = self.request_post('/api/store/%s/create' % uid, token, None, post_data)
             self.assert200(response, 'create store request failed')
             response_data = Struct(response.json)
             self.assertIsNotNone(response_data)
@@ -142,7 +142,7 @@ class FlaskTestCase(BaseTestCase):
                 'description': 'store description',
                 'currency_code': currency_code
             }
-            response = self.request_post('/api/store/%s/create' % uid, token, post_data)
+            response = self.request_post('/api/store/%s/create' % uid, token, None, post_data)
             self.assert200(response, 'create store request failed')
             response_data = Struct(response.json)
             self.assertIsNotNone(response_data)
@@ -161,7 +161,7 @@ class FlaskTestCase(BaseTestCase):
                 {'lat': 0, 'lng': 0, 'address': 'hagat', 'city': 'ramat fam', 'country_code': 'IL', 'is_close': False},
                 {'address': 'hagat', 'city': 'ramat fam', 'country_code': 'IL', 'is_close': True},
             ]
-            response = self.request_post('/api/store/{}/{}/locations'.format(uid, store_code), token, locations)
+            response = self.request_post('/api/store/{}/{}/locations'.format(uid, store_code), token, None, locations)
             self.assert200(response, 'update store loocation request failed')
             hours = [
                 {'day': 1, 'location_id': None, 'from_time': 8, 'to_time': 21, 'is_open_24': False, 'is_close': False},
@@ -172,7 +172,7 @@ class FlaskTestCase(BaseTestCase):
                 {'day': 6, 'location_id': None, 'from_time': None, 'to_time': None, 'is_open_24': False, 'is_close': False},
                 {'day': 7, 'location_id': None, 'from_time': None, 'to_time': None, 'is_open_24': False, 'is_close': True},
             ]
-            response = self.request_post('/api/store/{}/{}/hours'.format(uid, store_code), token, hours)
+            response = self.request_post('/api/store/{}/{}/hours'.format(uid, store_code), token, None, hours)
             self.assert200(response, 'update store hours request failed')
             response_data = Struct(response.json)
             self.assertIsNotNone(response_data)
@@ -210,7 +210,7 @@ class FlaskTestCase(BaseTestCase):
             'description': 'store description',
             'currency_code': currency_code
         }
-        response = self.request_post('/api/store/%s/create' % uid, token, post_data)
+        response = self.request_post('/api/store/%s/create' % uid, token, None, post_data)
         self.assert200(response, 'create store request failed')
         response_data = Struct(response.json)
         self.assertIsNotNone(response_data)
@@ -234,7 +234,7 @@ class FlaskTestCase(BaseTestCase):
             {'day': 6, 'location_id': None, 'from_time': None, 'to_time': None, 'is_open_24': False, 'is_close': False},
             {'day': 7, 'location_id': None, 'from_time': None, 'to_time': None, 'is_open_24': False, 'is_close': True},
         ]
-        response = self.request_post('/api/store/{}/{}/hours'.format(uid, store_code), token, hours)
+        response = self.request_post('/api/store/{}/{}/hours'.format(uid, store_code), token, None, hours)
         self.assert200(response, 'update store hours request failed')
         response_data = Struct(response.json)
 
@@ -270,7 +270,7 @@ class FlaskTestCase(BaseTestCase):
                 'description': 'store description',
                 'currency_code': currency_code
             }
-            response = self.request_post('/api/store/%s/create' % uid, token, post_data)
+            response = self.request_post('/api/store/%s/create' % uid, token, None, post_data)
             self.assert200(response, 'create store #1 request failed')
             response_data = Struct(response.json)
             self.assertIsNotNone(response_data)
@@ -287,7 +287,7 @@ class FlaskTestCase(BaseTestCase):
                 'description': 'store description',
                 'currency_code': currency_code
             }
-            response = self.request_post('/api/store/%s/create' % uid, token, post_data)
+            response = self.request_post('/api/store/%s/create' % uid, token, None, post_data)
             self.assert200(response, 'create store #2 request failed')
             self.assertIsNotNone(response_data)
             self.assertTrue(response_data.status)
@@ -323,7 +323,7 @@ class FlaskTestCase(BaseTestCase):
                 'description': 'store description',
                 'currency_code': currency_code
             }
-            response = self.request_post('/api/store/%s/create' % uid, token, post_data)
+            response = self.request_post('/api/store/%s/create' % uid, token, None, post_data)
             self.assert200(response, 'create store request failed')
             response_data = Struct(response.json)
             self.assertIsNotNone(response_data)
@@ -340,7 +340,7 @@ class FlaskTestCase(BaseTestCase):
                 {'address': 'hagat', 'city': 'ramat fam', 'country_code': 'IL', 'is_close': True},
             ]
 
-            response = self.request_post('/api/store/{}/{}/locations'.format(uid, store_code), token, locations)
+            response = self.request_post('/api/store/{}/{}/locations'.format(uid, store_code), token, None, locations)
             self.assert200(response, 'update store loocation request failed')
             response_data = Struct(response.json)
             store = self.storeService.get_store_by_status_code(store_code, True)
@@ -353,7 +353,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.info.default_currency_code, store.default_currency_code)
             self.assertEqual(len(response_data.data.locations), 2)
             locations = []
-            response = self.request_post('/api/store/{}/{}/locations'.format(uid, store_code), token, locations)
+            response = self.request_post('/api/store/{}/{}/locations'.format(uid, store_code), token, None, locations)
             self.assert200(response, 'update store loocation request failed')
             response_data = Struct(response.json)
             store = self.storeService.get_store_by_status_code(store_code, True)
@@ -383,7 +383,7 @@ class FlaskTestCase(BaseTestCase):
                 'description': 'store description',
                 'currency_code': currency_code
             }
-            response = self.request_post('/api/store/%s/create' % uid, token, post_data)
+            response = self.request_post('/api/store/%s/create' % uid, token, None, post_data)
             self.assert200(response, 'create store request failed')
             response_data = Struct(response.json)
             self.assertIsNotNone(response_data)
@@ -400,7 +400,7 @@ class FlaskTestCase(BaseTestCase):
                 {'address': 'hagat', 'city': 'ramat fam', 'country_code': 'IL', 'is_close': True},
             ]
 
-            response = self.request_post('/api/store/{}/{}/locations'.format(uid, store_code), token, locations)
+            response = self.request_post('/api/store/{}/{}/locations'.format(uid, store_code), token, None, locations)
             self.assert200(response, 'update store loocation request failed')
             response_data = Struct(response.json)
             store = self.storeService.get_store_by_status_code(store_code)
@@ -430,7 +430,7 @@ class FlaskTestCase(BaseTestCase):
             'description': 'store description',
             'currency_code': currency_code
         }
-        response = self.request_post('/api/store/%s/create' % uid, token, post_data)
+        response = self.request_post('/api/store/%s/create' % uid, token, None, post_data)
         self.assert200(response, 'create store request failed')
         response_data = Struct(response.json)
         self.assertIsNotNone(response_data)
@@ -449,7 +449,7 @@ class FlaskTestCase(BaseTestCase):
             'description': 'store description updated',
             'currency_code': currency_code
         }
-        response = self.request_put('/api/store/{}/{}/update'.format(uid, store_code), token, post_data)
+        response = self.request_put('/api/store/{}/{}/update'.format(uid, store_code), token, None, post_data)
 
         self.assert200(response, 'update store info request failed')
         response_data = Struct(response.json)

@@ -17,7 +17,7 @@ def check_role(*role_names):
             response = verify_response()
             if response is None:
                 try:
-                    res = userService.check_user_auth(request)
+                    res = userService.check_user_auth(request, True)
                     if res is not None:
                         return res
                     uid = request.uid
@@ -29,8 +29,6 @@ def check_role(*role_names):
                 except Exception as e:
                     app.logger.error(e)
                     return response_error('Unauthorized  access', None, 401)
-            else:
-                return response
             return f(*args, **kwargs)
         return decorator
     return wrapper

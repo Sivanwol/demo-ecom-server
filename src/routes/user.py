@@ -9,7 +9,7 @@ from marshmallow import ValidationError
 from config import settings
 from config.api import app as current_app
 from src.middlewares.check_role import check_role
-from src.middlewares.check_token import check_token
+from src.middlewares.check_token import check_token_register_firebase_user, check_token_of_user
 from src.schemas.requests.user import CreatePlatformUser
 from src.services.roles import RolesService
 from src.services.store import StoreService
@@ -69,7 +69,7 @@ def user_toggle_active(uid):
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/passed_tutorial/<uid>/<store_code>"), methods=["PUT"])
-@check_token
+@check_token_of_user
 def mark_user_passed_tutorial(uid, store_code):
     if verify_uid(uid):
         try:
@@ -82,27 +82,6 @@ def mark_user_passed_tutorial(uid, store_code):
             current_app.logger.error("User not found", {uid: uid})
             return response_error("Error on format of the params", {uid: uid})
         except UserNotFoundError:
-            return response_error("User not found", {uid: uid})
-        except FirebaseError as err:
-            current_app.logger.error("unknown error", err)
-            return response_error("unknown error", {err: err.cause})
-    return response_error("Error on format of the params", {uid: uid})
-
-
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/<store_code>"), methods=["POST"])
-@check_token
-def sync_store_user_create(uid, store_code):
-    if verify_uid(uid):
-        try:
-            has_store = storeService.store_exists(uid, store_code)
-            if has_store is None:
-                response_error("error store not existed", {uid: uid, store_code: store_code})
-            roles = roleSerivce.get_roles([RolesTypes.StoreCustomer.value])
-            return response_success(get_user_object(uid, roles, False))
-        except ValueError:
-            return response_error("Error on format of the params", {uid: uid})
-        except UserNotFoundError:
-            current_app.logger.error("User not found", {uid: uid})
             return response_error("User not found", {uid: uid})
         except FirebaseError as err:
             current_app.logger.error("unknown error", err)
@@ -126,9 +105,7 @@ def sync_platform_user_create(uid):
                 return response_error("Error on format of the params", {'params': request.json})
             if roleSerivce.check_roles(data.role_names):
                 return response_error("One or more of fields are invalid", request.data)
-
-            roles = roleSerivce.get_roles(data.role_names)
-            return response_success(get_user_object(uid, roles, True))
+            return response_success(get_user_object(uid, data.role_names, True))
         except ValueError:
             return response_error("Error on format of the params", {uid: uid})
         except UserNotFoundError:
@@ -140,9 +117,29 @@ def sync_platform_user_create(uid):
     return response_error("Error on format of the params", {uid: uid})
 
 
-def get_user_object(uid, role_names, is_platform_user):
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/bind/<store_code>"), methods=["POST"])
+@check_token_register_firebase_user
+def sync_store_user_create(uid, store_code):
+    if not verify_uid(uid):
+        try:
+            has_store = storeService.store_exists(uid, store_code)
+            if has_store is None:
+                response_error("error store not existed", {uid: uid, store_code: store_code})
+            return response_success(get_user_object(uid, [RolesTypes.StoreCustomer.value], False, store_code))
+        except ValueError:
+            return response_error("Error on format of the params", {uid: uid})
+        except UserNotFoundError:
+            current_app.logger.error("User not found", {uid: uid})
+            return response_error("User not found", {uid: uid})
+        except FirebaseError as err:
+            current_app.logger.error("unknown error", err)
+            return response_error("unknown error", {err: err.cause})
+    return response_error("Error user exist", {uid: uid})
+
+
+def get_user_object(uid, role_names, is_platform_user, store_code=None):
     response = {'user': json.dumps(userService.get_firebase_user(uid).__dict__['_data'], indent=4), 'extend_info': None}
     roles = roleSerivce.get_roles(role_names)
-    userService.sync_firebase_user(uid, roles, is_platform_user)
+    userService.sync_firebase_user(uid, roles, is_platform_user, store_code)
     response['extend_info'] = userService.get_user(uid)
     return response

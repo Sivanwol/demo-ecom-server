@@ -13,7 +13,7 @@ from src.services.store import StoreService
 from src.services.user import UserService
 from src.utils.enums import RolesTypes
 from src.utils.firebase_utils import create_firebase_user as create_fb_user, setup_firebase_client, login_user
-from src.utils.general import is_json_key_present
+from src.utils.general import is_json_key_present, Struct
 
 
 class BaseTestCase(TestCase):
@@ -102,19 +102,54 @@ class BaseTestCase(TestCase):
         roles = self.roleService.get_roles([RolesTypes.Accounts.value])
         self.userService.sync_firebase_user(self.platform_accounts_object.uid, roles, True)
 
-    def create_store_user(self,email, roles, inital_state=False, store_code=None):
+    def create_store_user(self, email, roles, initial_state=False, store_code=None):
         user = create_fb_user(email, self.global_password)
         self.assertIsNotNone(user)
         if user is not None:
-            auth.delete_user(user.uid) # we need make sure this user will be delete no point keep at as there a lot of tests
+            auth.delete_user(user.uid)  # we need make sure this user will be delete no point keep at as there a lot of tests
             user = create_fb_user(email, self.global_password)
         roles = self.roleService.get_roles(roles)
-        if inital_state:
+        if initial_state:
             store_code = None
-        self.userService.sync_firebase_user(user.uid, roles, inital_state, store_code)
+        self.userService.sync_firebase_user(user.uid, roles, initial_state, store_code)
 
-    def request_get(self, url, token):
-        headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token}
+    def create_firebase_store_user(self, email):
+        user = create_fb_user(email, self.global_password)
+        if user is not None:
+            auth.delete_user(user.uid)  # we need make sure this user will be delete no point keep at as there a lot of tests
+            user = create_fb_user(email, self.global_password)
+
+        self.assertIsNotNone(user)
+        return user
+
+    def create_store(self):
+        user_object = self.login_user(self.platform_owner_user)
+        owner_uid = user_object['uid']
+        owner_token = user_object['idToken']
+        user = self.userService.get_user(owner_uid, True)
+        self.assertIsNone(user.store_code)
+        store_name = self.fake.company()
+        currency_code = self.fake.currency_code()
+        post_data = {
+            'name': store_name,
+            'description': 'store description',
+            'currency_code': currency_code
+        }
+        response = self.request_post('/api/store/%s/create' % owner_uid, owner_token , None, post_data)
+        self.assert200(response, 'create store request failed')
+        response_data = Struct(response.json)
+        self.assertIsNotNone(response_data)
+        self.assertTrue(response_data.status)
+        self.assertIsNotNone(response_data.data)
+        self.assertIsNotNone(response_data.data.info)
+        self.assertIsNotNone(response_data.data.info)
+        self.assertNotEqual(response_data.data.info.store_code, '')
+        return response_data
+
+    def request_get(self, url, token, extra_headers=None):
+        if extra_headers is None:
+            extra_headers = {}
+        headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token} | extra_headers
         print('request get -> %s' % url)
         print('request headers -> %s' % json.dumps(headers))
         return self.client.get(
@@ -122,8 +157,12 @@ class BaseTestCase(TestCase):
             headers=headers
         )
 
-    def request_put(self, url, token, data={}):
-        headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token}
+    def request_put(self, url, token, extra_headers=None, data=None):
+        if data is None:
+            data = {}
+        if extra_headers is None:
+            extra_headers = {}
+        headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token} | extra_headers
         print('request put -> %s' % url)
         print('request headers -> %s' % json.dumps(headers))
         print('request put data-> %s' % json.dumps(data))
@@ -133,8 +172,12 @@ class BaseTestCase(TestCase):
             headers=headers
         )
 
-    def request_post(self, url, token, data={}):
-        headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token}
+    def request_post(self, url, token, extra_headers=None, data=None):
+        if extra_headers is None:
+            extra_headers = {}
+        if data is None:
+            data = {}
+        headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token} | extra_headers
         print('request post -> %s' % url)
         print('request headers -> %s' % json.dumps(headers))
         print('request post data-> %s' % json.dumps(data))
@@ -144,8 +187,10 @@ class BaseTestCase(TestCase):
             headers=headers
         )
 
-    def request_delete(self, url, token):
-        headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token}
+    def request_delete(self, url, token, extra_headers=None):
+        if extra_headers is None:
+            extra_headers = {}
+        headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token} | extra_headers
         print('request delete -> %s' % url)
         print('request headers -> %s' % json.dumps(headers))
         return self.client.delete(
