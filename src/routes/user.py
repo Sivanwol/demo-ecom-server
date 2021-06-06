@@ -16,9 +16,9 @@ from src.services.store import StoreService
 from src.services.user import UserService
 from src.utils.enums import RolesTypes
 from src.utils.general import Struct
-from src.utils.responses import response_error, response_success
+from src.utils.responses import response_error, response_success, response_success_paging
 from src.utils.common_methods import verify_uid
-from src.utils.validations import valid_countryCode, valid_currency
+from src.utils.validations import valid_countryCode, valid_currency, vaild_per_page
 
 roleSerivce = RolesService()
 userService = UserService()
@@ -68,6 +68,15 @@ def user_toggle_active(uid):
             current_app.logger.error("unknown error", err)
             return response_error("unknown error", {err: err.cause})
     return response_error("Error on format of the params", {uid: uid})
+
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/platform/list/<per_page>/<page>"), methods=["GET"])
+@check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value, RolesTypes.Support.value])
+def get_platform_users(per_page, page):
+    if not vaild_per_page(per_page):
+        return response_error("Error on support per page", {per_page: per_page})
+    filter = { 'names': request.args.getlist('filter_fullname') }
+    result = userService.query_platform_users(filter, per_page, page)
+    return response_success_paging(result.items,result.total, result.pages, result.has_next, result.has_prev)
 
 # Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/passed_tutorial/<uid>"), methods=["PUT"])

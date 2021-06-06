@@ -8,7 +8,7 @@ Task for the user system
 - [ ] Add Test for route that add user staff by the owner of different store as not passed
 
 ### Logic
-- [ ] add logic get platform users [ roles: owner, accounts,  support ]
+- [x] add logic get platform users [ roles: owner, accounts,  support ]
   - [ ] add test to at
 - [ ] add logic get stores users [filter by: store_code, store name] [ order by store_code , user name ]
   - [ ] add test to at

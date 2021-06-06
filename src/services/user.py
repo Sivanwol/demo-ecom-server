@@ -1,5 +1,6 @@
 import firebase_admin
 from firebase_admin import auth
+from sqlalchemy import or_
 
 from config.api import cache
 from config.database import db
@@ -137,8 +138,12 @@ class UserService:
         self.sync_firebase_user(uid, roles, True, store_code, True)
         return self.get_user(uid)
 
-    def remove_user(self, uid):
-        pass
+    def query_platform_users(self, filters, per_page, page):
+        users = User.query
+        names =  filters['names']
+        if len(names) > 0:
+            users.filter(or_(User.fullname.like('%{}%'.format(v)) for v in names))
+        return users.paginate(page, per_page, False)
 
     def check_user_roles(self, uid, *requirements_roles):
         """ Return True if the user has all of the specified roles. Return False otherwise.

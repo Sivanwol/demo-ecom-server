@@ -13,8 +13,18 @@ class RolesTypes(Enum):
     StoreSupport = 'store_support'
 
 
+class PerPageSupport(Enum):
+    Per20: 20
+    Per30: 30
+    Per50: 50
+    Per75: 75
+    Per100: 100
+    Per200: 200
+
+
 class MediaAssetsType(Enum):
     Image = 1
     Video = 2
     Document = 3
     Unknown = 4
+
