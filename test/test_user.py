@@ -18,7 +18,7 @@ class FlaskTestCase(BaseTestCase):
     def test_check_user_not_active(self):
         with self.client:
             user_not_active = "noactive@user.com"
-            self.create_store_user(user_not_active, [RolesTypes.Support.value], True)
+            self.create_user(user_not_active, [RolesTypes.Support.value], True)
             user_object = self.login_user(self.platform_owner_user)
             owner_uid = user_object['uid']
             owner_token = user_object['idToken']
@@ -97,14 +97,15 @@ class FlaskTestCase(BaseTestCase):
     # todo:  Ensure that Flask was set up correctly
     def test_sync_new_user(self):
         with self.client:
-            new_user = "user@gmail.com"
-            store_info = self.create_store()
-            user_object = self.create_firebase_store_user(new_user)
-            uid = user_object.uid
-            user_object = self.login_user(new_user)
+            store_owner_user = "user@gmail.com"
+            store_customer_user = "customer@gmail.com"
+            store_info = self.create_store(store_owner_user)
+            self.create_firebase_store_user(store_customer_user)
+            user_object = self.login_user(store_customer_user)
+            uid = user_object['uid']
             token = user_object['idToken']
             response = self.request_post('/api/user/{}/bind/{}'.format(uid, store_info.data.info.store_code), token)
-            self.assertEqual(response.status_code, 200)
+            self.assert200(response, 'bind user to store request failed')
             response_data = Struct(response.json)
             user = self.userService.get_user(uid, True)
             self.assertIsNotNone(response_data)
@@ -115,6 +116,31 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.extend_info.store_code, store_info.data.info.store_code)
             self.assertEqual(response_data.data.extend_info.store_code, user.store_code)
             self.assertEqual(response_data.data.extend_info.uid, uid)
+
+    def test_service_user_part_of_store_valid(self):
+        new_user = "user@gmail.com"
+        store_info = self.create_store(new_user)
+        user_object = self.login_user(new_user)
+        uid = user_object['uid']
+        self.assertTrue(self.userService.check_user_part_store(uid, store_info.data.info.store_code))
+
+    def test_service_user_part_of_store_staff_valid(self):
+        user_staff = "staff@gmail.com"
+        new_user = "user@gmail.com"
+        store_info = self.create_store(new_user)
+        self.create_user(user_staff, [RolesTypes.StoreAccount.value], False, store_info.data.info.store_code)
+        user_object = self.login_user(user_staff)
+        uid = user_object['uid']
+        self.assertTrue(self.userService.check_user_part_store(uid, store_info.data.info.store_code))
+
+    def test_service_user_part_of_store_invalid(self):
+        user_not_active = "noactive@user.com"
+        self.create_user(user_not_active, [RolesTypes.Support.value], True)
+        new_user = "user@gmail.com"
+        store_info = self.create_store(new_user)
+        user_object = self.login_user(user_not_active)
+        uid = user_object['uid']
+        self.assertFalse(self.userService.check_user_part_store(uid, store_info.data.info.store_code))
 
 
 if __name__ == '__main__':

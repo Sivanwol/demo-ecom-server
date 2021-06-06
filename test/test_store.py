@@ -18,7 +18,7 @@ class FlaskTestCase(BaseTestCase):
 
     def test_create_store(self):
         with self.client:
-            self.create_store_user(self.store_owner_user, [RolesTypes.StoreOwner.value], True)
+            self.create_user(self.store_owner_user, [RolesTypes.StoreOwner.value], True)
             user_object = self.login_user(self.platform_owner_user)
             uid = user_object['uid']
             token = user_object['idToken']
@@ -54,7 +54,7 @@ class FlaskTestCase(BaseTestCase):
 
     def test_freeze_store(self):
         with self.client:
-            self.create_store_user(self.user_owner, [RolesTypes.StoreOwner.value], True)
+            self.create_user(self.user_owner, [RolesTypes.StoreOwner.value], True)
             user_object = self.login_user(self.platform_owner_user)
             store_user_object = self.login_user(self.user_owner)
             uid = store_user_object['uid']
@@ -92,7 +92,7 @@ class FlaskTestCase(BaseTestCase):
 
     def test_toggle_store_maintenance(self):
         with self.client:
-            self.create_store_user(self.user_owner, [RolesTypes.StoreOwner.value], True)
+            self.create_user(self.user_owner, [RolesTypes.StoreOwner.value], True)
             user_object = self.login_user(self.platform_owner_user)
             store_user_object = self.login_user(self.user_owner)
             uid = store_user_object['uid']
@@ -128,7 +128,7 @@ class FlaskTestCase(BaseTestCase):
 
     def test_get_store_info(self):
         with self.client:
-            self.create_store_user(self.user_owner, [RolesTypes.StoreOwner.value], True)
+            self.create_user(self.user_owner, [RolesTypes.StoreOwner.value], True)
             user_object = self.login_user(self.platform_owner_user)
             store_user_object = self.login_user(self.user_owner)
             uid = store_user_object['uid']
@@ -196,7 +196,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertListEqual(response.json['data']['hours'], store['hours'])
 
     def test_update_hours(self):
-        self.create_store_user(self.user_owner, [RolesTypes.StoreOwner.value], True)
+        self.create_user(self.user_owner, [RolesTypes.StoreOwner.value], True)
         user_object = self.login_user(self.platform_owner_user)
         store_user_object = self.login_user(self.user_owner)
         uid = store_user_object['uid']
@@ -255,8 +255,8 @@ class FlaskTestCase(BaseTestCase):
     def test_get_stores(self):
         with self.client:
             user_owner_secand = 'user_owner_2@store.us'
-            self.create_store_user(self.user_owner, [RolesTypes.StoreOwner.value], True)
-            self.create_store_user(user_owner_secand, [RolesTypes.StoreOwner.value], True)
+            self.create_user(self.user_owner, [RolesTypes.StoreOwner.value], True)
+            self.create_user(user_owner_secand, [RolesTypes.StoreOwner.value], True)
             user_object = self.login_user(self.platform_owner_user)
             store_user_object = self.login_user(self.user_owner)
             uid = store_user_object['uid']
@@ -309,7 +309,7 @@ class FlaskTestCase(BaseTestCase):
 
     def test_update_zero_locations(self):
         with self.client:
-            self.create_store_user(self.user_owner, [RolesTypes.StoreOwner.value], True)
+            self.create_user(self.user_owner, [RolesTypes.StoreOwner.value], True)
             user_object = self.login_user(self.platform_owner_user)
             store_user_object = self.login_user(self.user_owner)
             uid = store_user_object['uid']
@@ -369,7 +369,7 @@ class FlaskTestCase(BaseTestCase):
 
     def test_update_locations(self):
         with self.client:
-            self.create_store_user(self.user_owner, [RolesTypes.StoreOwner.value], True)
+            self.create_user(self.user_owner, [RolesTypes.StoreOwner.value], True)
             user_object = self.login_user(self.platform_owner_user)
             store_user_object = self.login_user(self.user_owner)
             uid = store_user_object['uid']
@@ -416,7 +416,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertListEqual(response.json['data']['locations'], store['locations'])
 
     def test_update_store_info(self):
-        self.create_store_user(self.user_owner, [RolesTypes.StoreOwner.value], True)
+        self.create_user(self.user_owner, [RolesTypes.StoreOwner.value], True)
         user_object = self.login_user(self.platform_owner_user)
         store_user_object = self.login_user(self.user_owner)
         uid = store_user_object['uid']

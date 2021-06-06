@@ -102,15 +102,13 @@ class BaseTestCase(TestCase):
         roles = self.roleService.get_roles([RolesTypes.Accounts.value])
         self.userService.sync_firebase_user(self.platform_accounts_object.uid, roles, True)
 
-    def create_store_user(self, email, roles, initial_state=False, store_code=None):
+    def create_user(self, email, roles, initial_state=False, store_code=None):
         user = create_fb_user(email, self.global_password)
         self.assertIsNotNone(user)
         if user is not None:
             auth.delete_user(user.uid)  # we need make sure this user will be delete no point keep at as there a lot of tests
             user = create_fb_user(email, self.global_password)
         roles = self.roleService.get_roles(roles)
-        if initial_state:
-            store_code = None
         self.userService.sync_firebase_user(user.uid, roles, initial_state, store_code)
 
     def create_firebase_store_user(self, email):
@@ -122,11 +120,14 @@ class BaseTestCase(TestCase):
         self.assertIsNotNone(user)
         return user
 
-    def create_store(self):
+    def create_store(self, email):
+        self.create_user(email, [RolesTypes.StoreCustomer.value], True)
+        user_object = self.login_user(email)
+        uid = user_object['uid']
         user_object = self.login_user(self.platform_owner_user)
-        owner_uid = user_object['uid']
         owner_token = user_object['idToken']
-        user = self.userService.get_user(owner_uid, True)
+
+        user = self.userService.get_user(uid, True)
         self.assertIsNone(user.store_code)
         store_name = self.fake.company()
         currency_code = self.fake.currency_code()
@@ -135,8 +136,9 @@ class BaseTestCase(TestCase):
             'description': 'store description',
             'currency_code': currency_code
         }
-        response = self.request_post('/api/store/%s/create' % owner_uid, owner_token , None, post_data)
+        response = self.request_post('/api/store/%s/create' % uid, owner_token, None, post_data)
         self.assert200(response, 'create store request failed')
+        user = self.userService.get_user(uid, True)
         response_data = Struct(response.json)
         self.assertIsNotNone(response_data)
         self.assertTrue(response_data.status)
@@ -144,6 +146,7 @@ class BaseTestCase(TestCase):
         self.assertIsNotNone(response_data.data.info)
         self.assertIsNotNone(response_data.data.info)
         self.assertNotEqual(response_data.data.info.store_code, '')
+        self.assertEqual(response_data.data.info.store_code, user.store_code)
         return response_data
 
     def request_get(self, url, token, extra_headers=None):

@@ -4,6 +4,7 @@ from firebase_admin import auth
 from config.api import cache
 from config.database import db
 from src.models import User
+from src.models.stores import Store
 from src.schemas.user_schema import UserSchema
 from src.utils.firebase_utils import create_firebase_user
 from src.utils.responses import response_error
@@ -74,6 +75,15 @@ class UserService:
             return False
         return True
 
+    def check_user_part_store(self, uid, store_code):
+        store = Store.query.filter_by(store_code=store_code).first()
+        user = self.get_user(uid, True)
+        if store is None or user is None:
+            return False
+        if store.owner_id == uid or user.store_code == store_code:
+            return True
+        return False
+
     def check_user_auth(self, request, existed_on_system):
         if not request.headers.get('authorization'):
             return response_error('No token provided', None, 400)
@@ -110,6 +120,7 @@ class UserService:
         auth.revoke_refresh_tokens(uid)
 
     ''' Will create staff user for the store (this will not for customer as he work on different workflow'''
+
     def create_user(self, email, password, roles, store_code):
         user_obj = create_firebase_user(email, password)
         uid = user_obj['localId']
