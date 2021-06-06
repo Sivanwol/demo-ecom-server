@@ -10,7 +10,7 @@ from config import settings
 from config.api import app as current_app
 from src.middlewares.check_role import check_role
 from src.middlewares.check_token import check_token_register_firebase_user, check_token_of_user
-from src.schemas.requests.user import CreatePlatformUser, CreateStoreStaffUser
+from src.schemas.requests.user import CreatePlatformUser, CreateStoreStaffUser, UpdateUserInfo
 from src.services.roles import RolesService
 from src.services.store import StoreService
 from src.services.user import UserService
@@ -18,6 +18,7 @@ from src.utils.enums import RolesTypes
 from src.utils.general import Struct
 from src.utils.responses import response_error, response_success
 from src.utils.common_methods import verify_uid
+from src.utils.validations import valid_countryCode, valid_currency
 
 roleSerivce = RolesService()
 userService = UserService()
@@ -68,7 +69,7 @@ def user_toggle_active(uid):
             return response_error("unknown error", {err: err.cause})
     return response_error("Error on format of the params", {uid: uid})
 
-
+# Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/passed_tutorial/<uid>/<store_code>"), methods=["PUT"])
 @check_token_of_user
 def mark_user_passed_tutorial(uid, store_code):
@@ -89,7 +90,36 @@ def mark_user_passed_tutorial(uid, store_code):
             return response_error("unknown error", {err: err.cause})
     return response_error("Error on format of the params", {uid: uid})
 
+# Todo: Add test for this route
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/update"), methods=["PUT"])
+@check_token_of_user
+def update_user_info():
+    if not request.is_json:
+        return response_error("Request Data must be in json format", request.data)
+    try:
+        body = request.json()
+        try:
+            schema = UpdateUserInfo()
+            data = schema.load(body)
+        except ValidationError as e:
+            return response_error("Error on format of the params", {'params': request.json})
+        data = Struct(data)
+        if not valid_currency(data.currency) or not valid_countryCode(data.country):
+            return response_error("Error on format of the params", {'params': request.json})
+        uid = request.uid
+        userService.update_user_info(uid, data)
+        return response_success({})
+    except ValueError:
+        current_app.logger.error("User not found", {uid: uid})
+        return response_error("Error on format of the params", {uid: uid})
+    except UserNotFoundError:
+        return response_error("User not found", {uid: uid})
+    except FirebaseError as err:
+        current_app.logger.error("unknown error", err)
+        return response_error("unknown error", {err: err.cause})
 
+
+# Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/staff/<store_code>"), methods=["POST"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value])
 def create_store_stuff(store_code):

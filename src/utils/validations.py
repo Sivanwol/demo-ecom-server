@@ -7,3 +7,11 @@ def valid_currency(currency):
     except LookupError:
         return False
     return True
+
+
+def valid_countryCode(country):
+    try:
+        pycountry.countries.lookup(country.upper())
+    except LookupError:
+        return False
+    return True

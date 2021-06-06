@@ -16,6 +16,7 @@ def check_token_of_user(f):
             result =  userService.check_user_auth(request, True)
             if result is not None:
                 return result
+
         return f(*args, **kwargs)
 
     return decorator

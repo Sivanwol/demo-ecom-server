@@ -99,6 +99,16 @@ class UserService:
         except:
             return response_error('Invalid token provided', None, 400)
 
+    def update_user_info(self, uid, user_data):
+        user = self.get_user(uid, True)
+        user.phone = user_data.phone
+        user.address1 = user_data.address1
+        user.address2 = user_data.address2
+        user.country = user_data.country
+        user.currency = user_data.currency
+        db.session.merge(user)
+        db.session.commit()
+
     def update_user_store_owner(self, uid, store_code):
         user = self.get_user(uid, True)
         user.store_code = store_code
