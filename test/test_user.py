@@ -94,7 +94,6 @@ class FlaskTestCase(BaseTestCase):
             response_data = Struct(response.json)
             self.assertFalse(response_data.status)
 
-    # todo:  Ensure that Flask was set up correctly
     def test_sync_new_user(self):
         with self.client:
             store_owner_user = "user@gmail.com"

@@ -70,15 +70,15 @@ def user_toggle_active(uid):
     return response_error("Error on format of the params", {uid: uid})
 
 # Todo: Add test for this route
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/passed_tutorial/<uid>/<store_code>"), methods=["PUT"])
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/passed_tutorial/<uid>"), methods=["PUT"])
 @check_token_of_user
-def mark_user_passed_tutorial(uid, store_code):
+def mark_user_passed_tutorial(uid):
     if verify_uid(uid):
         try:
             user = userService.get_user(uid)
             if not user or user.is_pass_tutorial:
                 return response_error("User not found", {uid: uid})
-            userService.mark_user_passed_tutorial(uid, store_code)
+            userService.mark_user_passed_tutorial(uid)
             return response_success({})
         except ValueError:
             current_app.logger.error("User not found", {uid: uid})
@@ -89,6 +89,7 @@ def mark_user_passed_tutorial(uid, store_code):
             current_app.logger.error("unknown error", err)
             return response_error("unknown error", {err: err.cause})
     return response_error("Error on format of the params", {uid: uid})
+
 
 # Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/update"), methods=["PUT"])
