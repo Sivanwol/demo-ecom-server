@@ -69,14 +69,30 @@ def user_toggle_active(uid):
             return response_error("unknown error", {err: err.cause})
     return response_error("Error on format of the params", {uid: uid})
 
+
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/platform/list/<per_page>/<page>"), methods=["GET"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value, RolesTypes.Support.value])
 def get_platform_users(per_page, page):
     if not vaild_per_page(per_page):
         return response_error("Error on support per page", {per_page: per_page})
-    filter = { 'names': request.args.getlist('filter_fullname') }
+    filter = {'names': request.args.getlist('filter_fullname')}
     result = userService.query_platform_users(filter, per_page, page)
-    return response_success_paging(result.items,result.total, result.pages, result.has_next, result.has_prev)
+    return response_success_paging(result.items, result.total, result.pages, result.has_next, result.has_prev)
+
+
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/store/<store_code>/list/<per_page>/<page>"),
+                   methods=["GET"])
+@check_role([RolesTypes.Support.value, RolesTypes.StoreAccount.value, RolesTypes.StoreOwner.value, RolesTypes.StoreSupport.value])
+def get_store_users(store_code, per_page, page):
+    if not vaild_per_page(per_page):
+        return response_error("Error on support per page", {per_page: per_page})
+    uid = request.uid
+    if not storeService.store_exists(uid, store_code):
+        response_error("store not exist", {uid: uid, store_code: store_code})
+    filter = {'names': request.args.getlist('filter_fullname')}
+    result = userService.query_store_users(store_code, filter, per_page, page)
+    return response_success_paging(result.items, result.total, result.pages, result.has_next, result.has_prev)
+
 
 # Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/passed_tutorial/<uid>"), methods=["PUT"])

@@ -138,11 +138,23 @@ class UserService:
         self.sync_firebase_user(uid, roles, True, store_code, True)
         return self.get_user(uid)
 
-    def query_platform_users(self, filters, per_page, page):
+    def query_platform_users(self, filters, per_page, page , include_stores=False):
         users = User.query
-        names =  filters['names']
+        if not include_stores:
+            users.filter_by(store_code=None)
+
+        names = filters['names']
         if len(names) > 0:
             users.filter(or_(User.fullname.like('%{}%'.format(v)) for v in names))
+        users.order_by(User.store_code.desc(), User.fullname.desc())
+        return users.paginate(page, per_page, False)
+
+    def query_store_users(self, store_code, filters, per_page, page):
+        users = User.query.filter_by(store_code=store_code)
+        names = filters['names']
+        if len(names) > 0:
+            users.filter(or_(User.fullname.like('%{}%'.format(v)) for v in names))
+        users.order_by(User.fullname.desc())
         return users.paginate(page, per_page, False)
 
     def check_user_roles(self, uid, *requirements_roles):
