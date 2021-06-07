@@ -1,5 +1,6 @@
 import json
 import os
+from random import randint
 
 from faker import Faker
 from firebase_admin import auth
@@ -50,7 +51,7 @@ class BaseTestCase(TestCase):
         self.roleService.insert_roles()
         print(self.roleService.get_all_roles())
         self.init_unit_data()
-        Faker.seed(0)
+        Faker.seed(randint(0, 100))
 
     def testTearDown(self):
         db.session.remove()
@@ -84,7 +85,7 @@ class BaseTestCase(TestCase):
         if self.platform_owner_object is not None:
             self.assertNotEqual(self.platform_owner_object.uid, '')
         roles = self.roleService.get_roles([RolesTypes.Owner.value])
-        self.userService.sync_firebase_user(self.platform_owner_object.uid, roles, True)
+        self.userService.sync_firebase_user(self.platform_owner_object.uid, roles, self.platform_owner_user, 'platform owner', True)
 
     def setup_support_user(self):
         self.platform_support_object = create_fb_user(self.platform_support_user, self.global_password)
@@ -92,7 +93,7 @@ class BaseTestCase(TestCase):
         if self.platform_support_object is not None:
             self.assertNotEqual(self.platform_support_object.uid, '')
         roles = self.roleService.get_roles([RolesTypes.Support.value])
-        self.userService.sync_firebase_user(self.platform_support_object.uid, roles, True)
+        self.userService.sync_firebase_user(self.platform_support_object.uid, roles, self.platform_support_user, 'platform support', True)
 
     def setup_account_user(self):
         self.platform_accounts_object = create_fb_user(self.platform_account_user, self.global_password)
@@ -100,7 +101,7 @@ class BaseTestCase(TestCase):
         if self.platform_accounts_object is not None:
             self.assertNotEqual(self.platform_accounts_object.uid, '')
         roles = self.roleService.get_roles([RolesTypes.Accounts.value])
-        self.userService.sync_firebase_user(self.platform_accounts_object.uid, roles, True)
+        self.userService.sync_firebase_user(self.platform_accounts_object.uid, roles, self.platform_account_user, 'platform account', True)
 
     def create_user(self, email, roles, initial_state=False, store_code=None):
         user = create_fb_user(email, self.global_password)
@@ -109,7 +110,7 @@ class BaseTestCase(TestCase):
             auth.delete_user(user.uid)  # we need make sure this user will be delete no point keep at as there a lot of tests
             user = create_fb_user(email, self.global_password)
         roles = self.roleService.get_roles(roles)
-        self.userService.sync_firebase_user(user.uid, roles, initial_state, store_code)
+        self.userService.sync_firebase_user(user.uid, roles, email, self.fake.name(), initial_state, store_code)
 
     def create_firebase_store_user(self, email):
         user = create_fb_user(email, self.global_password)
@@ -121,7 +122,7 @@ class BaseTestCase(TestCase):
         return user
 
     def create_store(self, email):
-        self.create_user(email, [RolesTypes.StoreCustomer.value], True)
+        self.create_user(email, [RolesTypes.StoreOwner.value], True)
         user_object = self.login_user(email)
         uid = user_object['uid']
         user_object = self.login_user(self.platform_owner_user)
@@ -130,7 +131,7 @@ class BaseTestCase(TestCase):
         user = self.userService.get_user(uid, True)
         self.assertIsNone(user.store_code)
         store_name = self.fake.company()
-        currency_code = self.fake.currency_code()
+        currency_code = 'USD'
         post_data = {
             'name': store_name,
             'description': 'store description',
@@ -200,3 +201,7 @@ class BaseTestCase(TestCase):
             url,
             headers=headers
         )
+
+    def assertRequestPassed(self, response, message):
+        print('response headers -> %s' % response.data)
+        self.assert200(response, message)

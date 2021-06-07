@@ -32,7 +32,7 @@ class FlaskTestCase(BaseTestCase):
                 'currency_code': currency_code
             }
             response = self.request_post('/api/store/%s/create' % owner_uid, owner_token, None, post_data)
-            self.assert200(response, 'create store request failed')
+            self.assertRequestPassed(response, 'create store request failed')
             response_data = Struct(response.json)
             self.assertIsNotNone(response_data)
             self.assertTrue(response_data.status)
@@ -44,7 +44,7 @@ class FlaskTestCase(BaseTestCase):
             uid = user_object['uid']
             token = user_object['idToken']
             response = self.request_put('/api/user/%s/toggle_active' % uid, owner_token)
-            self.assert200(response, 'toggle active state of user request failed')
+            self.assertRequestPassed(response, 'toggle active state of user request failed')
             response_data = Struct(response.json)
             self.assertIsNotNone(response_data)
             self.assertTrue(response_data.status)
@@ -60,8 +60,9 @@ class FlaskTestCase(BaseTestCase):
             user_object = self.login_user(self.platform_owner_user)
             uid = user_object['uid']
             token = user_object['idToken']
+            display_name = user_object['display_name']
             response = self.request_get('/api/user/{}'.format(uid), token)
-            self.assert200(response, 'get user request failed')
+            self.assertRequestPassed(response, 'get user request failed')
             response_data = Struct(response.json)
             self.assertTrue(response_data.status)
             self.assertIsNotNone(response_data)
@@ -73,6 +74,8 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.user_data.uid, user.uid)
             self.assertEqual(response_data.data.user_data.is_pass_tutorial, user.is_pass_tutorial)
             self.assertEqual(response_data.data.user_data.id, user.id)
+            self.assertEqual(response_data.data.user_data.email, user.email)
+            self.assertEqual(response_data.data.user_data.fullname, user.fullname)
             self.assertEqual(response_data.data.user_data.roles[0].id, user.roles[0].id)
 
     def test_check_role_not_match(self):
@@ -104,7 +107,7 @@ class FlaskTestCase(BaseTestCase):
             uid = user_object['uid']
             token = user_object['idToken']
             response = self.request_post('/api/user/{}/bind/{}'.format(uid, store_info.data.info.store_code), token)
-            self.assert200(response, 'bind user to store request failed')
+            self.assertRequestPassed(response, 'bind user to store request failed')
             response_data = Struct(response.json)
             user = self.userService.get_user(uid, True)
             self.assertIsNotNone(response_data)
@@ -151,13 +154,247 @@ class FlaskTestCase(BaseTestCase):
         uid = user_object['uid']
         token = user_object['idToken']
         response = self.request_post('/api/user/{}/bind/{}'.format(uid, store_info.data.info.store_code), token)
-        self.assert200(response, 'bind user to store request failed')
+        self.assertRequestPassed(response, 'bind user to store request failed')
         user = self.userService.get_user(uid, True)
         self.assertFalse(user.is_pass_tutorial)
         response = self.request_put('/api/user/{}/passed_tutorial'.format(uid), token)
-        self.assert200(response, 'mark user pass tutrial as passed request failed')
+        self.assertRequestPassed(response, 'mark user pass tutrial as passed request failed')
         user = self.userService.get_user(uid, True)
         self.assertTrue(user.is_pass_tutorial)
+
+    def test_user_update_info_self(self):
+        user_object = self.login_user(self.platform_support_user)
+        uid = user_object['uid']
+        token = user_object['idToken']
+        # old_user_data = self.userService.get_user(uid, True)
+        country = self.fake.country_code()
+        currency = self.fake.currency_code()
+        fullname = self.fake.name()
+        address1 =  self.fake.address()
+        address2 =  self.fake.address()
+        post_data = {
+            'fullname': fullname,
+            'address1': address1,
+            'address2': address2,
+            'currency': currency,
+            'country': country
+        }
+        response = self.request_put('/api/user/update', token, None, post_data)
+        self.assertRequestPassed(response, 'update user info request failed')
+        response_data = Struct(response.json)
+        user = self.userService.get_user(uid, True)
+        self.assertIsNotNone(response_data)
+        self.assertTrue(response_data.status)
+        self.assertEqual(user.fullname, fullname)
+        self.assertEqual(user.address1, address1)
+        self.assertEqual(user.address2, address2)
+        self.assertEqual(user.country, country)
+        self.assertEqual(user.currency, currency)
+
+    def test_user_update_info_as_global_support(self):
+        store_customer_user = "customer@gmail.com"
+        store_owner_user = "user@gmail.com"
+        user_object = self.login_user(self.platform_support_user)
+        token = user_object['idToken']
+        store_info = self.create_store(store_owner_user)
+        self.create_user(store_customer_user, [RolesTypes.StoreCustomer.value], False, store_info.data.info.store_code)
+        user_object = self.login_user(store_customer_user)
+        uid = user_object['uid']
+        # old_user_data = self.userService.get_user(uid, True)
+        country = self.fake.country_code()
+        currency = self.fake.currency_code()
+        fullname = self.fake.name()
+        address1 = self.fake.address()
+        address2 = self.fake.address()
+        post_data = {
+            'fullname': fullname,
+            'address1': address1,
+            'address2': address2,
+            'currency': currency,
+            'country': country
+        }
+        response = self.request_put('/api/user/{}/update'.format(uid), token, None, post_data)
+        self.assertRequestPassed(response, 'update user info request failed')
+        response_data = Struct(response.json)
+        user = self.userService.get_user(uid, True)
+        self.assertIsNotNone(response_data)
+        self.assertTrue(response_data.status)
+        self.assertEqual(user.fullname, fullname)
+        self.assertEqual(user.address1, address1)
+        self.assertEqual(user.address2, address2)
+        self.assertEqual(user.country, country)
+        self.assertEqual(user.currency, currency)
+
+    def test_user_update_info_as_store_support(self):
+        store_customer_user = "customer@gmail.com"
+        store_owner_user = "user@gmail.com"
+        store_support_user = "support_store@gmail.com"
+        store_info = self.create_store(store_owner_user)
+
+        self.create_user(store_customer_user, [RolesTypes.StoreCustomer.value], False, store_info.data.info.store_code)
+        self.create_user(store_support_user, [RolesTypes.StoreSupport.value], False, store_info.data.info.store_code)
+
+        user_object = self.login_user(store_support_user)
+        token = user_object['idToken']
+        user_object = self.login_user(store_customer_user)
+        uid = user_object['uid']
+        # old_user_data = self.userService.get_user(uid, True)
+        country = self.fake.country_code()
+        currency = self.fake.currency_code()
+        fullname = self.fake.name()
+        address1 = self.fake.address()
+        address2 = self.fake.address()
+        post_data = {
+            'fullname': fullname,
+            'address1': address1,
+            'address2': address2,
+            'currency': currency,
+            'country': country
+        }
+        response = self.request_put('/api/user/{}/update'.format(uid), token, None, post_data)
+        self.assertRequestPassed(response, 'update user info request failed')
+        response_data = Struct(response.json)
+        user = self.userService.get_user(uid, True)
+        self.assertIsNotNone(response_data)
+        self.assertTrue(response_data.status)
+        self.assertEqual(user.fullname, fullname)
+        self.assertEqual(user.address1, address1)
+        self.assertEqual(user.address2, address2)
+        self.assertEqual(user.country, country)
+        self.assertEqual(user.currency, currency)
+
+    def test_user_update_info_as_store_support_invalid(self):
+        store_customer_user = "customer@gmail.com"
+        store_owner_user = "user2@gmail.com"
+        store_support_user = "support_store@gmail.com"
+        store_info = self.create_store(store_owner_user)
+        diff_store_info = self.create_store(store_owner_user)
+
+        self.create_user(store_customer_user, [RolesTypes.StoreCustomer.value], False, diff_store_info.data.info.store_code)
+        self.create_user(store_support_user, [RolesTypes.StoreSupport.value], False, store_info.data.info.store_code)
+
+        user_object = self.login_user(store_support_user)
+        token = user_object['idToken']
+        user_object = self.login_user(store_customer_user)
+        uid = user_object['uid']
+        # old_user_data = self.userService.get_user(uid, True)
+        country = self.fake.country_code()
+        currency = self.fake.currency_code()
+        fullname = self.fake.name()
+        address1 = self.fake.address()
+        address2 = self.fake.address()
+        post_data = {
+            'fullname': fullname,
+            'address1': address1,
+            'address2': address2,
+            'currency': currency,
+            'country': country
+        }
+        response = self.request_put('/api/user/{}/update'.format(uid), token, None, post_data)
+        self.assert500(response, 'update user info passed with invalid user store entered (diff store_code)')
+
+    def test_add_store_staff_by_store_owner(self):
+        store_owner_user = "user@gmail.com"
+        store_staff_user = self.fake.ascii_company_email()
+        store_info = self.create_store(store_owner_user)
+        user_object = self.login_user(store_owner_user)
+        token = user_object['idToken']
+        uid = user_object['uid']
+        post_data = {
+            'email': store_staff_user,
+            'password': self.global_password,
+            'roles': [RolesTypes.StoreSupport.value, RolesTypes.StoreReport.value],
+            'fullname': self.fake.name(),
+
+        }
+        response = self.request_post('/api/user/staff/%s'% store_info.data.info.store_code, token, None, post_data)
+        self.assertRequestPassed(response, 'update store staff user request failed')
+
+        user_object = self.login_user(store_staff_user)
+        uid = user_object['uid']
+        response_data = Struct(response.json)
+        user = self.userService.get_user(uid, True)
+        self.assertIsNotNone(response_data)
+        self.assertTrue(response_data.status)
+        self.assertEqual(user.fullname, post_data['fullname'])
+        self.assertEqual(user.email, post_data['email'])
+
+    def test_add_store_staff_by_store_support_staff(self):
+        store_owner_user = "user@gmail.com"
+        store_support_user = "support_store@gmail.com"
+        store_staff_user = self.fake.ascii_company_email()
+        store_info = self.create_store(store_owner_user)
+        self.create_user(store_support_user, [RolesTypes.StoreSupport.value], False, store_info.data.info.store_code)
+        user_object = self.login_user(store_support_user)
+        token = user_object['idToken']
+        uid = user_object['uid']
+        post_data = {
+            'email': store_staff_user,
+            'password': self.global_password,
+            'roles': [RolesTypes.StoreSupport.value, RolesTypes.StoreReport.value],
+            'fullname': self.fake.name(),
+
+        }
+        response = self.request_post('/api/user/staff/%s'% store_info.data.info.store_code, token, None, post_data)
+        self.assertRequestPassed(response, 'update store staff user request failed')
+
+        user_object = self.login_user(store_staff_user)
+        uid = user_object['uid']
+        response_data = Struct(response.json)
+        user = self.userService.get_user(uid, True)
+        self.assertIsNotNone(response_data)
+        self.assertTrue(response_data.status)
+        self.assertEqual(user.fullname, post_data['fullname'])
+        self.assertEqual(user.email, post_data['email'])
+
+    def test_add_store_staff_by_store_platform_staff(self):
+        store_owner_user = "user@gmail.com"
+        store_staff_user = self.fake.ascii_company_email()
+        store_info = self.create_store(store_owner_user)
+        user_object = self.login_user(self.platform_support_user)
+        token = user_object['idToken']
+        uid = user_object['uid']
+        post_data = {
+            'email': store_staff_user,
+            'password': self.global_password,
+            'roles': [RolesTypes.StoreSupport.value, RolesTypes.StoreReport.value],
+            'fullname': self.fake.name(),
+        }
+        response = self.request_post('/api/user/staff/%s' % store_info.data.info.store_code, token, None, post_data)
+        self.assertRequestPassed(response, 'update store staff user request failed')
+
+        user_object = self.login_user(store_staff_user)
+        uid = user_object['uid']
+        response_data = Struct(response.json)
+        user = self.userService.get_user(uid, True)
+        self.assertIsNotNone(response_data)
+        self.assertTrue(response_data.status)
+        self.assertEqual(user.fullname, post_data['fullname'])
+        self.assertEqual(user.email, post_data['email'])
+
+    def test_add_store_staff_by_store_support_staff_invalid_store(self):
+        store_owner_user = "user@gmail.com"
+        store_owner_user1 = "user1@gmail.com"
+        store_support_user = self.fake.ascii_company_email()
+        store_staff_user = self.fake.ascii_company_email()
+        store_info = self.create_store(store_owner_user)
+        diff_store_info = self.create_store(store_owner_user1)
+        self.create_user(store_support_user, [RolesTypes.StoreSupport.value], False, diff_store_info.data.info.store_code)
+        user_object = self.login_user(store_support_user)
+        token = user_object['idToken']
+        uid = user_object['uid']
+        post_data = {
+            'email': store_staff_user,
+            'password': self.global_password,
+            'roles': [RolesTypes.StoreSupport.value, RolesTypes.StoreReport.value],
+            'fullname': self.fake.name(),
+
+        }
+        response = self.request_post('/api/user/staff/%s'% store_info.data.info.store_code, token, None, post_data)
+        self.assert500(response, 'update store staff user request passed with invalid user store entered (diff store_code)')
+
+
+
 
 
 if __name__ == '__main__':

@@ -10,7 +10,7 @@ from config import settings
 from config.api import app as current_app
 from src.middlewares.check_role import check_role
 from src.middlewares.check_token import check_token_register_firebase_user, check_token_of_user
-from src.schemas.requests.user import CreatePlatformUser, CreateStoreStaffUser, UpdateUserInfo
+from src.schemas.requests.user import UserRolesList, CreateStoreStaffUser, UpdateUserInfo
 from src.services.roles import RolesService
 from src.services.store import StoreService
 from src.services.user import UserService
@@ -96,7 +96,6 @@ def get_store_users(store_code, per_page, page):
     return response_success_paging(result.items, result.total, result.pages, result.has_next, result.has_prev)
 
 
-# Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/passed_tutorial"), methods=["PUT"])
 @check_token_of_user
 def mark_user_passed_tutorial(uid):
@@ -115,46 +114,40 @@ def mark_user_passed_tutorial(uid):
     return response_error("Error on format of the params", {uid: uid})
 
 
-# Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/update"), methods=["PUT"])
 @check_token_of_user
 def update_user_info():
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     try:
-        body = request.json()
-        try:
-            schema = UpdateUserInfo()
-            data = schema.load(body)
-        except ValidationError as e:
-            return response_error("Error on format of the params", {'params': request.json})
-        data = Struct(data)
-        if not valid_currency(data.currency) or not valid_countryCode(data.country):
-            return response_error("Error on format of the params", {'params': request.json})
-        uid = request.uid
-        userService.update_user_info(uid, data)
-        return response_success({})
-    except ValueError:
-        current_app.logger.error("User not found", {uid: uid})
-        return response_error("Error on format of the params", {uid: uid})
-    except UserNotFoundError:
-        return response_error("User not found", {uid: uid})
-    except FirebaseError as err:
-        current_app.logger.error("unknown error", err)
-        return response_error("unknown error", {err: err.cause})
+        schema = UpdateUserInfo()
+        data = schema.load(request.json)
+    except ValidationError as e:
+        return response_error("Error on format of the params", {'params': request.json})
+    data = Struct(data)
+    if not valid_currency(data.currency) or not valid_countryCode(data.country):
+        return response_error("Error on format of the params", {'params': request.json})
+    uid = request.uid
+    userService.update_user_info(uid, data)
+    return response_success({})
 
 
 # Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/update"), methods=["PUT"])
-@check_role([RolesTypes.Support.value])
+@check_role([RolesTypes.Support.value, RolesTypes.StoreSupport.value])
 def update_user_info_by_support_user(uid):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
-    try:
-        body = request.json()
+    if verify_uid(uid):
+        if userService.user_has_role_matched(request.uid, [RolesTypes.StoreSupport.value]):
+            user = userService.get_user(uid, True)
+            requester_user = userService.get_user(request.uid, True)
+            if user.store_code != requester_user.store_code:
+                return response_error("Error support store user not matched with user (not in same store)", {'params': request.json})
+
         try:
             schema = UpdateUserInfo()
-            data = schema.load(body)
+            data = schema.load(request.json)
         except ValidationError as e:
             return response_error("Error on format of the params", {'params': request.json})
         data = Struct(data)
@@ -162,35 +155,31 @@ def update_user_info_by_support_user(uid):
             return response_error("Error on format of the params", {'params': request.json})
         userService.update_user_info(uid, data)
         return response_success({})
-    except ValueError:
-        current_app.logger.error("User not found", {uid: uid})
-        return response_error("Error on format of the params", {uid: uid})
-    except UserNotFoundError:
-        return response_error("User not found", {uid: uid})
-    except FirebaseError as err:
-        current_app.logger.error("unknown error", err)
-        return response_error("unknown error", {err: err.cause})
+    return response_error("Error on format of the params", {'uid': uid})
 
 
-# Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/staff/<store_code>"), methods=["POST"])
-@check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value])
+@check_role([RolesTypes.Support.value,RolesTypes.StoreSupport.value, RolesTypes.StoreOwner.value])
 def create_store_stuff(store_code):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     try:
-        body = request.json()
-        try:
-            schema = CreateStoreStaffUser()
-            data = schema.load(body)
-        except ValidationError as e:
-            return response_error("Error on format of the params", {'params': request.json})
-        data = Struct(data)
-        if roleSerivce.check_roles([data.role]):
-            return response_error("One or more of fields are invalid", request.data)
+        schema = CreateStoreStaffUser()
+        data = schema.load(request.json)
+    except ValidationError as e:
+        return response_error("Error on format of the params", {'params': request.json})
 
-        roles = roleSerivce.get_roles([data.role])
-        return response_success(userService.create_user(data.email, data.password, roles, store_code))
+    if userService.user_has_any_role_matched(request.uid, [RolesTypes.StoreSupport.value, RolesTypes.StoreOwner.value]):
+        requester_user = userService.get_user(request.uid, True)
+        if store_code != requester_user.store_code:
+            return response_error("Error support store user not matched with user (not in same store)", {'params': request.json})
+    data = Struct(data)
+    if not roleSerivce.check_roles(data.roles):
+        return response_error("One or more of fields are invalid", {'params': request.json})
+
+    try:
+        roles = roleSerivce.get_roles(data.roles)
+        return response_success(userService.create_user(data.email, data.fullname, data.password, roles, store_code))
     except ValueError:
         return response_error("Error on format of the params", request.data)
     except UserNotFoundError:
@@ -211,7 +200,7 @@ def sync_platform_user_create(uid):
             body = request.json()
             bodyObj = {"role_names": ', '.join(body['role_names'])}
             try:
-                schema = CreatePlatformUser()
+                schema = UserRolesList()
                 data = schema.load(bodyObj)
             except ValidationError as e:
                 return response_error("Error on format of the params", {'params': request.json})
@@ -250,8 +239,11 @@ def sync_store_user_create(uid, store_code):
 
 
 def sync_user_from_firebase_user(uid, role_names, is_platform_user, store_code=None, new_user=True):
-    response = {'user': json.dumps(userService.get_firebase_user(uid).__dict__['_data'], indent=4), 'extend_info': None}
+    user_object = userService.get_firebase_user(uid).__dict__['_data']
+    response = {'user': json.dumps(user_object, indent=4), 'extend_info': None}
     roles = roleSerivce.get_roles(role_names)
-    userService.sync_firebase_user(uid, roles, is_platform_user, store_code, new_user)
+    email = user_object['email']
+    fullname = user_object['display_name']
+    userService.sync_firebase_user(uid, email, fullname, roles, is_platform_user, store_code, new_user)
     response['extend_info'] = userService.get_user(uid)
     return response

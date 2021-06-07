@@ -20,7 +20,7 @@ def upgrade():
     op.add_column('users', sa.Column('is_pass_tutorial', sa.BOOLEAN(),
                                      nullable=False, default=False))
     op.add_column('users', sa.Column('store_code', sa.String(length=100),
-                                     nullable=True))
+                                     nullable=True, index=True))
     op.add_column('users', sa.Column('country', sa.String(length=3),
                                      nullable=True))
     op.add_column('users', sa.Column('currency', sa.String(length=3),

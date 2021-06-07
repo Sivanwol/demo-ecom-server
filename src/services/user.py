@@ -57,7 +57,7 @@ class UserService:
         query = User.query
         if filter_active:
             query = query.filter_by(is_active=True)
-        users = query.all()
+        users = query.order_by(User.created_at.desc()).all()
         if not return_model:
             return self.user_schema.dump(users, many=True)
         return users
@@ -75,6 +75,14 @@ class UserService:
         if user is None:
             return False
         return True
+
+    def user_has_any_role_matched(self, uid, roles):
+        user = self.get_user(uid, True)
+        return user.has_any_role(roles)
+
+    def user_has_role_matched(self, uid, roles):
+        user = self.get_user(uid, True)
+        return user.has_role(roles)
 
     def check_user_part_store(self, uid, store_code):
         store = Store.query.filter_by(store_code=store_code).first()
@@ -102,7 +110,7 @@ class UserService:
 
     def update_user_info(self, uid, user_data):
         user = self.get_user(uid, True)
-        user.phone = user_data.phone
+        user.fullname = user_data.fullname
         user.address1 = user_data.address1
         user.address2 = user_data.address2
         user.country = user_data.country
@@ -132,13 +140,13 @@ class UserService:
 
     ''' Will create staff user for the store (this will not for customer as he work on different workflow'''
 
-    def create_user(self, email, password, roles, store_code):
+    def create_user(self, email, fullname, password, roles, store_code):
         user_obj = create_firebase_user(email, password)
-        uid = user_obj['localId']
-        self.sync_firebase_user(uid, roles, True, store_code, True)
+        uid = user_obj.uid
+        self.sync_firebase_user(uid, roles, email, fullname, True, store_code, True)
         return self.get_user(uid)
 
-    def query_platform_users(self, filters, per_page, page , include_stores=False):
+    def query_platform_users(self, filters, per_page, page, include_stores=False):
         users = User.query
         if not include_stores:
             users.filter_by(store_code=None)
@@ -197,8 +205,8 @@ class UserService:
             # All requirements have been met: return True
         return True
 
-    def sync_firebase_user(self, uid, roles, is_platform_user, store_code=None, is_new_user=True):
-        user = User(uid, True, is_new_user)
+    def sync_firebase_user(self, uid, roles, email, fullname, is_platform_user, store_code=None, is_new_user=True):
+        user = User(uid, email, fullname, True, is_new_user)
         if not is_platform_user:
             if store_code is not None:
                 user.store_code = store_code
