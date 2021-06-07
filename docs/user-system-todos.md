@@ -6,12 +6,10 @@ Task for the user system
 - [ ] Add Test for route that add user staff by the owner as passed
 - [ ] Add Test for route that add user staff not by the owner as passed
 - [ ] Add Test for route that add user staff by the owner of different store as not passed
+- [ ] Add Test For Get Platform And Stores User list
+- [ ] Add Test For Get Platform User list With correct user
+- [ ] Add Test For Get Platform User list With wrong correct user
+- [ ] Add Test For Get Store Users
 
-### Logic
-- [x] add logic get platform users [ roles: owner, accounts,  support ]
-  - [ ] add test to at
-- [x] add logic get stores users [filter by: store_code, store name] [ order by store_code , user name ]
-  - [ ] add test to at
-- [x] add logic user platform (support only/ or it own user) able to update user info
-  - [ ] add test to at
+
 
