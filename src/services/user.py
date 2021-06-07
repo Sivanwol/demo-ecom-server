@@ -57,7 +57,7 @@ class UserService:
         query = User.query
         if filter_active:
             query = query.filter_by(is_active=True)
-        users = query.all()
+        users = query.order_by(User.created_at.desc()).all()
         if not return_model:
             return self.user_schema.dump(users, many=True)
         return users
@@ -146,7 +146,7 @@ class UserService:
         self.sync_firebase_user(uid, roles, True, store_code, True)
         return self.get_user(uid)
 
-    def query_platform_users(self, filters, per_page, page , include_stores=False):
+    def query_platform_users(self, filters, per_page, page, include_stores=False):
         users = User.query
         if not include_stores:
             users.filter_by(store_code=None)

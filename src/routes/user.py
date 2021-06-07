@@ -171,10 +171,10 @@ def create_store_stuff(store_code):
         except ValidationError as e:
             return response_error("Error on format of the params", {'params': request.json})
         data = Struct(data)
-        if roleSerivce.check_roles([data.role]):
+        if roleSerivce.check_roles(data.roles):
             return response_error("One or more of fields are invalid", request.data)
 
-        roles = roleSerivce.get_roles([data.role])
+        roles = roleSerivce.get_roles(data.roles)
         return response_success(userService.create_user(data.email, data.password, roles, store_code))
     except ValueError:
         return response_error("Error on format of the params", request.data)

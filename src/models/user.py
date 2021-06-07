@@ -15,9 +15,10 @@ class User(TimestampMixin, db.Model):
     id = db.Column(Integer, primary_key=True)
     uid = db.Column(String(100), nullable=False)
     avatar_id = db.Column(Integer, nullable=True)
+    email = db.Column(String(100), nullable=False, unique=True, index=True)
     phone = db.Column(String(100), nullable=True)
-    store_code = db.Column(String(100), nullable=True)
-    fullname = db.Column(String(255), nullable=True)
+    store_code = db.Column(String(100), nullable=True, index=True)
+    fullname = db.Column(String(255), nullable=False, index=True)
     address1 = db.Column(String(255), nullable=True)
     address2 = db.Column(String(255), nullable=True)
     is_active = db.Column(Boolean, nullable=False, default=False)
@@ -28,11 +29,12 @@ class User(TimestampMixin, db.Model):
     # Define the relationship to Role via UserRoles
     roles = db.relationship('Roles', secondary='user_roles')
 
-    def __init__(self, uid, is_active, is_pass_tutorial, fullname=None, country=None, currency=None, store_code=None, avatar_id=0, phone='', address1='',
+    def __init__(self, uid, email ,is_active, is_pass_tutorial, fullname=None, country=None, currency=None, store_code=None, avatar_id=0, phone='', address1='',
                  address2=''):
         self.uid = uid
         self.fullname = fullname
         self.avatar_id = avatar_id
+        self.email = email
         self.phone = phone
         self.address1 = address1
         self.address2 = address2
@@ -43,12 +45,13 @@ class User(TimestampMixin, db.Model):
         self.store_code = store_code
 
     def __repr__(self):
-        return "<User(id='{id}', uid='{uid}', fullname='{fullname}', is_active='{is_active}' is_pass_tutorial={is_pass_tutorial} store_code='{store_code})>".format(
+        return "<User(id='{id}', uid='{uid}', email='{email}', fullname='{fullname}', is_active='{is_active}' is_pass_tutorial={is_pass_tutorial} store_code='{store_code})>".format(
             id=self.id,
             uid=self.uid,
             fullname=self.fullname,
             is_active=self.is_active,
             is_pass_tutorial=self.is_pass_tutorial,
+            email=self.email,
             store_code=self.store_code)
 
     def to_dict(self):

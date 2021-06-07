@@ -291,15 +291,20 @@ class FlaskTestCase(BaseTestCase):
         response = self.request_put('/api/user/{}/update'.format(uid), token, None, post_data)
         self.assert500(response, 'update user info passed with invalid user store entered (diff store_code)')
 
-    def test_add_store_staff_by_owner(self):
+    def test_add_store_staff_by_store_owner(self):
         store_owner_user = "user@gmail.com"
         store_staff_user = "staff@gmail.com"
         store_info = self.create_store(store_owner_user)
         user_object = self.login_user(store_owner_user)
         token = user_object['idToken']
-        self.create_firebase_store_user(store_staff_user)
-        user_object = self.login_user(store_staff_user)
         uid = user_object['uid']
+        post_data = {
+            'email': 'support_staff@user.com',
+            'password': self.global_password,
+            'roles': [RolesTypes.StoreSupport.value, RolesTypes.StoreReport.value],
+            'fullname': self.fake.name(),
+
+        }
         response = self.request_put('/api/user/update', token, None, post_data)
         self.assertRequestPassed(response, 'update user info request failed')
 

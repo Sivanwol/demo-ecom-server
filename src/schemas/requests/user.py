@@ -8,7 +8,9 @@ class UserRolesList(Schema):
 
 
 class CreateStoreStaffUser(Schema):
-    role = fields.Str(required=True, validate=validate.Length(min=3, max=100, error='field name not valid'))
+    roles = fields.List(
+        fields.Str(required=True, validate=validate.Length(min=3, max=100, error='field role not valid'))
+    )
     email = fields.Email(required=True)
     fullname = fields.Str(required=True, validate=validate.Length(min=5, max=255, error='field name not valid'))
     password = fields.Str(required=True, validate=validate.Length(min=8, max=100, error='field name not valid'))
