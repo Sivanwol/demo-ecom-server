@@ -1,13 +1,15 @@
 import firebase_admin
 from firebase_admin import auth
+from sqlalchemy import or_
 
 from config.api import cache
 from config.database import db
 from src.models import User
+from src.models.stores import Store
 from src.schemas.user_schema import UserSchema
+from src.utils.firebase_utils import create_firebase_user
 from src.utils.responses import response_error
 from src.utils.singleton import singleton
-
 
 
 @singleton
@@ -74,19 +76,39 @@ class UserService:
             return False
         return True
 
-    def check_user_auth(self, request):
+    def check_user_part_store(self, uid, store_code):
+        store = Store.query.filter_by(store_code=store_code).first()
+        user = self.get_user(uid, True)
+        if store is None or user is None:
+            return False
+        if store.owner_id == uid or user.store_code == store_code:
+            return True
+        return False
+
+    def check_user_auth(self, request, existed_on_system):
         if not request.headers.get('authorization'):
             return response_error('No token provided', None, 400)
         try:
             token = request.headers['authorization'].replace('Bearer ', '')
             firebase_obj = auth.verify_id_token(token)
-            uid = firebase_obj["uid"]
-            user_exist = self.user_exists(uid)
-            if not user_exist:
-                return response_error('user not active', None, 400)
+            if existed_on_system:
+                uid = firebase_obj["uid"]
+                user_exist = self.user_exists(uid)
+                if not user_exist:
+                    return response_error('user not active', None, 400)
             request.uid = firebase_obj["uid"]
         except:
             return response_error('Invalid token provided', None, 400)
+
+    def update_user_info(self, uid, user_data):
+        user = self.get_user(uid, True)
+        user.phone = user_data.phone
+        user.address1 = user_data.address1
+        user.address2 = user_data.address2
+        user.country = user_data.country
+        user.currency = user_data.currency
+        db.session.merge(user)
+        db.session.commit()
 
     def update_user_store_owner(self, uid, store_code):
         user = self.get_user(uid, True)
@@ -103,10 +125,37 @@ class UserService:
     def toggle_freeze_user(self, uid):
         user = self.get_user(uid, True)
         user.is_active = not user.is_active
-        firebase_admin.auth.update_user(uid,  disabled=not user.is_active)
+        firebase_admin.auth.update_user(uid, disabled=not user.is_active)
         db.session.merge(user)
         db.session.commit()
         auth.revoke_refresh_tokens(uid)
+
+    ''' Will create staff user for the store (this will not for customer as he work on different workflow'''
+
+    def create_user(self, email, password, roles, store_code):
+        user_obj = create_firebase_user(email, password)
+        uid = user_obj['localId']
+        self.sync_firebase_user(uid, roles, True, store_code, True)
+        return self.get_user(uid)
+
+    def query_platform_users(self, filters, per_page, page , include_stores=False):
+        users = User.query
+        if not include_stores:
+            users.filter_by(store_code=None)
+
+        names = filters['names']
+        if len(names) > 0:
+            users.filter(or_(User.fullname.like('%{}%'.format(v)) for v in names))
+        users.order_by(User.store_code.desc(), User.fullname.desc())
+        return users.paginate(page, per_page, False)
+
+    def query_store_users(self, store_code, filters, per_page, page):
+        users = User.query.filter_by(store_code=store_code)
+        names = filters['names']
+        if len(names) > 0:
+            users.filter(or_(User.fullname.like('%{}%'.format(v)) for v in names))
+        users.order_by(User.fullname.desc())
+        return users.paginate(page, per_page, False)
 
     def check_user_roles(self, uid, *requirements_roles):
         """ Return True if the user has all of the specified roles. Return False otherwise.
@@ -153,6 +202,7 @@ class UserService:
         if not is_platform_user:
             if store_code is not None:
                 user.store_code = store_code
+            user.is_pass_tutorial = False
             if not is_new_user:
                 user.is_pass_tutorial = True
         user.add_user_roles(roles)

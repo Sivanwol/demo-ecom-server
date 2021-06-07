@@ -4,16 +4,32 @@ from flask import request
 
 from src.services.user import UserService
 from src.utils.common_methods import verify_response
+
 userService = UserService()
 
 
-def check_token(f):
+def check_token_of_user(f):
     @wraps(f)
     def decorator(*args, **kwargs):
         response = verify_response()
         if response is None:
-            return userService.check_user_auth(request)
-        else:
-            return response
+            result =  userService.check_user_auth(request, True)
+            if result is not None:
+                return result
+
         return f(*args, **kwargs)
-    return check_token
+
+    return decorator
+
+
+def check_token_register_firebase_user(f):
+    @wraps(f)
+    def decorator(*args, **kwargs):
+        response = verify_response()
+        if response is None:
+            result =  userService.check_user_auth(request, False)
+            if result is not None:
+                return result
+        return f(*args, **kwargs)
+
+    return decorator

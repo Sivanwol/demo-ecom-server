@@ -4,9 +4,10 @@ from sqlalchemy import Integer, String, Boolean
 
 from config.database import db
 from src.models import User
+from src.models.mixin.TimestampMixin import TimestampMixin
 
 
-class Store(db.Model):
+class Store(TimestampMixin, db.Model):
     """
     This is a base user Model
     """
@@ -21,8 +22,6 @@ class Store(db.Model):
     default_currency_code = db.Column(String(3), nullable=False)
     # Note only owner able set this on or off
     is_maintenance = db.Column(Boolean, nullable=False, default=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now())
-    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now(), onupdate=datetime.now())
 
     owner = db.relationship(User, uselist=False)
 

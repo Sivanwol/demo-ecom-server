@@ -20,6 +20,7 @@ def upgrade():
     roles = op.create_table('roles',
                             sa.Column('id', sa.Integer(), nullable=False),
                             sa.Column('name', sa.String(length=255), unique=True, index=True, nullable=False),
+                            sa.Column('is_global', sa.Boolean(), default=False),
                             sa.Column('is_active', sa.Boolean(), default=True),
                             sa.PrimaryKeyConstraint('id'))
     # ### end Alembic commands ###

@@ -8,6 +8,9 @@ class RolesService:
     def get_all_roles(self):
         return Roles.query.all()
 
+    def list_roles(self, is_store_owner=True):
+        return Roles.query.filter(Roles.is_global != is_store_owner).all()
+
     def get_roles(self, roles_names=None):
         if roles_names is None:
             roles_names = []

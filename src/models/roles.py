@@ -11,17 +11,18 @@ class Roles(db.Model):
 
     id = db.Column(Integer, primary_key=True)
     name = db.Column(String(100), nullable=False)
-    is_active = db.Column(Boolean, nullable=False)
+    is_global = db.Column(Boolean, nullable=False, default=False)
+    is_active = db.Column(Boolean, nullable=False, default=True)
     # Define the relationship to Role via UserRoles
     user = db.relationship('User', secondary='user_roles', viewonly=True)
 
-    def __init__(self, name, is_active):
+    def __init__(self, name, is_global=False, is_active=True):
         self.name = name
         self.is_active = is_active
+        self.is_global = is_global
 
     def __repr__(self):
-        return "<Role(id='{id}', name='{name} , is_active={is_active}')>".format(id=self.id, name=self.name,
-                                                                                 is_active=self.is_active)
+        return "<Role(id='{}', name='{} , is_active={}')>".format(id, self.name, self.is_global, self.is_active)
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}

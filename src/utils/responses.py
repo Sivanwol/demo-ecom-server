@@ -22,3 +22,15 @@ def response_success(data=None):
     if data is None:
         data = {}
     return generic_response(200, data)
+
+
+def response_success_paging(items, total, pages, has_next, has_prev):
+    return response_success({
+        "meta": {
+            "next": has_next,
+            "prev": has_prev,
+            "pages": pages,
+            "total_items": total,
+        },
+        "items": items
+    })
