@@ -265,7 +265,6 @@ class FlaskTestCase(BaseTestCase):
 
     def test_user_update_info_as_store_support_invalid(self):
         store_customer_user = "customer@gmail.com"
-        store_owner_user = "user@gmail.com"
         store_owner_user = "user2@gmail.com"
         store_support_user = "support_store@gmail.com"
         store_info = self.create_store(store_owner_user)
@@ -361,7 +360,7 @@ class FlaskTestCase(BaseTestCase):
             'roles': [RolesTypes.StoreSupport.value, RolesTypes.StoreReport.value],
             'fullname': self.fake.name(),
         }
-        response = self.request_post('/api/user/staff/%s'% store_info.data.info.store_code, token, None, post_data)
+        response = self.request_post('/api/user/staff/%s' % store_info.data.info.store_code, token, None, post_data)
         self.assertRequestPassed(response, 'update store staff user request failed')
 
         user_object = self.login_user(store_staff_user)
@@ -373,6 +372,26 @@ class FlaskTestCase(BaseTestCase):
         self.assertEqual(user.fullname, post_data['fullname'])
         self.assertEqual(user.email, post_data['email'])
 
+    def test_add_store_staff_by_store_support_staff_invalid_store(self):
+        store_owner_user = "user@gmail.com"
+        store_owner_user1 = "user1@gmail.com"
+        store_support_user = self.fake.ascii_company_email()
+        store_staff_user = self.fake.ascii_company_email()
+        store_info = self.create_store(store_owner_user)
+        diff_store_info = self.create_store(store_owner_user1)
+        self.create_user(store_support_user, [RolesTypes.StoreSupport.value], False, diff_store_info.data.info.store_code)
+        user_object = self.login_user(store_support_user)
+        token = user_object['idToken']
+        uid = user_object['uid']
+        post_data = {
+            'email': store_staff_user,
+            'password': self.global_password,
+            'roles': [RolesTypes.StoreSupport.value, RolesTypes.StoreReport.value],
+            'fullname': self.fake.name(),
+
+        }
+        response = self.request_post('/api/user/staff/%s'% store_info.data.info.store_code, token, None, post_data)
+        self.assert500(response, 'update store staff user request passed with invalid user store entered (diff store_code)')
 
 
 

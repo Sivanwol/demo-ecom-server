@@ -168,6 +168,11 @@ def create_store_stuff(store_code):
         data = schema.load(request.json)
     except ValidationError as e:
         return response_error("Error on format of the params", {'params': request.json})
+
+    if userService.user_has_any_role_matched(request.uid, [RolesTypes.StoreSupport.value, RolesTypes.StoreOwner.value]):
+        requester_user = userService.get_user(request.uid, True)
+        if store_code != requester_user.store_code:
+            return response_error("Error support store user not matched with user (not in same store)", {'params': request.json})
     data = Struct(data)
     if not roleSerivce.check_roles(data.roles):
         return response_error("One or more of fields are invalid", {'params': request.json})
