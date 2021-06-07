@@ -159,7 +159,7 @@ def update_user_info_by_support_user(uid):
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/staff/<store_code>"), methods=["POST"])
-@check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value])
+@check_role([RolesTypes.Support.value,RolesTypes.StoreSupport.value, RolesTypes.StoreOwner.value])
 def create_store_stuff(store_code):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)

@@ -10,6 +10,7 @@ Task for the user system
 
 - [x] Add Test for route that add user staff by the owner as passed
 - [ ] Add Test for route that add user staff not by the owner as passed
+- [ ] Add Test for route that add user staff bt platform support
 - [ ] Add Test for route that add user staff by the owner of different store as not passed
 - [ ] Add Test for route that add user staff by the owner as passed
 - [ ] Add Test for route that add user staff not by the owner as passed
@@ -18,7 +19,7 @@ Task for the user system
 ### Tests get user queries Route
 
 
-- [ ] create logic for getting user by platform and store via filters [filters: store_code, platform , emails , full name , country] and order by  [ create_at , full name , email,  id, platform ,  stores ]
+- [ ] create logic for getting user by platform and store via filters [ filters: store_code, platform , emails , full name , country] and order by  [ create_at , full name , email,  id, platform ,  stores ]
     - [ ] Add Test For Get Platform And Stores User list
     - [ ] Add Test For Get Platform User list With correct user
     - [ ] Add Test For Get Platform User list With wrong correct user
