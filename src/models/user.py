@@ -29,7 +29,7 @@ class User(TimestampMixin, db.Model):
     # Define the relationship to Role via UserRoles
     roles = db.relationship('Roles', secondary='user_roles')
 
-    def __init__(self, uid, email ,is_active, is_pass_tutorial, fullname=None, country=None, currency=None, store_code=None, avatar_id=0, phone='', address1='',
+    def __init__(self, uid, email, fullname, is_active, is_pass_tutorial, country=None, currency=None, store_code=None, avatar_id=0, phone='', address1='',
                  address2=''):
         self.uid = uid
         self.fullname = fullname

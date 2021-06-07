@@ -15,6 +15,8 @@ class UserSchema(SQLAlchemySchema):
 
     id = auto_field()
     uid = auto_field()
+    email = auto_field()
+    fullname = auto_field()
     address1 = auto_field()
     address2 = auto_field()
     phone = auto_field()

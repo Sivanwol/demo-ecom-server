@@ -74,8 +74,8 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.user_data.uid, user.uid)
             self.assertEqual(response_data.data.user_data.is_pass_tutorial, user.is_pass_tutorial)
             self.assertEqual(response_data.data.user_data.id, user.id)
-            self.assertEqual(response_data.data.user_data.email, self.platform_owner_user)
-            self.assertEqual(response_data.data.user_data.fullname, display_name)
+            self.assertEqual(response_data.data.user_data.email, user.email)
+            self.assertEqual(response_data.data.user_data.fullname, user.fullname)
             self.assertEqual(response_data.data.user_data.roles[0].id, user.roles[0].id)
 
     def test_check_role_not_match(self):

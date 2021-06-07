@@ -206,15 +206,13 @@ class UserService:
         return True
 
     def sync_firebase_user(self, uid, email, fullname, roles, is_platform_user, store_code=None, is_new_user=True):
-        user = User(uid, True, is_new_user)
+        user = User(uid, email, fullname, True, is_new_user)
         if not is_platform_user:
             if store_code is not None:
                 user.store_code = store_code
             user.is_pass_tutorial = False
             if not is_new_user:
                 user.is_pass_tutorial = True
-        user.email = email
-        user.fullname = fullname
         user.add_user_roles(roles)
         db.session.add(user)
         db.session.commit()
