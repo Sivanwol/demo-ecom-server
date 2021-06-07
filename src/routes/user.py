@@ -158,24 +158,23 @@ def update_user_info_by_support_user(uid):
     return response_error("Error on format of the params", {'uid': uid})
 
 
-# Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/staff/<store_code>"), methods=["POST"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value])
 def create_store_stuff(store_code):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     try:
-        try:
-            schema = CreateStoreStaffUser()
-            data = schema.load(request.json)
-        except ValidationError as e:
-            return response_error("Error on format of the params", {'params': request.json})
-        data = Struct(data)
-        if roleSerivce.check_roles(data.roles):
-            return response_error("One or more of fields are invalid", request.data)
+        schema = CreateStoreStaffUser()
+        data = schema.load(request.json)
+    except ValidationError as e:
+        return response_error("Error on format of the params", {'params': request.json})
+    data = Struct(data)
+    if not roleSerivce.check_roles(data.roles):
+        return response_error("One or more of fields are invalid", {'params': request.json})
 
+    try:
         roles = roleSerivce.get_roles(data.roles)
-        return response_success(userService.create_user(data.email, data.password, roles, store_code))
+        return response_success(userService.create_user(data.email, data.fullname, data.password, roles, store_code))
     except ValueError:
         return response_error("Error on format of the params", request.data)
     except UserNotFoundError:

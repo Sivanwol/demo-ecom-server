@@ -22,8 +22,6 @@ def check_role(*role_names):
                         return res
                     uid = request.uid
 
-                    # TODO: User must be logged in with a confirmed email address
-
                     if not userService.check_user_roles(uid, role_names):
                         raise UnknownRolesOrNotMatched(role_names)
                 except Exception as e:

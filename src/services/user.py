@@ -140,10 +140,10 @@ class UserService:
 
     ''' Will create staff user for the store (this will not for customer as he work on different workflow'''
 
-    def create_user(self, email, password, roles, store_code):
+    def create_user(self, email, fullname, password, roles, store_code):
         user_obj = create_firebase_user(email, password)
-        uid = user_obj['localId']
-        self.sync_firebase_user(uid, roles, True, store_code, True)
+        uid = user_obj.uid
+        self.sync_firebase_user(uid, roles, email, fullname, True, store_code, True)
         return self.get_user(uid)
 
     def query_platform_users(self, filters, per_page, page, include_stores=False):
@@ -205,7 +205,7 @@ class UserService:
             # All requirements have been met: return True
         return True
 
-    def sync_firebase_user(self, uid, email, fullname, roles, is_platform_user, store_code=None, is_new_user=True):
+    def sync_firebase_user(self, uid, roles, email, fullname, is_platform_user, store_code=None, is_new_user=True):
         user = User(uid, email, fullname, True, is_new_user)
         if not is_platform_user:
             if store_code is not None:

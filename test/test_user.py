@@ -296,20 +296,30 @@ class FlaskTestCase(BaseTestCase):
 
     def test_add_store_staff_by_store_owner(self):
         store_owner_user = "user@gmail.com"
-        store_staff_user = "staff@gmail.com"
+        store_staff_user = self.fake.ascii_company_email()
         store_info = self.create_store(store_owner_user)
         user_object = self.login_user(store_owner_user)
         token = user_object['idToken']
         uid = user_object['uid']
         post_data = {
-            'email': 'support_staff@user.com',
+            'email': store_staff_user,
             'password': self.global_password,
             'roles': [RolesTypes.StoreSupport.value, RolesTypes.StoreReport.value],
             'fullname': self.fake.name(),
 
         }
-        response = self.request_put('/api/user/update', token, None, post_data)
-        self.assertRequestPassed(response, 'update user info request failed')
+        response = self.request_post('/api/user/staff/%s'% store_info.data.info.store_code, token, None, post_data)
+        self.assertRequestPassed(response, 'update store staff user request failed')
+
+        user_object = self.login_user(store_staff_user)
+        uid = user_object['uid']
+        response_data = Struct(response.json)
+        user = self.userService.get_user(uid, True)
+        self.assertIsNotNone(response_data)
+        self.assertTrue(response_data.status)
+        self.assertEqual(user.fullname, post_data['fullname'])
+        self.assertEqual(user.email, post_data['email'])
+
 
 
 

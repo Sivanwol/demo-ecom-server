@@ -139,7 +139,7 @@ class StoreService:
 
     def create_store(self, owner_id, store_object):
         if not valid_currency(store_object['currency_code']):
-            raise ParamsNotMatchCreateStore(owner_id, store_object['name'], store_object['currency_code'], None, store_object['description'])
+            raise ParamsNotMatchCreateStore(owner_id, store_object['name'], store_object['currency_code'], store_object['description'])
         self.clear_stores_cache()
         store_code = "%s" % uuid.uuid4()
         store = Store(store_code, owner_id, store_object['name'], store_object['currency_code'], None, store_object['description'])
