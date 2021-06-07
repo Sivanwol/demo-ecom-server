@@ -11,7 +11,7 @@ Task for the user system
 - [x] Add Test for route that add user staff by the owner as passed
 - [x] Add Test for route that add user staff not by the owner as passed
 - [x] Add Test for route that add user staff bt platform support
-- [ ] Add Test for route that add user staff by the owner of different store as not passed
+- [x] Add Test for route that add user staff by the owner of different store as not passed
 
 ### Tests get user queries Route
 
