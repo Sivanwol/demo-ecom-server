@@ -131,7 +131,7 @@ class BaseTestCase(TestCase):
         user = self.userService.get_user(uid, True)
         self.assertIsNone(user.store_code)
         store_name = self.fake.company()
-        currency_code = self.fake.currency_code()
+        currency_code = 'USD'
         post_data = {
             'name': store_name,
             'description': 'store description',
