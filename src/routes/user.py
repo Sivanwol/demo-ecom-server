@@ -144,6 +144,32 @@ def update_user_info():
         current_app.logger.error("unknown error", err)
         return response_error("unknown error", {err: err.cause})
 
+# Todo: Add test for this route
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/update"), methods=["PUT"])
+@check_role([RolesTypes.Support.value])
+def update_user_info(uid):
+    if not request.is_json:
+        return response_error("Request Data must be in json format", request.data)
+    try:
+        body = request.json()
+        try:
+            schema = UpdateUserInfo()
+            data = schema.load(body)
+        except ValidationError as e:
+            return response_error("Error on format of the params", {'params': request.json})
+        data = Struct(data)
+        if not valid_currency(data.currency) or not valid_countryCode(data.country):
+            return response_error("Error on format of the params", {'params': request.json})
+        userService.update_user_info(uid, data)
+        return response_success({})
+    except ValueError:
+        current_app.logger.error("User not found", {uid: uid})
+        return response_error("Error on format of the params", {uid: uid})
+    except UserNotFoundError:
+        return response_error("User not found", {uid: uid})
+    except FirebaseError as err:
+        current_app.logger.error("unknown error", err)
+        return response_error("unknown error", {err: err.cause})
 
 # Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/staff/<store_code>"), methods=["POST"])
