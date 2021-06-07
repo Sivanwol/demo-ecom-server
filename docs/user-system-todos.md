@@ -16,7 +16,7 @@ Task for the user system
 ### Tests get user queries Route
 
 
-- [ ] create logic for getting user by platform and store via filters [ filters: store_code, platform , emails , full name , country] and order by  [ create_at , full name , email,  id, platform ,  stores ]
+- [x] create logic for getting user by platform and store via filters [ filters: store_code,  emails , full name , country] and order by  [ create_at , full name , email,  id,   stores ]
     - [ ] Add Test For Get Platform And Stores User list
     - [ ] Add Test For Get Platform User list With correct user
     - [ ] Add Test For Get Platform User list With wrong correct user

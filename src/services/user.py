@@ -1,6 +1,7 @@
 import firebase_admin
 from firebase_admin import auth
 from sqlalchemy import or_
+from sqlalchemy.testing import in_
 
 from config.api import cache
 from config.database import db
@@ -53,11 +54,29 @@ class UserService:
         return user
 
     @cache.memoize(50)
-    def get_users(self, filter_active=False, return_model=False):
+    def get_users(self, filters, orders, is_active=True, return_model=False):
         query = User.query
-        if filter_active:
+        if not filters['platform']:
+            if len(filters['stores']) > 0:
+                query.filter(User.store_code.in_(code for code in filters['stores']))
+        else:
+            query.filter_by(store_code=None)
+        if len(filters['emails']) > 0:
+            query.filter(User.email.lower().in_(email.lower() for email in filters['emails']))
+        if len(filters['names']) > 0:
+            query.filter(or_(User.fullname.lower().like('%{}%'.format(v.lower())) for v in filters['names']))
+        if len(filters['countries']) > 0:
+            query.filter(User.country.in_(v for v in filters['countries']))
+        if is_active:
             query = query.filter_by(is_active=True)
-        users = query.order_by(User.created_at.desc()).all()
+        if len(orders) <= 0:
+            query = query.order_by(User.created_at.desc()).all()
+        else:
+            for order in orders:
+                if order['direction'].lower() == 'desc':
+                    query.order_by(User.c[order['field']].desc())
+                query.order_by(User.c[order['field']].asc())
+        users = query.all()
         if not return_model:
             return self.user_schema.dump(users, many=True)
         return users
@@ -161,7 +180,7 @@ class UserService:
         users = User.query.filter_by(store_code=store_code)
         names = filters['names']
         if len(names) > 0:
-            users.filter(or_(User.fullname.like('%{}%'.format(v)) for v in names))
+            users.filter(or_(User.fullname.lower().like('%{}%'.format(v.lower()) for v in names)))
         users.order_by(User.fullname.desc())
         return users.paginate(page, per_page, False)
 
