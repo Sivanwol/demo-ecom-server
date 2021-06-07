@@ -8,7 +8,7 @@ Task for the user system
 
 ### Tests Staff Route
 
-- [ ] Add Test for route that add user staff by the owner as passed
+- [x] Add Test for route that add user staff by the owner as passed
 - [ ] Add Test for route that add user staff not by the owner as passed
 - [ ] Add Test for route that add user staff by the owner of different store as not passed
 - [ ] Add Test for route that add user staff by the owner as passed
