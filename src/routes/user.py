@@ -69,6 +69,7 @@ def user_toggle_active(uid):
             return response_error("unknown error", {err: err.cause})
     return response_error("Error on format of the params", {uid: uid})
 
+
 # Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/platform/list/<per_page>/<page>"), methods=["GET"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value, RolesTypes.Support.value])
@@ -78,6 +79,7 @@ def get_platform_users(per_page, page):
     filter = {'names': request.args.getlist('filter_fullname')}
     result = userService.query_platform_users(filter, per_page, page)
     return response_success_paging(result.items, result.total, result.pages, result.has_next, result.has_prev)
+
 
 # Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/store/<store_code>/list/<per_page>/<page>"),
@@ -95,14 +97,11 @@ def get_store_users(store_code, per_page, page):
 
 
 # Todo: Add test for this route
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/passed_tutorial/<uid>"), methods=["PUT"])
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/passed_tutorial"), methods=["PUT"])
 @check_token_of_user
 def mark_user_passed_tutorial(uid):
     if verify_uid(uid):
         try:
-            user = userService.get_user(uid)
-            if not user or user.is_pass_tutorial:
-                return response_error("User not found", {uid: uid})
             userService.mark_user_passed_tutorial(uid)
             return response_success({})
         except ValueError:
@@ -144,10 +143,11 @@ def update_user_info():
         current_app.logger.error("unknown error", err)
         return response_error("unknown error", {err: err.cause})
 
+
 # Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/update"), methods=["PUT"])
 @check_role([RolesTypes.Support.value])
-def update_user_info(uid):
+def update_user_info_by_support_user(uid):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     try:
@@ -170,6 +170,7 @@ def update_user_info(uid):
     except FirebaseError as err:
         current_app.logger.error("unknown error", err)
         return response_error("unknown error", {err: err.cause})
+
 
 # Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/staff/<store_code>"), methods=["POST"])
@@ -216,7 +217,7 @@ def sync_platform_user_create(uid):
                 return response_error("Error on format of the params", {'params': request.json})
             if roleSerivce.check_roles(data.role_names):
                 return response_error("One or more of fields are invalid", request.data)
-            return response_success(get_user_object(uid, data.role_names, True))
+            return response_success(sync_user_from_firebase_user(uid, data.role_names, True, False))
         except ValueError:
             return response_error("Error on format of the params", {uid: uid})
         except UserNotFoundError:
@@ -236,7 +237,7 @@ def sync_store_user_create(uid, store_code):
             has_store = storeService.store_exists(uid, store_code)
             if has_store is None:
                 response_error("error store not existed", {uid: uid, store_code: store_code})
-            return response_success(get_user_object(uid, [RolesTypes.StoreCustomer.value], False, store_code))
+            return response_success(sync_user_from_firebase_user(uid, [RolesTypes.StoreCustomer.value], False, store_code))
         except ValueError:
             return response_error("Error on format of the params", {uid: uid})
         except UserNotFoundError:
@@ -248,9 +249,9 @@ def sync_store_user_create(uid, store_code):
     return response_error("Error user exist", {uid: uid})
 
 
-def get_user_object(uid, role_names, is_platform_user, store_code=None):
+def sync_user_from_firebase_user(uid, role_names, is_platform_user, store_code=None, new_user=True):
     response = {'user': json.dumps(userService.get_firebase_user(uid).__dict__['_data'], indent=4), 'extend_info': None}
     roles = roleSerivce.get_roles(role_names)
-    userService.sync_firebase_user(uid, roles, is_platform_user, store_code)
+    userService.sync_firebase_user(uid, roles, is_platform_user, store_code, new_user)
     response['extend_info'] = userService.get_user(uid)
     return response

@@ -202,6 +202,7 @@ class UserService:
         if not is_platform_user:
             if store_code is not None:
                 user.store_code = store_code
+            user.is_pass_tutorial = False
             if not is_new_user:
                 user.is_pass_tutorial = True
         user.add_user_roles(roles)

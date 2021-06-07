@@ -1,7 +1,7 @@
 # Tasks for user system
 Task for the user system
 ### Tests
-- [ ] Add Test for route that mark tutrial as passed
+- [x] Add Test for route that mark tutrial as passed
 - [ ] Add Test for route that update user info as passed
 - [ ] Add Test for route that add user staff by the owner as passed
 - [ ] Add Test for route that add user staff not by the owner as passed

@@ -115,6 +115,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.extend_info.store_code, store_info.data.info.store_code)
             self.assertEqual(response_data.data.extend_info.store_code, user.store_code)
             self.assertEqual(response_data.data.extend_info.uid, uid)
+            self.assertFalse(user.is_pass_tutorial)
 
     def test_service_user_part_of_store_valid(self):
         new_user = "user@gmail.com"
@@ -140,6 +141,23 @@ class FlaskTestCase(BaseTestCase):
         user_object = self.login_user(user_not_active)
         uid = user_object['uid']
         self.assertFalse(self.userService.check_user_part_store(uid, store_info.data.info.store_code))
+
+    def test_mark_user_finish_tutrial(self):
+        store_owner_user = "user@gmail.com"
+        store_customer_user = "customer@gmail.com"
+        store_info = self.create_store(store_owner_user)
+        self.create_firebase_store_user(store_customer_user)
+        user_object = self.login_user(store_customer_user)
+        uid = user_object['uid']
+        token = user_object['idToken']
+        response = self.request_post('/api/user/{}/bind/{}'.format(uid, store_info.data.info.store_code), token)
+        self.assert200(response, 'bind user to store request failed')
+        user = self.userService.get_user(uid, True)
+        self.assertFalse(user.is_pass_tutorial)
+        response = self.request_put('/api/user/{}/passed_tutorial'.format(uid), token)
+        self.assert200(response, 'mark user pass tutrial as passed request failed')
+        user = self.userService.get_user(uid, True)
+        self.assertTrue(user.is_pass_tutorial)
 
 
 if __name__ == '__main__':
