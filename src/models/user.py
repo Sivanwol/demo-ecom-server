@@ -54,6 +54,22 @@ class User(TimestampMixin, db.Model):
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
+    def has_any_role(self, roles):
+        match_roles = 0
+        for role in roles:
+            for user_role in self.roles:
+                if role == user_role.name:
+                    match_roles = 1 + match_roles
+        return match_roles != 0
+
+    def has_role(self, roles):
+        match_roles = 0
+        for role in roles:
+            for user_role in self.roles:
+                if role == user_role.name:
+                    match_roles = 1 + match_roles
+        return match_roles == len(roles)
+
     def add_user_roles(self, roles):
         for role in roles:
             self.roles.append(role)

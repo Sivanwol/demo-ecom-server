@@ -76,6 +76,14 @@ class UserService:
             return False
         return True
 
+    def user_has_any_role_matched(self, uid, roles):
+        user = self.get_user(uid, True)
+        return user.has_any_role(roles)
+
+    def user_has_role_matched(self, uid, roles):
+        user = self.get_user(uid, True)
+        return user.has_role(roles)
+
     def check_user_part_store(self, uid, store_code):
         store = Store.query.filter_by(store_code=store_code).first()
         user = self.get_user(uid, True)

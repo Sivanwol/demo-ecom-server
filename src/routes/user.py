@@ -96,7 +96,6 @@ def get_store_users(store_code, per_page, page):
     return response_success_paging(result.items, result.total, result.pages, result.has_next, result.has_prev)
 
 
-# Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/passed_tutorial"), methods=["PUT"])
 @check_token_of_user
 def mark_user_passed_tutorial(uid):
@@ -115,7 +114,6 @@ def mark_user_passed_tutorial(uid):
     return response_error("Error on format of the params", {uid: uid})
 
 
-# Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/update"), methods=["PUT"])
 @check_token_of_user
 def update_user_info():
@@ -136,11 +134,17 @@ def update_user_info():
 
 # Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/update"), methods=["PUT"])
-@check_role([RolesTypes.Support.value])
+@check_role([RolesTypes.Support.value, RolesTypes.StoreSupport.value])
 def update_user_info_by_support_user(uid):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
-    try:
+    if verify_uid(uid):
+        if userService.user_has_role_matched(request.uid, [RolesTypes.StoreSupport.value]):
+            user = userService.get_user(uid, True)
+            requester_user = userService.get_user(request.uid, True)
+            if user.store_code != requester_user.store_code:
+                return response_error("Error support store user not matched with user (not in same store)", {'params': request.json})
+
         try:
             schema = UpdateUserInfo()
             data = schema.load(request.json)
@@ -151,14 +155,7 @@ def update_user_info_by_support_user(uid):
             return response_error("Error on format of the params", {'params': request.json})
         userService.update_user_info(uid, data)
         return response_success({})
-    except ValueError:
-        current_app.logger.error("User not found", {uid: uid})
-        return response_error("Error on format of the params", {uid: uid})
-    except UserNotFoundError:
-        return response_error("User not found", {uid: uid})
-    except FirebaseError as err:
-        current_app.logger.error("unknown error", err)
-        return response_error("unknown error", {err: err.cause})
+    return response_error("Error on format of the params", {'uid': uid})
 
 
 # Todo: Add test for this route

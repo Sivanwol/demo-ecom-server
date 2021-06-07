@@ -159,7 +159,7 @@ class FlaskTestCase(BaseTestCase):
         user = self.userService.get_user(uid, True)
         self.assertTrue(user.is_pass_tutorial)
 
-    def test_user_update_info(self):
+    def test_user_update_info_self(self):
         user_object = self.login_user(self.platform_support_user)
         uid = user_object['uid']
         token = user_object['idToken']
@@ -187,6 +187,123 @@ class FlaskTestCase(BaseTestCase):
         self.assertEqual(user.address2, address2)
         self.assertEqual(user.country, country)
         self.assertEqual(user.currency, currency)
+
+    def test_user_update_info_as_global_support(self):
+        store_customer_user = "customer@gmail.com"
+        store_owner_user = "user@gmail.com"
+        user_object = self.login_user(self.platform_support_user)
+        token = user_object['idToken']
+        store_info = self.create_store(store_owner_user)
+        self.create_user(store_customer_user, [RolesTypes.StoreCustomer.value], False, store_info.data.info.store_code)
+        user_object = self.login_user(store_customer_user)
+        uid = user_object['uid']
+        # old_user_data = self.userService.get_user(uid, True)
+        country = self.fake.country_code()
+        currency = self.fake.currency_code()
+        fullname = self.fake.name()
+        address1 = self.fake.address()
+        address2 = self.fake.address()
+        post_data = {
+            'fullname': fullname,
+            'address1': address1,
+            'address2': address2,
+            'currency': currency,
+            'country': country
+        }
+        response = self.request_put('/api/user/{}/update'.format(uid), token, None, post_data)
+        self.assertRequestPassed(response, 'update user info request failed')
+        response_data = Struct(response.json)
+        user = self.userService.get_user(uid, True)
+        self.assertIsNotNone(response_data)
+        self.assertTrue(response_data.status)
+        self.assertEqual(user.fullname, fullname)
+        self.assertEqual(user.address1, address1)
+        self.assertEqual(user.address2, address2)
+        self.assertEqual(user.country, country)
+        self.assertEqual(user.currency, currency)
+
+    def test_user_update_info_as_store_support(self):
+        store_customer_user = "customer@gmail.com"
+        store_owner_user = "user@gmail.com"
+        store_support_user = "support_store@gmail.com"
+        store_info = self.create_store(store_owner_user)
+
+        self.create_user(store_customer_user, [RolesTypes.StoreCustomer.value], False, store_info.data.info.store_code)
+        self.create_user(store_support_user, [RolesTypes.StoreSupport.value], False, store_info.data.info.store_code)
+
+        user_object = self.login_user(store_support_user)
+        token = user_object['idToken']
+        user_object = self.login_user(store_customer_user)
+        uid = user_object['uid']
+        # old_user_data = self.userService.get_user(uid, True)
+        country = self.fake.country_code()
+        currency = self.fake.currency_code()
+        fullname = self.fake.name()
+        address1 = self.fake.address()
+        address2 = self.fake.address()
+        post_data = {
+            'fullname': fullname,
+            'address1': address1,
+            'address2': address2,
+            'currency': currency,
+            'country': country
+        }
+        response = self.request_put('/api/user/{}/update'.format(uid), token, None, post_data)
+        self.assertRequestPassed(response, 'update user info request failed')
+        response_data = Struct(response.json)
+        user = self.userService.get_user(uid, True)
+        self.assertIsNotNone(response_data)
+        self.assertTrue(response_data.status)
+        self.assertEqual(user.fullname, fullname)
+        self.assertEqual(user.address1, address1)
+        self.assertEqual(user.address2, address2)
+        self.assertEqual(user.country, country)
+        self.assertEqual(user.currency, currency)
+
+    def test_user_update_info_as_store_support_invalid(self):
+        store_customer_user = "customer@gmail.com"
+        store_owner_user = "user@gmail.com"
+        store_owner_user = "user2@gmail.com"
+        store_support_user = "support_store@gmail.com"
+        store_info = self.create_store(store_owner_user)
+        diff_store_info = self.create_store(store_owner_user)
+
+        self.create_user(store_customer_user, [RolesTypes.StoreCustomer.value], False, diff_store_info.data.info.store_code)
+        self.create_user(store_support_user, [RolesTypes.StoreSupport.value], False, store_info.data.info.store_code)
+
+        user_object = self.login_user(store_support_user)
+        token = user_object['idToken']
+        user_object = self.login_user(store_customer_user)
+        uid = user_object['uid']
+        # old_user_data = self.userService.get_user(uid, True)
+        country = self.fake.country_code()
+        currency = self.fake.currency_code()
+        fullname = self.fake.name()
+        address1 = self.fake.address()
+        address2 = self.fake.address()
+        post_data = {
+            'fullname': fullname,
+            'address1': address1,
+            'address2': address2,
+            'currency': currency,
+            'country': country
+        }
+        response = self.request_put('/api/user/{}/update'.format(uid), token, None, post_data)
+        self.assert500(response, 'update user info passed with invalid user store entered (diff store_code)')
+
+    def test_add_store_staff_by_owner(self):
+        store_owner_user = "user@gmail.com"
+        store_staff_user = "staff@gmail.com"
+        store_info = self.create_store(store_owner_user)
+        user_object = self.login_user(store_owner_user)
+        token = user_object['idToken']
+        self.create_firebase_store_user(store_staff_user)
+        user_object = self.login_user(store_staff_user)
+        uid = user_object['uid']
+        response = self.request_put('/api/user/update', token, None, post_data)
+        self.assertRequestPassed(response, 'update user info request failed')
+
+
 
 
 
