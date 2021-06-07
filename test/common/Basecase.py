@@ -1,5 +1,6 @@
 import json
 import os
+from random import randint
 
 from faker import Faker
 from firebase_admin import auth
@@ -50,7 +51,7 @@ class BaseTestCase(TestCase):
         self.roleService.insert_roles()
         print(self.roleService.get_all_roles())
         self.init_unit_data()
-        Faker.seed(0)
+        Faker.seed(randint(0, 100))
 
     def testTearDown(self):
         db.session.remove()
@@ -200,3 +201,7 @@ class BaseTestCase(TestCase):
             url,
             headers=headers
         )
+
+    def assertRequestPassed(self, response, message):
+        print('response headers -> %s' % response.data)
+        self.assert200(response, message)

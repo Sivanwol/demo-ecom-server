@@ -102,7 +102,7 @@ class UserService:
 
     def update_user_info(self, uid, user_data):
         user = self.get_user(uid, True)
-        user.phone = user_data.phone
+        user.fullname = user_data.fullname
         user.address1 = user_data.address1
         user.address2 = user_data.address2
         user.country = user_data.country

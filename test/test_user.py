@@ -32,7 +32,7 @@ class FlaskTestCase(BaseTestCase):
                 'currency_code': currency_code
             }
             response = self.request_post('/api/store/%s/create' % owner_uid, owner_token, None, post_data)
-            self.assert200(response, 'create store request failed')
+            self.assertRequestPassed(response, 'create store request failed')
             response_data = Struct(response.json)
             self.assertIsNotNone(response_data)
             self.assertTrue(response_data.status)
@@ -44,7 +44,7 @@ class FlaskTestCase(BaseTestCase):
             uid = user_object['uid']
             token = user_object['idToken']
             response = self.request_put('/api/user/%s/toggle_active' % uid, owner_token)
-            self.assert200(response, 'toggle active state of user request failed')
+            self.assertRequestPassed(response, 'toggle active state of user request failed')
             response_data = Struct(response.json)
             self.assertIsNotNone(response_data)
             self.assertTrue(response_data.status)
@@ -61,7 +61,7 @@ class FlaskTestCase(BaseTestCase):
             uid = user_object['uid']
             token = user_object['idToken']
             response = self.request_get('/api/user/{}'.format(uid), token)
-            self.assert200(response, 'get user request failed')
+            self.assertRequestPassed(response, 'get user request failed')
             response_data = Struct(response.json)
             self.assertTrue(response_data.status)
             self.assertIsNotNone(response_data)
@@ -104,7 +104,7 @@ class FlaskTestCase(BaseTestCase):
             uid = user_object['uid']
             token = user_object['idToken']
             response = self.request_post('/api/user/{}/bind/{}'.format(uid, store_info.data.info.store_code), token)
-            self.assert200(response, 'bind user to store request failed')
+            self.assertRequestPassed(response, 'bind user to store request failed')
             response_data = Struct(response.json)
             user = self.userService.get_user(uid, True)
             self.assertIsNotNone(response_data)
@@ -151,13 +151,43 @@ class FlaskTestCase(BaseTestCase):
         uid = user_object['uid']
         token = user_object['idToken']
         response = self.request_post('/api/user/{}/bind/{}'.format(uid, store_info.data.info.store_code), token)
-        self.assert200(response, 'bind user to store request failed')
+        self.assertRequestPassed(response, 'bind user to store request failed')
         user = self.userService.get_user(uid, True)
         self.assertFalse(user.is_pass_tutorial)
         response = self.request_put('/api/user/{}/passed_tutorial'.format(uid), token)
-        self.assert200(response, 'mark user pass tutrial as passed request failed')
+        self.assertRequestPassed(response, 'mark user pass tutrial as passed request failed')
         user = self.userService.get_user(uid, True)
         self.assertTrue(user.is_pass_tutorial)
+
+    def test_user_update_info(self):
+        user_object = self.login_user(self.platform_support_user)
+        uid = user_object['uid']
+        token = user_object['idToken']
+        # old_user_data = self.userService.get_user(uid, True)
+        country = self.fake.country_code()
+        currency = self.fake.currency_code()
+        fullname = self.fake.name()
+        address1 =  self.fake.address()
+        address2 =  self.fake.address()
+        post_data = {
+            'fullname': fullname,
+            'address1': address1,
+            'address2': address2,
+            'currency': currency,
+            'country': country
+        }
+        response = self.request_put('/api/user/update', token, None, post_data)
+        self.assertRequestPassed(response, 'update user info request failed')
+        response_data = Struct(response.json)
+        user = self.userService.get_user(uid, True)
+        self.assertIsNotNone(response_data)
+        self.assertTrue(response_data.status)
+        self.assertEqual(user.fullname, fullname)
+        self.assertEqual(user.address1, address1)
+        self.assertEqual(user.address2, address2)
+        self.assertEqual(user.country, country)
+        self.assertEqual(user.currency, currency)
+
 
 
 if __name__ == '__main__':

@@ -10,7 +10,7 @@ from config import settings
 from config.api import app as current_app
 from src.middlewares.check_role import check_role
 from src.middlewares.check_token import check_token_register_firebase_user, check_token_of_user
-from src.schemas.requests.user import CreatePlatformUser, CreateStoreStaffUser, UpdateUserInfo
+from src.schemas.requests.user import UserRolesList, CreateStoreStaffUser, UpdateUserInfo
 from src.services.roles import RolesService
 from src.services.store import StoreService
 from src.services.user import UserService
@@ -122,26 +122,16 @@ def update_user_info():
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     try:
-        body = request.json()
-        try:
-            schema = UpdateUserInfo()
-            data = schema.load(body)
-        except ValidationError as e:
-            return response_error("Error on format of the params", {'params': request.json})
-        data = Struct(data)
-        if not valid_currency(data.currency) or not valid_countryCode(data.country):
-            return response_error("Error on format of the params", {'params': request.json})
-        uid = request.uid
-        userService.update_user_info(uid, data)
-        return response_success({})
-    except ValueError:
-        current_app.logger.error("User not found", {uid: uid})
-        return response_error("Error on format of the params", {uid: uid})
-    except UserNotFoundError:
-        return response_error("User not found", {uid: uid})
-    except FirebaseError as err:
-        current_app.logger.error("unknown error", err)
-        return response_error("unknown error", {err: err.cause})
+        schema = UpdateUserInfo()
+        data = schema.load(request.json)
+    except ValidationError as e:
+        return response_error("Error on format of the params", {'params': request.json})
+    data = Struct(data)
+    if not valid_currency(data.currency) or not valid_countryCode(data.country):
+        return response_error("Error on format of the params", {'params': request.json})
+    uid = request.uid
+    userService.update_user_info(uid, data)
+    return response_success({})
 
 
 # Todo: Add test for this route
@@ -151,10 +141,9 @@ def update_user_info_by_support_user(uid):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     try:
-        body = request.json()
         try:
             schema = UpdateUserInfo()
-            data = schema.load(body)
+            data = schema.load(request.json)
         except ValidationError as e:
             return response_error("Error on format of the params", {'params': request.json})
         data = Struct(data)
@@ -179,10 +168,9 @@ def create_store_stuff(store_code):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     try:
-        body = request.json()
         try:
             schema = CreateStoreStaffUser()
-            data = schema.load(body)
+            data = schema.load(request.json)
         except ValidationError as e:
             return response_error("Error on format of the params", {'params': request.json})
         data = Struct(data)
@@ -211,7 +199,7 @@ def sync_platform_user_create(uid):
             body = request.json()
             bodyObj = {"role_names": ', '.join(body['role_names'])}
             try:
-                schema = CreatePlatformUser()
+                schema = UserRolesList()
                 data = schema.load(bodyObj)
             except ValidationError as e:
                 return response_error("Error on format of the params", {'params': request.json})
