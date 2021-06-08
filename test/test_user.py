@@ -7,14 +7,67 @@ from test.common.Basecase import BaseTestCase
 
 
 class FlaskTestCase(BaseTestCase):
-
     def setUp(self):
         self.testSetUp()
 
     def tearDown(self):
         self.testTearDown()
 
-    # Todo: checking if try get user with correct roles when the user not active
+    # region Test User List
+
+    def test_get_user_list_no_filters_no_order(self):
+        pass
+
+    def test_get_user_list_email_filters_no_order(self):
+        pass
+
+    def test_get_user_list_fullname_filters_no_order(self):
+        pass
+
+    def test_get_user_list_stores_filters_no_order(self):
+        pass
+
+    def test_get_user_list_platform_filters_no_order(self):
+        pass
+
+    def test_get_user_list_multi_filters_no_order(self):
+        pass
+
+
+    def test_get_user_list_no_filters_create_at_order(self):
+        pass
+
+    def test_get_user_list_no_filters_email_order(self):
+        pass
+
+    def test_get_user_list_no_filters_fullname_order(self):
+        pass
+
+    def test_get_user_list_no_filters_store_order(self):
+        pass
+
+    def test_get_user_list_no_filters_multi_order(self):
+        pass
+
+    def test_get_user_list_no_filters_unknown_column_order(self): # get error
+        pass
+
+    def test_get_user_list_platform_filter_user_platform(self):
+        pass
+
+    def test_get_user_list_platform_filter_user_store(self): # get error
+        pass
+
+    def test_get_user_list_stores_filter_user_platform(self):
+        pass
+
+    def test_get_user_list_stores_filter_user_stores(self): # need get only it own user no cross stores users
+        pass
+
+    # endregion
+
+    # region Test User Actions
+
     def test_check_user_not_active(self):
         with self.client:
             user_not_active = "noactive@user.com"
@@ -55,28 +108,7 @@ class FlaskTestCase(BaseTestCase):
 
             self.login_failed_user(user_not_active)
 
-    def test_get_user_object(self):
-        with self.client:
-            user_object = self.login_user(self.platform_owner_user)
-            uid = user_object['uid']
-            token = user_object['idToken']
-            display_name = user_object['display_name']
-            response = self.request_get('/api/user/{}'.format(uid), token)
-            self.assertRequestPassed(response, 'get user request failed')
-            response_data = Struct(response.json)
-            self.assertTrue(response_data.status)
-            self.assertIsNotNone(response_data)
-            self.assertIsNotNone(response_data.data)
-            user = self.userService.get_user(uid, True)
-            self.assertIsNotNone(user)
-            self.assertIsNotNone(response_data)
-            self.assertEqual(response_data.data.user_meta.display_name, user_object['display_name'])
-            self.assertEqual(response_data.data.user_data.uid, user.uid)
-            self.assertEqual(response_data.data.user_data.is_pass_tutorial, user.is_pass_tutorial)
-            self.assertEqual(response_data.data.user_data.id, user.id)
-            self.assertEqual(response_data.data.user_data.email, user.email)
-            self.assertEqual(response_data.data.user_data.fullname, user.fullname)
-            self.assertEqual(response_data.data.user_data.roles[0].id, user.roles[0].id)
+
 
     def test_check_role_not_match(self):
         with self.client:
@@ -393,6 +425,30 @@ class FlaskTestCase(BaseTestCase):
         response = self.request_post('/api/user/staff/%s'% store_info.data.info.store_code, token, None, post_data)
         self.assert500(response, 'update store staff user request passed with invalid user store entered (diff store_code)')
 
+    # endregion
+
+    def test_get_user_object(self):
+        with self.client:
+            user_object = self.login_user(self.platform_owner_user)
+            uid = user_object['uid']
+            token = user_object['idToken']
+            display_name = user_object['display_name']
+            response = self.request_get('/api/user/{}'.format(uid), token)
+            self.assertRequestPassed(response, 'get user request failed')
+            response_data = Struct(response.json)
+            self.assertTrue(response_data.status)
+            self.assertIsNotNone(response_data)
+            self.assertIsNotNone(response_data.data)
+            user = self.userService.get_user(uid, True)
+            self.assertIsNotNone(user)
+            self.assertIsNotNone(response_data)
+            self.assertEqual(response_data.data.user_meta.display_name, user_object['display_name'])
+            self.assertEqual(response_data.data.user_data.uid, user.uid)
+            self.assertEqual(response_data.data.user_data.is_pass_tutorial, user.is_pass_tutorial)
+            self.assertEqual(response_data.data.user_data.id, user.id)
+            self.assertEqual(response_data.data.user_data.email, user.email)
+            self.assertEqual(response_data.data.user_data.fullname, user.fullname)
+            self.assertEqual(response_data.data.user_data.roles[0].id, user.roles[0].id)
 
 
 

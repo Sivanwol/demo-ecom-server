@@ -70,7 +70,7 @@ def user_toggle_active(uid):
     return response_error("Error on format of the params", {uid: uid})
 
 
-# Todo: Add test for this route
+# Todo: need refactor this
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/platform/list/<per_page>/<page>"), methods=["GET"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value, RolesTypes.Support.value])
 def get_platform_users(per_page, page):
@@ -81,7 +81,7 @@ def get_platform_users(per_page, page):
     return response_success_paging(result.items, result.total, result.pages, result.has_next, result.has_prev)
 
 
-# Todo: Add test for this route
+# Todo: Need refactor this
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/store/<store_code>/list/<per_page>/<page>"),
                    methods=["GET"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreAccount.value, RolesTypes.StoreOwner.value, RolesTypes.StoreSupport.value])
@@ -132,7 +132,6 @@ def update_user_info():
     return response_success({})
 
 
-# Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/update"), methods=["PUT"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreSupport.value])
 def update_user_info_by_support_user(uid):
