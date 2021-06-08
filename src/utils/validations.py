@@ -2,8 +2,6 @@ import re
 from uuid import UUID
 
 import pycountry
-
-from src.services.user import UserService
 from src.utils.enums import PerPageSupport, AllowUserColumnOrderBy, AllowSortByDirection, RolesTypes
 
 
@@ -94,8 +92,7 @@ def valid_user_list_params(filters, orders):
     }
 
 
-def valid_user_list_by_permissions(requester_uid, filters):
-    userService = UserService()
+def valid_user_list_by_permissions(userService, requester_uid, filters):
     user = userService.get_user(requester_uid, True)
     # check if requester user is platform user and have relevant roles allow to do query
     platform_roles = [

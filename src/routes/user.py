@@ -77,13 +77,13 @@ def get_users(per_page, page):
     result = valid_user_list_params(filters, orders)
     if not result:
         return response_error("Error on incorrect params", {'filters': filters, 'orders': orders})
-    result = valid_user_list_by_permissions(request.uid, filters)
+    result = valid_user_list_by_permissions(userService, request.uid, filters)
     if not result:
         return response_error("restricted access to some of the filter params", {'filters': filters, 'orders': orders}, 401)
     if not isinstance(result, (bool)):
         filters = result['filters']
         orders = result['orders']
-    result = userService.get_users(filters, orders, per_page, page, is_inactive)
+    result = userService.get_users(filters, orders, int(per_page), int(page), is_inactive)
     schema = UserSchema()
     return response_success_paging(filters, orders, schema.dump(result.items, many=True), result.total, result.pages, result.has_next, result.has_prev)
 

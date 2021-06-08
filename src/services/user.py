@@ -67,7 +67,7 @@ class UserService:
             query = query.filter(or_(User.fullname.lower().like('%{}%'.format(v.lower())) for v in filters['names']))
         if len(filters['countries']) > 0:
             query = query.filter(User.country.in_(v for v in filters['countries']))
-        if is_inactive:
+        if not is_inactive:
             query = query.filter_by(is_active=False)
         else:
             query = query.filter_by(is_active=True)
@@ -79,7 +79,7 @@ class UserService:
                     query = query.order_by(User.c[order['field'].value].desc())
                 else:
                     query = query.order_by(User.c[order['field'].value].asc())
-        return query.paginate(per_page, page, False)
+        return query.paginate(page=page, per_page=per_page, error_out=False)
 
     @cache.memoize(50)
     def get_active_user(self, uid, return_model=False):

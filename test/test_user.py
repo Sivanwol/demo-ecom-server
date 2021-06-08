@@ -1,6 +1,7 @@
 # tests/test_basic.py
 import unittest
 
+from src.schemas.user_schema import UserSchema
 from src.utils.enums import RolesTypes
 from src.utils.general import Struct
 from test.common.Basecase import BaseTestCase
@@ -33,6 +34,24 @@ class FlaskTestCase(BaseTestCase):
         query_string = urlencode(query_params)
         response = self.request_get('/api/user/list/20/1', token, query_string)
         self.assertRequestPassed(response, 'getting user list request failed')
+        response_data = Struct(response.json)
+        filters = {
+            'names': [],
+            'emails': [],
+            'stores': [],
+            'countries': []
+        }
+        self.assertIsNotNone(response_data)
+        self.assertTrue(response_data.status)
+        self.assertIsNotNone(response_data.data)
+        users = self.userService.get_users(filters, [], 20, 1, False)
+        schema = UserSchema()
+        data = schema.dump(users.items , many=True)
+        self.assertListEqual(data , response.json['data']['items'] )
+        self.assertEqual(response_data.data.meta.pages,users.pages)
+        self.assertEqual(response_data.data.meta.total_items,users.total)
+        self.assertFalse(response_data.data.meta.next)
+        self.assertFalse(response_data.data.meta.prev)
 
     def test_get_user_list_no_filters_no_order_paginate(self):
         pass
