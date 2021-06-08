@@ -4,6 +4,7 @@ import unittest
 from src.utils.enums import RolesTypes
 from src.utils.general import Struct
 from test.common.Basecase import BaseTestCase
+from urllib.parse import urlencode
 
 
 class FlaskTestCase(BaseTestCase):
@@ -16,6 +17,24 @@ class FlaskTestCase(BaseTestCase):
     # region Test User List
 
     def test_get_user_list_no_filters_no_order(self):
+        user_object = self.login_user(self.platform_owner_user)
+        token = user_object['idToken']
+        uid = user_object['uid']
+        self.userUtils.create_platforms_users()
+        query_params = {
+            'filter_fullnames': [],
+            'filter_emails': [],
+            'filter_stores': [],
+            'filter_countries': [],
+            'filter_inactive': 1,
+            'filter_platform': 1,
+            'order_by': []
+        }
+        query_string = urlencode(query_params)
+        response = self.request_get('/api/user/list/20/1?%s' % query_string, token)
+        self.assertRequestPassed(response, 'getting user list request failed')
+
+    def test_get_user_list_no_filters_no_order_paginate(self):
         pass
 
     def test_get_user_list_email_filters_no_order(self):
@@ -48,19 +67,19 @@ class FlaskTestCase(BaseTestCase):
     def test_get_user_list_no_filters_multi_order(self):
         pass
 
-    def test_get_user_list_no_filters_unknown_column_order(self): # get error
+    def test_get_user_list_no_filters_unknown_column_order(self):  # get error
         pass
 
     def test_get_user_list_platform_filter_user_platform(self):
         pass
 
-    def test_get_user_list_platform_filter_user_store(self): # get error
+    def test_get_user_list_platform_filter_user_store(self):  # get error
         pass
 
     def test_get_user_list_stores_filter_user_platform(self):
         pass
 
-    def test_get_user_list_stores_filter_user_stores(self): # need get only it own user no cross stores users
+    def test_get_user_list_stores_filter_user_stores(self):  # need get only it own user no cross stores users
         pass
 
     # endregion
@@ -106,8 +125,6 @@ class FlaskTestCase(BaseTestCase):
             self.assertFalse(user.is_active)
 
             self.login_failed_user(user_not_active)
-
-
 
     def test_check_role_not_match(self):
         with self.client:
@@ -201,8 +218,8 @@ class FlaskTestCase(BaseTestCase):
         country = self.fake.country_code()
         currency = self.fake.currency_code()
         fullname = self.fake.name()
-        address1 =  self.fake.address()
-        address2 =  self.fake.address()
+        address1 = self.fake.address()
+        address2 = self.fake.address()
         post_data = {
             'fullname': fullname,
             'address1': address1,
@@ -338,7 +355,7 @@ class FlaskTestCase(BaseTestCase):
             'fullname': self.fake.name(),
 
         }
-        response = self.request_post('/api/user/staff/%s'% store_info.data.info.store_code, token, None, post_data)
+        response = self.request_post('/api/user/staff/%s' % store_info.data.info.store_code, token, None, post_data)
         self.assertRequestPassed(response, 'update store staff user request failed')
 
         user_object = self.login_user(store_staff_user)
@@ -366,7 +383,7 @@ class FlaskTestCase(BaseTestCase):
             'fullname': self.fake.name(),
 
         }
-        response = self.request_post('/api/user/staff/%s'% store_info.data.info.store_code, token, None, post_data)
+        response = self.request_post('/api/user/staff/%s' % store_info.data.info.store_code, token, None, post_data)
         self.assertRequestPassed(response, 'update store staff user request failed')
 
         user_object = self.login_user(store_staff_user)
@@ -421,7 +438,7 @@ class FlaskTestCase(BaseTestCase):
             'fullname': self.fake.name(),
 
         }
-        response = self.request_post('/api/user/staff/%s'% store_info.data.info.store_code, token, None, post_data)
+        response = self.request_post('/api/user/staff/%s' % store_info.data.info.store_code, token, None, post_data)
         self.assert500(response, 'update store staff user request passed with invalid user store entered (diff store_code)')
 
     # endregion
@@ -448,8 +465,6 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.user_data.email, user.email)
             self.assertEqual(response_data.data.user_data.fullname, user.fullname)
             self.assertEqual(response_data.data.user_data.roles[0].id, user.roles[0].id)
-
-
 
 
 if __name__ == '__main__':

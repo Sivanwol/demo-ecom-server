@@ -15,6 +15,7 @@ from src.services.user import UserService
 from src.utils.enums import RolesTypes
 from src.utils.firebase_utils import create_firebase_user as create_fb_user, setup_firebase_client, login_user
 from src.utils.general import is_json_key_present, Struct
+from test.utils.user import UserTestUtills
 
 
 class BaseTestCase(TestCase):
@@ -34,6 +35,9 @@ class BaseTestCase(TestCase):
     global_password = "password!0101"
     firebase_client_object = None
     firebaseService = FirebaseService()
+
+    def __init__(self):
+        self.userUtils = UserTestUtills(self)
 
     def create_app(self):
         # app.config.from_object('config.TestConfig')

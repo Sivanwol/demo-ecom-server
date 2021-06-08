@@ -31,6 +31,7 @@ Task for the user system
     - [ ] Add Test For Get Stores User list With order by ->  create_at order provided
     - [ ] Add Test For Get Stores User list With multi order by ->  email,create_at order provided
     - [ ] Add Test For Get Stores User list With unknown column  order by-> get 400 (invalid params)
+    - [ ] Add Test For Get Stores User list paginate (test 3 pages)
   - [ ] User test Permissions for Get List of Users
     - [ ] Add Test For Get Platform User list  , Role Platform user  , platform Filters , no order by
     - [ ] Add Test For Get Platform User list  , Role Store Staff user -> show error   , platform Filters , no order by
