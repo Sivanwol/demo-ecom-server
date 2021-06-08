@@ -1,13 +1,13 @@
 import firebase_admin
 from firebase_admin import auth
 from sqlalchemy import or_
-from sqlalchemy.testing import in_
 
 from config.api import cache
 from config.database import db
 from src.models import User
 from src.models.stores import Store
 from src.schemas.user_schema import UserSchema
+from src.utils.enums import AllowSortByDirection
 from src.utils.firebase_utils import create_firebase_user
 from src.utils.responses import response_error
 from src.utils.singleton import singleton
@@ -54,7 +54,7 @@ class UserService:
         return user
 
     @cache.memoize(50)
-    def get_users(self, filters, orders, is_active=True, return_model=False):
+    def get_users(self, filters, orders,per_page, page, is_inactive=True):
         query = User.query
         if not filters['platform']:
             if len(filters['stores']) > 0:
@@ -67,19 +67,18 @@ class UserService:
             query.filter(or_(User.fullname.lower().like('%{}%'.format(v.lower())) for v in filters['names']))
         if len(filters['countries']) > 0:
             query.filter(User.country.in_(v for v in filters['countries']))
-        if is_active:
+        if is_inactive:
+            query = query.filter_by(is_active=False)
+        else:
             query = query.filter_by(is_active=True)
         if len(orders) <= 0:
             query = query.order_by(User.created_at.desc()).all()
         else:
             for order in orders:
-                if order['direction'].lower() == 'desc':
-                    query.order_by(User.c[order['field']].desc())
-                query.order_by(User.c[order['field']].asc())
-        users = query.all()
-        if not return_model:
-            return self.user_schema.dump(users, many=True)
-        return users
+                if order['sort'] == AllowSortByDirection.DESC:
+                    query.order_by(User.c[order['field'].value].desc())
+                query.order_by(User.c[order['field'].value].asc())
+        return query.paginate(per_page, page, False)
 
     @cache.memoize(50)
     def get_active_user(self, uid, return_model=False):
@@ -165,6 +164,7 @@ class UserService:
         self.sync_firebase_user(uid, roles, email, fullname, True, store_code, True)
         return self.get_user(uid)
 
+    # TODO: Remove this method
     def query_platform_users(self, filters, per_page, page, include_stores=False):
         users = User.query
         if not include_stores:
@@ -176,6 +176,7 @@ class UserService:
         users.order_by(User.store_code.desc(), User.fullname.desc())
         return users.paginate(page, per_page, False)
 
+    # TODO: Remove this method
     def query_store_users(self, store_code, filters, per_page, page):
         users = User.query.filter_by(store_code=store_code)
         names = filters['names']

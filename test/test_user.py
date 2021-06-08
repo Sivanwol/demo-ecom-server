@@ -33,7 +33,6 @@ class FlaskTestCase(BaseTestCase):
     def test_get_user_list_multi_filters_no_order(self):
         pass
 
-
     def test_get_user_list_no_filters_create_at_order(self):
         pass
 

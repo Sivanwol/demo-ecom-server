@@ -13,7 +13,7 @@ from src.utils.common_methods import verify_uid
 from src.utils.enums import RolesTypes
 from src.utils.general import Struct
 from src.utils.responses import response_success, response_error
-from src.utils.validations import valid_currency
+from src.utils.validations import valid_currency_code
 
 storeService = StoreService()
 userService = UserService()
@@ -93,7 +93,7 @@ def update_store_support(uid, store_code):
             data = schema.load(request.json)
         except ValidationError as e:
             return response_error("Error on format of the params", {'params': request.json})
-        if not valid_currency(data['currency_code']):
+        if not valid_currency_code(data['currency_code']):
             return response_error("Error on format of the params", {'params': request.json})
         data = Struct(data)
         store = storeService.update_store_info(uid, store_code, data)

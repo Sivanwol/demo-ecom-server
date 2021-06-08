@@ -11,6 +11,7 @@ from config.api import app as current_app
 from src.middlewares.check_role import check_role
 from src.middlewares.check_token import check_token_register_firebase_user, check_token_of_user
 from src.schemas.requests.user import UserRolesList, CreateStoreStaffUser, UpdateUserInfo
+from src.schemas.user_schema import UserSchema
 from src.services.roles import RolesService
 from src.services.store import StoreService
 from src.services.user import UserService
@@ -18,7 +19,7 @@ from src.utils.enums import RolesTypes
 from src.utils.general import Struct
 from src.utils.responses import response_error, response_success, response_success_paging
 from src.utils.common_methods import verify_uid
-from src.utils.validations import valid_countryCode, valid_currency, vaild_per_page
+from src.utils.validations import valid_country_code, valid_currency_code, vaild_per_page, valid_user_list_params, valid_user_list_by_permissions
 
 roleSerivce = RolesService()
 userService = UserService()
@@ -50,6 +51,40 @@ def get(uid):
             current_app.logger.error("unknown error", err)
             return response_error("unknown error", {err: err.cause})
     return response_error("Error on format of the params", {uid: uid})
+
+
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/list/<per_page>/<page>"))
+@check_token_of_user
+def get_users(per_page, page):
+    if not vaild_per_page(per_page) and isinstance(page, int):
+        return response_error("Error on support per page or page number invalid", {'per_page': 'per_page', page: page})
+    is_platform = False
+    if request.args.get('filter_platform', type=int):
+        is_platform = True
+
+    is_inactive = False
+    if request.args.get('filter_inactive', type=int):
+        is_inactive = True
+
+    filters = {
+        'names': request.args.getlist('filter_fullnames'),
+        'emails': request.args.getlist('filter_emails'),
+        'stores': request.args.getlist('filter_stores'),
+        'countries': request.args.getlist('filter_countries'),
+        'platform': is_platform,
+    }
+    orders = request.args.getlist('order_by')
+    result = valid_user_list_params(filters, orders)
+    if not result:
+        return response_error("Error on incorrect params", {'filters': filters, 'orders': orders})
+    filters = result['filters']
+    orders = result['orders']
+    result = valid_user_list_by_permissions(request.uid, filters)
+    if not result:
+        return response_error("restricted access to some of the filter params", {'filters': filters, 'orders': orders}, 401)
+    result = userService.get_users(filters, orders, per_page, page, is_inactive)
+    schema = UserSchema()
+    return response_success_paging(filters, orders, schema.dump(result.items, many=True), result.total, result.pages, result.has_next, result.has_prev)
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/toggle_active"), methods=["PUT"])
@@ -125,7 +160,7 @@ def update_user_info():
     except ValidationError as e:
         return response_error("Error on format of the params", {'params': request.json})
     data = Struct(data)
-    if not valid_currency(data.currency) or not valid_countryCode(data.country):
+    if not valid_currency_code(data.currency) or not valid_country_code(data.country):
         return response_error("Error on format of the params", {'params': request.json})
     uid = request.uid
     userService.update_user_info(uid, data)
@@ -150,7 +185,7 @@ def update_user_info_by_support_user(uid):
         except ValidationError as e:
             return response_error("Error on format of the params", {'params': request.json})
         data = Struct(data)
-        if not valid_currency(data.currency) or not valid_countryCode(data.country):
+        if not valid_currency_code(data.currency) or not valid_country_code(data.country):
             return response_error("Error on format of the params", {'params': request.json})
         userService.update_user_info(uid, data)
         return response_success({})
@@ -158,7 +193,7 @@ def update_user_info_by_support_user(uid):
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/staff/<store_code>"), methods=["POST"])
-@check_role([RolesTypes.Support.value,RolesTypes.StoreSupport.value, RolesTypes.StoreOwner.value])
+@check_role([RolesTypes.Support.value, RolesTypes.StoreSupport.value, RolesTypes.StoreOwner.value])
 def create_store_stuff(store_code):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
