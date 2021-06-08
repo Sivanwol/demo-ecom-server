@@ -58,26 +58,27 @@ class UserService:
         query = User.query
         if not filters['platform']:
             if len(filters['stores']) > 0:
-                query.filter(User.store_code.in_(code for code in filters['stores']))
+                query = query.filter(User.store_code.in_(code for code in filters['stores']))
         else:
-            query.filter_by(store_code=None)
+            query = query.filter_by(store_code=None)
         if len(filters['emails']) > 0:
-            query.filter(User.email.lower().in_(email.lower() for email in filters['emails']))
+            query = query.filter(User.email.lower().in_(email.lower() for email in filters['emails']))
         if len(filters['names']) > 0:
-            query.filter(or_(User.fullname.lower().like('%{}%'.format(v.lower())) for v in filters['names']))
+            query = query.filter(or_(User.fullname.lower().like('%{}%'.format(v.lower())) for v in filters['names']))
         if len(filters['countries']) > 0:
-            query.filter(User.country.in_(v for v in filters['countries']))
+            query = query.filter(User.country.in_(v for v in filters['countries']))
         if is_inactive:
             query = query.filter_by(is_active=False)
         else:
             query = query.filter_by(is_active=True)
         if len(orders) <= 0:
-            query = query.order_by(User.created_at.desc()).all()
+            query = query.order_by(User.created_at.desc())
         else:
             for order in orders:
                 if order['sort'] == AllowSortByDirection.DESC:
-                    query.order_by(User.c[order['field'].value].desc())
-                query.order_by(User.c[order['field'].value].asc())
+                    query = query.order_by(User.c[order['field'].value].desc())
+                else:
+                    query = query.order_by(User.c[order['field'].value].asc())
         return query.paginate(per_page, page, False)
 
     @cache.memoize(50)

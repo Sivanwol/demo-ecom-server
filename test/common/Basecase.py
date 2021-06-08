@@ -36,9 +36,6 @@ class BaseTestCase(TestCase):
     firebase_client_object = None
     firebaseService = FirebaseService()
 
-    def __init__(self):
-        self.userUtils = UserTestUtills(self)
-
     def create_app(self):
         # app.config.from_object('config.TestConfig')
         print(os.environ.get("FLASK_ENV", "development"))
@@ -47,6 +44,7 @@ class BaseTestCase(TestCase):
         return app
 
     def testSetUp(self):
+        self.userUtils = UserTestUtills(self)
         self.app_context = self.app.app_context()
         self.app_context.push()
         self.client = self.app.test_client()
@@ -154,55 +152,71 @@ class BaseTestCase(TestCase):
         self.assertEqual(response_data.data.info.store_code, user.store_code)
         return response_data
 
-    def request_get(self, url, token, extra_headers=None):
+    def request_get(self, url, token, query_string=None, extra_headers=None):
         if extra_headers is None:
             extra_headers = {}
+        if query_string is None:
+            query_string = {}
         headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token} | extra_headers
         print('request get -> %s' % url)
+        print('request query string -> %s' % json.dumps(query_string))
         print('request headers -> %s' % json.dumps(headers))
         return self.client.get(
             url,
+            query_string=query_string,
             headers=headers
         )
 
-    def request_put(self, url, token, extra_headers=None, data=None):
+    def request_put(self, url, token, query_string=None, extra_headers=None, data=None):
         if data is None:
             data = {}
         if extra_headers is None:
             extra_headers = {}
+        if query_string is None:
+            query_string = {}
         headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token} | extra_headers
         print('request put -> %s' % url)
+        print('request query string -> %s' % json.dumps(query_string))
         print('request headers -> %s' % json.dumps(headers))
         print('request put data-> %s' % json.dumps(data))
         return self.client.put(
             url,
+            query_string=query_string,
             data=json.dumps(data),
             headers=headers
         )
 
-    def request_post(self, url, token, extra_headers=None, data=None):
+    def request_post(self, url, token, query_string=None, extra_headers=None, data=None):
         if extra_headers is None:
             extra_headers = {}
         if data is None:
             data = {}
+        if query_string is None:
+            query_string = {}
         headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token} | extra_headers
         print('request post -> %s' % url)
+        print('request query string -> %s' % json.dumps(query_string))
         print('request headers -> %s' % json.dumps(headers))
         print('request post data-> %s' % json.dumps(data))
         return self.client.post(
             url,
             data=json.dumps(data),
+            query_string=query_string,
             headers=headers
         )
 
-    def request_delete(self, url, token, extra_headers=None):
+    def request_delete(self, url, token, query_string=None, extra_headers=None):
         if extra_headers is None:
             extra_headers = {}
+        if query_string is None:
+            query_string = {}
         headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token} | extra_headers
         print('request delete -> %s' % url)
+        print('request query string -> %s' % json.dumps(query_string))
         print('request headers -> %s' % json.dumps(headers))
         return self.client.delete(
             url,
+            query_string=query_string,
             headers=headers
         )
 

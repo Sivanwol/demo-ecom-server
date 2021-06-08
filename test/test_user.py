@@ -22,16 +22,16 @@ class FlaskTestCase(BaseTestCase):
         uid = user_object['uid']
         self.userUtils.create_platforms_users()
         query_params = {
-            'filter_fullnames': [],
-            'filter_emails': [],
-            'filter_stores': [],
-            'filter_countries': [],
+            'filter_fullnames[]': [],
+            'filter_emails[]': [],
+            'filter_stores[]': [],
+            'filter_countries[]': [],
             'filter_inactive': 1,
             'filter_platform': 1,
-            'order_by': []
+            'order_by[]': []
         }
         query_string = urlencode(query_params)
-        response = self.request_get('/api/user/list/20/1?%s' % query_string, token)
+        response = self.request_get('/api/user/list/20/1', token, query_string)
         self.assertRequestPassed(response, 'getting user list request failed')
 
     def test_get_user_list_no_filters_no_order_paginate(self):
@@ -102,7 +102,7 @@ class FlaskTestCase(BaseTestCase):
                 'description': 'store description',
                 'currency_code': currency_code
             }
-            response = self.request_post('/api/store/%s/create' % owner_uid, owner_token, None, post_data)
+            response = self.request_post('/api/store/%s/create' % owner_uid, owner_token, None, None, post_data)
             self.assertRequestPassed(response, 'create store request failed')
             response_data = Struct(response.json)
             self.assertIsNotNone(response_data)
@@ -140,7 +140,7 @@ class FlaskTestCase(BaseTestCase):
                 'description': 'store description',
                 'currency_code': currency_code
             }
-            response = self.request_post('/api/store/%s/create' % uid, token, None, post_data)
+            response = self.request_post('/api/store/%s/create' % uid, token, None, None, post_data)
             self.assert401(response, 'role checks request not failed')
             response_data = Struct(response.json)
             self.assertFalse(response_data.status)
@@ -227,7 +227,7 @@ class FlaskTestCase(BaseTestCase):
             'currency': currency,
             'country': country
         }
-        response = self.request_put('/api/user/update', token, None, post_data)
+        response = self.request_put('/api/user/update', token, None, None, post_data)
         self.assertRequestPassed(response, 'update user info request failed')
         response_data = Struct(response.json)
         user = self.userService.get_user(uid, True)
@@ -261,7 +261,7 @@ class FlaskTestCase(BaseTestCase):
             'currency': currency,
             'country': country
         }
-        response = self.request_put('/api/user/{}/update'.format(uid), token, None, post_data)
+        response = self.request_put('/api/user/{}/update'.format(uid), token, None, None, post_data)
         self.assertRequestPassed(response, 'update user info request failed')
         response_data = Struct(response.json)
         user = self.userService.get_user(uid, True)
@@ -299,7 +299,7 @@ class FlaskTestCase(BaseTestCase):
             'currency': currency,
             'country': country
         }
-        response = self.request_put('/api/user/{}/update'.format(uid), token, None, post_data)
+        response = self.request_put('/api/user/{}/update'.format(uid), token, None, None, post_data)
         self.assertRequestPassed(response, 'update user info request failed')
         response_data = Struct(response.json)
         user = self.userService.get_user(uid, True)
@@ -338,7 +338,7 @@ class FlaskTestCase(BaseTestCase):
             'currency': currency,
             'country': country
         }
-        response = self.request_put('/api/user/{}/update'.format(uid), token, None, post_data)
+        response = self.request_put('/api/user/{}/update'.format(uid), token, None, None, post_data)
         self.assert500(response, 'update user info passed with invalid user store entered (diff store_code)')
 
     def test_add_store_staff_by_store_owner(self):
@@ -355,7 +355,7 @@ class FlaskTestCase(BaseTestCase):
             'fullname': self.fake.name(),
 
         }
-        response = self.request_post('/api/user/staff/%s' % store_info.data.info.store_code, token, None, post_data)
+        response = self.request_post('/api/user/staff/%s' % store_info.data.info.store_code, token, None, None, post_data)
         self.assertRequestPassed(response, 'update store staff user request failed')
 
         user_object = self.login_user(store_staff_user)
@@ -383,7 +383,7 @@ class FlaskTestCase(BaseTestCase):
             'fullname': self.fake.name(),
 
         }
-        response = self.request_post('/api/user/staff/%s' % store_info.data.info.store_code, token, None, post_data)
+        response = self.request_post('/api/user/staff/%s' % store_info.data.info.store_code, token, None, None, post_data)
         self.assertRequestPassed(response, 'update store staff user request failed')
 
         user_object = self.login_user(store_staff_user)
@@ -408,7 +408,7 @@ class FlaskTestCase(BaseTestCase):
             'roles': [RolesTypes.StoreSupport.value, RolesTypes.StoreReport.value],
             'fullname': self.fake.name(),
         }
-        response = self.request_post('/api/user/staff/%s' % store_info.data.info.store_code, token, None, post_data)
+        response = self.request_post('/api/user/staff/%s' % store_info.data.info.store_code, token, None, None, post_data)
         self.assertRequestPassed(response, 'update store staff user request failed')
 
         user_object = self.login_user(store_staff_user)
@@ -438,7 +438,7 @@ class FlaskTestCase(BaseTestCase):
             'fullname': self.fake.name(),
 
         }
-        response = self.request_post('/api/user/staff/%s' % store_info.data.info.store_code, token, None, post_data)
+        response = self.request_post('/api/user/staff/%s' % store_info.data.info.store_code, token, None, None, post_data)
         self.assert500(response, 'update store staff user request passed with invalid user store entered (diff store_code)')
 
     # endregion
