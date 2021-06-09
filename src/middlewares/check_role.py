@@ -3,17 +3,16 @@ from flask import request
 
 from config import app
 from src.exceptions.unknown_roles import UnknownRolesOrNotMatched
-from src.services.user import UserService
 from src.utils.common_methods import verify_response
 from src.utils.responses import response_error
-
-userService = UserService()
 
 
 def check_role(*role_names):
     def wrapper(f):
         @wraps(f)
         def decorator(*args, **kwargs):
+            from src.services.user import UserService
+            userService = UserService()
             response = verify_response()
             if response is None:
                 try:

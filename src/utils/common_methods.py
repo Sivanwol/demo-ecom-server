@@ -2,17 +2,14 @@ from urllib.parse import urlparse
 from flask import request, url_for
 from validator import validate
 from src.exceptions.unable_create_owner_user import CommandUnableCreateOwnerUser
-from src.services.roles import RolesService
-from src.services.user import UserService
 from src.utils.enums import RolesTypes
 from src.utils.firebase_utils import check_user, create_firebase_user
 from src.utils.responses import response_error
 
-roleSerivce = RolesService()
-userService = UserService()
-
 
 def verify_uid(uid):
+    from src.services.user import UserService
+    userService = UserService()
     rules = {"uid": "required|min:10"}
     result = validate({"uid": uid}, rules)  # True
     if result:
@@ -27,6 +24,8 @@ def verify_response():
 
 
 def setup_user(email, password, roles):
+    from src.services.user import UserService
+    userService = UserService()
     user = check_user(email)
     if user is None:
         print("Firebase user creation")
@@ -41,16 +40,22 @@ def setup_user(email, password, roles):
 
 
 def setup_owner_user(email, password):
+    from src.services.roles import RolesService
+    roleSerivce = RolesService()
     roles = roleSerivce.get_roles([RolesTypes.Owner])
     setup_user(email, password, roles)
 
 
 def setup_accounts_user(email, password):
+    from src.services.roles import RolesService
+    roleSerivce = RolesService()
     roles = roleSerivce.get_roles([RolesTypes.Accounts])
     setup_user(email, password, roles)
 
 
 def setup_support_user(email, password):
+    from src.services.roles import RolesService
+    roleSerivce = RolesService()
     roles = roleSerivce.get_roles([RolesTypes.SUPPORT])
     setup_user(email, password, roles)
 
