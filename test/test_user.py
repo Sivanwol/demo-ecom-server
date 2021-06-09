@@ -18,40 +18,41 @@ class FlaskTestCase(BaseTestCase):
     # region Test User List
 
     def test_get_user_list_no_filters_no_order(self):
-        user_object = self.login_user(self.platform_owner_user)
-        token = user_object['idToken']
-        uid = user_object['uid']
-        self.userUtils.create_platforms_users()
-        query_params = {
-            'filter_fullnames[]': [],
-            'filter_emails[]': [],
-            'filter_stores[]': [],
-            'filter_countries[]': [],
-            'filter_inactive': 1,
-            'filter_platform': 1,
-            'order_by[]': []
-        }
-        query_string = urlencode(query_params)
-        response = self.request_get('/api/user/list/20/1', token, query_string)
-        self.assertRequestPassed(response, 'getting user list request failed')
-        response_data = Struct(response.json)
-        filters = {
-            'names': [],
-            'emails': [],
-            'stores': [],
-            'countries': []
-        }
-        self.assertIsNotNone(response_data)
-        self.assertTrue(response_data.status)
-        self.assertIsNotNone(response_data.data)
-        users = self.userService.get_users(filters, [], 20, 1, False)
-        schema = UserSchema()
-        data = schema.dump(users.items , many=True)
-        self.assertListEqual(data , response.json['data']['items'] )
-        self.assertEqual(response_data.data.meta.pages,users.pages)
-        self.assertEqual(response_data.data.meta.total_items,users.total)
-        self.assertFalse(response_data.data.meta.next)
-        self.assertFalse(response_data.data.meta.prev)
+        with self.client:
+            user_object = self.login_user(self.platform_owner_user)
+            token = user_object['idToken']
+            uid = user_object['uid']
+            self.userUtils.create_platforms_users()
+            query_params = {
+                'filter_fullnames[]': [],
+                'filter_emails[]': [],
+                'filter_stores[]': [],
+                'filter_countries[]': [],
+                'filter_inactive': 1,
+                'filter_platform': 1,
+                'order_by[]': []
+            }
+            query_string = urlencode(query_params)
+            response = self.request_get('/api/user/list/20/1', token, query_string)
+            self.assertRequestPassed(response, 'getting user list request failed')
+            response_data = Struct(response.json)
+            filters = {
+                'names': [],
+                'emails': [],
+                'stores': [],
+                'countries': []
+            }
+            self.assertIsNotNone(response_data)
+            self.assertTrue(response_data.status)
+            self.assertIsNotNone(response_data.data)
+            users = self.userService.get_users(filters, [], 20, 1, False)
+            schema = UserSchema()
+            data = schema.dump(users.items , many=True)
+            self.assertListEqual(data , response.json['data']['items'] )
+            self.assertEqual(response_data.data.meta.pages,users.pages)
+            self.assertEqual(response_data.data.meta.total_items,users.total)
+            self.assertFalse(response_data.data.meta.next)
+            self.assertFalse(response_data.data.meta.prev)
 
     def test_get_user_list_no_filters_no_order_paginate(self):
         pass

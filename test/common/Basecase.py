@@ -221,5 +221,5 @@ class BaseTestCase(TestCase):
         )
 
     def assertRequestPassed(self, response, message):
-        print('response headers -> %s' % response.data)
+        print('response data -> %s' % response.data)
         self.assert200(response, message)
