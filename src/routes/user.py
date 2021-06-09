@@ -50,10 +50,12 @@ def get(uid):
     return response_error("Error on format of the params", {uid: uid})
 
 
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/list/<per_page>/<page>"))
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/list"))
 @check_token_of_user
 def get_users(per_page, page):
     userService = UserService()
+    per_page = request.args.get('per_page', type=int)
+    page = request.args.get('page', type=int)
     if not vaild_per_page(per_page) and isinstance(page, int):
         return response_error("Error on support per page or page number invalid", {'per_page': 'per_page', page: page})
     is_platform = False

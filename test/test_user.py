@@ -9,12 +9,6 @@ from urllib.parse import urlencode
 
 
 class FlaskTestCase(BaseTestCase):
-    def setUp(self):
-        self.testSetUp()
-
-    def tearDown(self):
-        self.testTearDown()
-
     # region Test User List
 
     def test_get_user_list_no_filters_no_order(self):
@@ -30,10 +24,12 @@ class FlaskTestCase(BaseTestCase):
                 'filter_countries[]': [],
                 'filter_inactive': 1,
                 'filter_platform': 1,
-                'order_by[]': []
+                'order_by[]': [],
+                'per_page': 20,
+                'page': 1
             }
             query_string = urlencode(query_params)
-            response = self.request_get('/api/user/list/20/1', token, query_string)
+            response = self.request_get('/api/user/list', token, query_string)
             self.assertRequestPassed(response, 'getting user list request failed')
             response_data = Struct(response.json)
             filters = {

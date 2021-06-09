@@ -35,28 +35,28 @@ def setup_user(email, password, roles):
     user_data = user.__dict__['_data']
     print('owner user {} => {}, {}'.format(email, password, user_data))
     uid = user_data['localId']
-    userService.sync_firebase_user(uid, roles, email, user_data['display_name'], True)
+    userService.sync_firebase_user(uid, roles, email, user_data['displayName'], True)
     print('owner user create {} => {}'.format(email, uid))
 
 
 def setup_owner_user(email, password):
     from src.services.roles import RolesService
     roleSerivce = RolesService()
-    roles = roleSerivce.get_roles([RolesTypes.Owner])
+    roles = roleSerivce.get_roles([RolesTypes.Owner.value])
     setup_user(email, password, roles)
 
 
 def setup_accounts_user(email, password):
     from src.services.roles import RolesService
     roleSerivce = RolesService()
-    roles = roleSerivce.get_roles([RolesTypes.Accounts])
+    roles = roleSerivce.get_roles([RolesTypes.Accounts.value])
     setup_user(email, password, roles)
 
 
 def setup_support_user(email, password):
     from src.services.roles import RolesService
     roleSerivce = RolesService()
-    roles = roleSerivce.get_roles([RolesTypes.SUPPORT])
+    roles = roleSerivce.get_roles([RolesTypes.SUPPORT.value])
     setup_user(email, password, roles)
 
 

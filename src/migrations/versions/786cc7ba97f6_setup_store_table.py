@@ -26,8 +26,8 @@ def upgrade():
                     sa.Column('description', sa.String(length=255), nullable=True),
                     sa.Column('default_currency_code', sa.String(length=3), nullable=False),
                     sa.Column('is_maintenance', sa.Boolean(), nullable=False, default=False),
-                    sa.Column('create_at', sa.DateTime(), default=sa.func.current_timestamp()),
-                    sa.Column('update_at', sa.DateTime(), onupdate=sa.ColumnDefault(sa.func.current_timestamp), default=sa.func.current_timestamp()),
+                    sa.Column('created_at', sa.DateTime(), default=sa.func.current_timestamp()),
+                    sa.Column('updated_at', sa.DateTime(), onupdate=sa.ColumnDefault(sa.func.current_timestamp), default=sa.func.current_timestamp()),
                     sa.PrimaryKeyConstraint('id')
                     )
     # ### end Alembic commands ###

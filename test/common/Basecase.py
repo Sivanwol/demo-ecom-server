@@ -43,10 +43,9 @@ class BaseTestCase(TestCase):
         app.app_context().push()
         return app
 
-    def testSetUp(self):
+    def setUp(self):
         self.userUtils = UserTestUtills(self)
         self.app_context = self.app.app_context()
-        self.app_context.push()
         self.client = self.app.test_client()
         db.create_all()
         db.session.commit()
@@ -55,7 +54,7 @@ class BaseTestCase(TestCase):
         self.init_unit_data()
         Faker.seed(randint(0, 100))
 
-    def testTearDown(self):
+    def tearDown(self):
         db.session.remove()
         db.drop_all()
 
