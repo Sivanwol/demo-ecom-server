@@ -11,8 +11,7 @@ def check_role(*role_names):
     def wrapper(f):
         @wraps(f)
         def decorator(*args, **kwargs):
-            from src.services.user import UserService
-            userService = UserService()
+            from src.routes import userService
             response = verify_response()
             if response is None:
                 try:

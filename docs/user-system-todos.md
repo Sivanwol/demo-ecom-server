@@ -17,7 +17,7 @@ Task for the user system
 
 
 - [x] create logic for getting user by platform and store via filters [ filters: store_code,  emails , full name , country] and order by  [ create_at , full name , email,   stores ]
-    - [ ] Add Test For Get Stores User list With no filters
+    - [x] Add Test For Get Stores User list With no filters
     - [ ] Add Test For Get Stores User list With email filters
     - [ ] Add Test For Get Stores User list With stores filters
     - [ ] Add Test For Get Stores User list With fullname filters

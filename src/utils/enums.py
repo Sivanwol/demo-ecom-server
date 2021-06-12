@@ -27,12 +27,12 @@ class AllowSortByDirection(Enum):
 
 
 class PerPageSupport(Enum):
-    Per20: 20
-    Per30: 30
-    Per50: 50
-    Per75: 75
-    Per100: 100
-    Per200: 200
+    Per20 = 20
+    Per30 = 30
+    Per50 = 50
+    Per75 = 75
+    Per100 = 100
+    Per200 = 200
 
 
 class MediaAssetsType(Enum):

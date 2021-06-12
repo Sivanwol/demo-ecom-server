@@ -2,10 +2,9 @@ from functools import wraps
 
 from flask import request
 
-from src.services.user import UserService
+from src.routes import userService
 from src.utils.common_methods import verify_response
 
-userService = UserService()
 
 
 def check_token_of_user(f):

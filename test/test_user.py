@@ -9,6 +9,11 @@ from urllib.parse import urlencode
 
 
 class FlaskTestCase(BaseTestCase):
+    def setUp(self):
+        self.testSetUp()
+
+    def tearDown(self):
+        self.testTearDown()
     # region Test User List
 
     def test_get_user_list_no_filters_no_order(self):
@@ -22,7 +27,7 @@ class FlaskTestCase(BaseTestCase):
                 'filter_emails[]': [],
                 'filter_stores[]': [],
                 'filter_countries[]': [],
-                'filter_inactive': 1,
+                'filter_inactive': 0,
                 'filter_platform': 1,
                 'order_by[]': [],
                 'per_page': 20,
@@ -36,7 +41,8 @@ class FlaskTestCase(BaseTestCase):
                 'names': [],
                 'emails': [],
                 'stores': [],
-                'countries': []
+                'countries': [],
+                'platform': True
             }
             self.assertIsNotNone(response_data)
             self.assertTrue(response_data.status)
@@ -50,55 +56,6 @@ class FlaskTestCase(BaseTestCase):
             self.assertFalse(response_data.data.meta.next)
             self.assertFalse(response_data.data.meta.prev)
 
-    def test_get_user_list_no_filters_no_order_paginate(self):
-        pass
-
-    def test_get_user_list_email_filters_no_order(self):
-        pass
-
-    def test_get_user_list_fullname_filters_no_order(self):
-        pass
-
-    def test_get_user_list_stores_filters_no_order(self):
-        pass
-
-    def test_get_user_list_platform_filters_no_order(self):
-        pass
-
-    def test_get_user_list_multi_filters_no_order(self):
-        pass
-
-    def test_get_user_list_no_filters_create_at_order(self):
-        pass
-
-    def test_get_user_list_no_filters_email_order(self):
-        pass
-
-    def test_get_user_list_no_filters_fullname_order(self):
-        pass
-
-    def test_get_user_list_no_filters_store_order(self):
-        pass
-
-    def test_get_user_list_no_filters_multi_order(self):
-        pass
-
-    def test_get_user_list_no_filters_unknown_column_order(self):  # get error
-        pass
-
-    def test_get_user_list_platform_filter_user_platform(self):
-        pass
-
-    def test_get_user_list_platform_filter_user_store(self):  # get error
-        pass
-
-    def test_get_user_list_stores_filter_user_platform(self):
-        pass
-
-    def test_get_user_list_stores_filter_user_stores(self):  # need get only it own user no cross stores users
-        pass
-
-    # endregion
 
     # region Test User Actions
 

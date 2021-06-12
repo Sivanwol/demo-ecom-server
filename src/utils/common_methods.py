@@ -7,9 +7,7 @@ from src.utils.firebase_utils import check_user, create_firebase_user
 from src.utils.responses import response_error
 
 
-def verify_uid(uid):
-    from src.services.user import UserService
-    userService = UserService()
+def verify_uid(userService, uid):
     rules = {"uid": "required|min:10"}
     result = validate({"uid": uid}, rules)  # True
     if result:
@@ -23,9 +21,7 @@ def verify_response():
         return response_error({"msg": "Missing JSON in request"}, None, 400)
 
 
-def setup_user(email, password, roles):
-    from src.services.user import UserService
-    userService = UserService()
+def setup_user(userService, email, password, roles):
     user = check_user(email)
     if user is None:
         print("Firebase user creation")
@@ -39,23 +35,17 @@ def setup_user(email, password, roles):
     print('owner user create {} => {}'.format(email, uid))
 
 
-def setup_owner_user(email, password):
-    from src.services.roles import RolesService
-    roleSerivce = RolesService()
+def setup_owner_user(roleSerivce, email, password):
     roles = roleSerivce.get_roles([RolesTypes.Owner.value])
     setup_user(email, password, roles)
 
 
-def setup_accounts_user(email, password):
-    from src.services.roles import RolesService
-    roleSerivce = RolesService()
+def setup_accounts_user(roleSerivce, email, password):
     roles = roleSerivce.get_roles([RolesTypes.Accounts.value])
     setup_user(email, password, roles)
 
 
-def setup_support_user(email, password):
-    from src.services.roles import RolesService
-    roleSerivce = RolesService()
+def setup_support_user(roleSerivce, email, password):
     roles = roleSerivce.get_roles([RolesTypes.SUPPORT.value])
     setup_user(email, password, roles)
 

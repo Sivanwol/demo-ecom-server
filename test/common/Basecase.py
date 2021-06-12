@@ -6,12 +6,11 @@ from faker import Faker
 from firebase_admin import auth
 from flask_testing import TestCase
 
+from config import settings
 from config.api import app
 from config.database import db
+from src.routes import userService, storeService, roleSerivce
 from src.services.firebase import FirebaseService
-from src.services.roles import RolesService
-from src.services.store import StoreService
-from src.services.user import UserService
 from src.utils.enums import RolesTypes
 from src.utils.firebase_utils import create_firebase_user as create_fb_user, setup_firebase_client, login_user
 from src.utils.general import is_json_key_present, Struct
@@ -22,9 +21,6 @@ class BaseTestCase(TestCase):
     """A base test case."""
 
     fake = Faker()
-    userService = UserService()
-    roleService = RolesService()
-    storeService = StoreService()
     TESTING = True
     platform_owner_user = "test+owner@user.com"
     platform_support_user = "test+support@user.com"
@@ -35,18 +31,23 @@ class BaseTestCase(TestCase):
     global_password = "password!0101"
     firebase_client_object = None
     firebaseService = FirebaseService()
+    userService = userService
+    roleService = roleSerivce
+    storeService = storeService
 
     def create_app(self):
         # app.config.from_object('config.TestConfig')
         print(os.environ.get("FLASK_ENV", "development"))
+        print(settings[os.environ.get("FLASK_ENV", "development")].SQLALCHEMY_DATABASE_URI)
         self.firebase_client_object = setup_firebase_client()
         app.app_context().push()
         return app
 
-    def setUp(self):
-        self.userUtils = UserTestUtills(self)
+    def testSetUp(self):
         self.app_context = self.app.app_context()
+        self.app_context.push()
         self.client = self.app.test_client()
+        self.userUtils = UserTestUtills(self)
         db.create_all()
         db.session.commit()
         self.roleService.insert_roles()
@@ -54,7 +55,7 @@ class BaseTestCase(TestCase):
         self.init_unit_data()
         Faker.seed(randint(0, 100))
 
-    def tearDown(self):
+    def testTearDown(self):
         db.session.remove()
         db.drop_all()
 
