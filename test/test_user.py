@@ -62,11 +62,11 @@ class FlaskTestCase(BaseTestCase):
             user_object = self.login_user(self.platform_owner_user)
             token = user_object['idToken']
             uid = user_object['uid']
-            emails = self.userUtils.create_platforms_users()
+            users = self.userUtils.create_platforms_users()
             selected_params = [
-                emails['accounts'][0]['email'],
-                emails['accounts'][1]['email'],
-                emails['support'][0]['email']
+                users['accounts'][0]['email'],
+                users['accounts'][1]['email'],
+                users['support'][0]['email']
             ]
             query_params = {
                 'filter_names': None,
@@ -86,9 +86,9 @@ class FlaskTestCase(BaseTestCase):
             filters = {
                 'names': [],
                 'emails': [
-                    emails['accounts'][0]['email'],
-                    emails['accounts'][1]['email'],
-                    emails['support'][0]['email']
+                    users['accounts'][0]['email'],
+                    users['accounts'][1]['email'],
+                    users['support'][0]['email']
                 ],
                 'stores': [],
                 'countries': [],
@@ -112,11 +112,11 @@ class FlaskTestCase(BaseTestCase):
             user_object = self.login_user(self.platform_owner_user)
             token = user_object['idToken']
             uid = user_object['uid']
-            emails = self.userUtils.create_platforms_users()
+            users = self.userUtils.create_platforms_users()
             selected_params = [
-                emails['accounts'][0]['name'],
-                emails['accounts'][1]['name'],
-                emails['support'][0]['name']
+                users['accounts'][0]['name'],
+                users['accounts'][1]['name'],
+                users['support'][0]['name']
             ]
             query_params = {
                 'filter_names': ','.join(selected_params),
@@ -135,9 +135,9 @@ class FlaskTestCase(BaseTestCase):
             response_data = Struct(response.json)
             filters = {
                 'names': [
-                    emails['accounts'][0]['name'],
-                    emails['accounts'][1]['name'],
-                    emails['support'][0]['name']
+                    users['accounts'][0]['name'],
+                    users['accounts'][1]['name'],
+                    users['support'][0]['name']
                 ],
                 'emails': [],
                 'stores': [],
@@ -161,7 +161,7 @@ class FlaskTestCase(BaseTestCase):
             user_object = self.login_user(self.platform_owner_user)
             token = user_object['idToken']
             uid = user_object['uid']
-            emails = self.userUtils.create_inactive_platform_users()
+            self.userUtils.create_inactive_platform_users()
             query_params = {
                 'filter_names': None,
                 'filter_emails': None,
@@ -201,15 +201,19 @@ class FlaskTestCase(BaseTestCase):
             user_object = self.login_user(self.platform_owner_user)
             token = user_object['idToken']
             uid = user_object['uid']
-            emails = self.userUtils.create_platforms_users()
-            selected_params = [
-                emails['accounts'][0]['email'],
-                emails['accounts'][1]['email'],
-                emails['support'][0]['email']
+            users = self.userUtils.create_platforms_users()
+            selected_params_email = [
+                users['accounts'][0]['email'],
+                users['accounts'][1]['email'],
+                users['support'][0]['email']
+            ]
+            selected_params_name = [
+                users['accounts'][2]['name'].split(' ')[0],
+                users['support'][1]['name'].split(' ')[0]
             ]
             query_params = {
-                'filter_names': None,
-                'filter_emails': ','.join(selected_params),
+                'filter_names': ','.join(selected_params_name),
+                'filter_emails': ','.join(selected_params_email),
                 'filter_stores': None,
                 'filter_countries': None,
                 'filter_inactive': 0,
@@ -223,11 +227,14 @@ class FlaskTestCase(BaseTestCase):
             self.assertRequestPassed(response, 'getting user list request failed')
             response_data = Struct(response.json)
             filters = {
-                'names': [],
+                'names': [
+                    users['accounts'][2]['name'].split(' ')[0],
+                    users['support'][1]['name'].split(' ')[0]
+                ],
                 'emails': [
-                    emails['accounts'][0]['email'],
-                    emails['accounts'][1]['email'],
-                    emails['support'][0]['email']
+                    users['accounts'][0]['email'],
+                    users['accounts'][1]['email'],
+                    users['support'][0]['email']
                 ],
                 'stores': [],
                 'countries': [],
@@ -244,6 +251,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.meta.total_items, users.total)
             self.assertFalse(response_data.data.meta.next)
             self.assertFalse(response_data.data.meta.prev)
+
     # region Test User Actions
 
     def test_check_user_not_active(self):

@@ -56,20 +56,25 @@ class UserService:
     @cache.memoize(50)
     def get_users(self, filters, orders,per_page, page, is_inactive=True):
         query = User.query
+        query_filters = []
+        # setup filter params
         if not filters['platform']:
             if len(filters['stores']) > 0:
-                query = query.filter(User.store_code.in_(tuple(filters['stores'])))
+                query_filters.append(User.store_code.in_(tuple(filters['stores'])))
         else:
             query = query.filter_by(store_code=None)
         if len(filters['emails']) > 0:
-            emails = []
-            for email in filters['emails']:
-                emails.append(email.lower())
-            query = query.filter(User.email.in_(emails))
+            query_filters.append(User.email.in_(tuple(filters['emails'])))
         if len(filters['names']) > 0:
-            query = query.filter(or_(User.fullname.ilike('%{}%'.format(v.lower())) for v in filters['names']))
+            for name in filters['names']:
+                query_filters.append(User.fullname.ilike('%{}%'.format(name.lower())))
         if len(filters['countries']) > 0:
-            query = query.filter(User.country.in_(v for v in filters['countries']))
+            query_filters.append(User.country.in_(tuple(filters['countries'])))
+
+        # building the query filter
+
+        # for query_filter in query_filters:
+        query = query.filter(or_(*query_filters))
         if not is_inactive:
             query = query.filter_by(is_active=True)
         else:
