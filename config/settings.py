@@ -21,7 +21,8 @@ class Config:
     DEBUG = True
     TESTING = False
     PORT = 8000
-
+    SENTRY_ENABLE = os.getenv('SENTRY_ENABLE')
+    SENTRY_URI = os.getenv('SENTRY_URI')
     # firebase config
     GOOGLE_APPLICATION_CREDENTIALS = os.getenv('FIREBASE_SERVICE_CONFIG_FILE')
     FIREBASE_CONFIG = os.getenv('FIREBASE_CONFIG_FILE')
@@ -78,6 +79,7 @@ class TestingConfig(Config):
     ENV = os.environ.get("FLASK_ENV", "testing")
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     DEBUG = True
+    SENTRY_ENABLE = False
     TESTING = True
 
 
