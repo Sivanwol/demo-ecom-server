@@ -105,14 +105,18 @@ class BaseTestCase(TestCase):
         roles = self.roleService.get_roles([RolesTypes.Accounts.value])
         self.userService.sync_firebase_user(self.platform_accounts_object.uid, roles, self.platform_account_user, 'platform account', True)
 
-    def create_user(self, email, roles, initial_state=False, store_code=None):
+    def create_user(self, email, name, roles, initial_state=False, store_code=None, user_data=None, is_active=True):
         user = create_fb_user(email, self.global_password)
         self.assertIsNotNone(user)
         if user is not None:
             auth.delete_user(user.uid)  # we need make sure this user will be delete no point keep at as there a lot of tests
             user = create_fb_user(email, self.global_password)
         roles = self.roleService.get_roles(roles)
-        self.userService.sync_firebase_user(user.uid, roles, email, self.fake.name(), initial_state, store_code)
+        self.userService.sync_firebase_user(user.uid, roles, email, name, initial_state, store_code)
+        if user_data is not None:
+            self.userService.update_user_info(user.uid, user_data)
+        if not is_active:
+            self.userService.toggle_freeze_user(user.uid)
 
     def create_firebase_store_user(self, email):
         user = create_fb_user(email, self.global_password)
@@ -124,7 +128,7 @@ class BaseTestCase(TestCase):
         return user
 
     def create_store(self, email):
-        self.create_user(email, [RolesTypes.StoreOwner.value], True)
+        self.create_user(email, self.fake.name(), [RolesTypes.StoreOwner.value], True)
         user_object = self.login_user(email)
         uid = user_object['uid']
         user_object = self.login_user(self.platform_owner_user)
