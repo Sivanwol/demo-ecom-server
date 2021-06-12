@@ -23,10 +23,10 @@ class FlaskTestCase(BaseTestCase):
             uid = user_object['uid']
             self.userUtils.create_platforms_users()
             query_params = {
-                'filter_fullnames[]': [],
-                'filter_emails[]': [],
-                'filter_stores[]': [],
-                'filter_countries[]': [],
+                'filter_names': None,
+                'filter_emails': None,
+                'filter_stores': None,
+                'filter_countries': None,
                 'filter_inactive': 0,
                 'filter_platform': 1,
                 'order_by[]': [],
@@ -40,6 +40,56 @@ class FlaskTestCase(BaseTestCase):
             filters = {
                 'names': [],
                 'emails': [],
+                'stores': [],
+                'countries': [],
+                'platform': True
+            }
+            self.assertIsNotNone(response_data)
+            self.assertTrue(response_data.status)
+            self.assertIsNotNone(response_data.data)
+            users = self.userService.get_users(filters, [], 20, 1, False)
+            schema = UserSchema()
+            data = schema.dump(users.items , many=True)
+            self.assertListEqual(data , response.json['data']['items'] )
+            self.assertEqual(response_data.data.meta.pages,users.pages)
+            self.assertEqual(response_data.data.meta.total_items,users.total)
+            self.assertFalse(response_data.data.meta.next)
+            self.assertFalse(response_data.data.meta.prev)
+
+
+    def test_get_user_list_email_filters_no_order(self):
+        with self.client:
+            user_object = self.login_user(self.platform_owner_user)
+            token = user_object['idToken']
+            uid = user_object['uid']
+            emails = self.userUtils.create_platforms_users()
+            selected_emails = [
+                emails['accounts'][0],
+                emails['accounts'][1],
+                emails['support'][0]
+            ]
+            query_params = {
+                'filter_names': None,
+                'filter_emails': ','.join(selected_emails),
+                'filter_stores': None,
+                'filter_countries': None,
+                'filter_inactive': 0,
+                'filter_platform': 1,
+                'order_by[]': [],
+                'per_page': 20,
+                'page': 1
+            }
+            query_string = urlencode(query_params)
+            response = self.request_get('/api/user/list', token, query_string)
+            self.assertRequestPassed(response, 'getting user list request failed')
+            response_data = Struct(response.json)
+            filters = {
+                'names': [],
+                'emails': [
+                    emails['accounts'][0],
+                    emails['accounts'][1],
+                    emails['support'][0]
+                ],
                 'stores': [],
                 'countries': [],
                 'platform': True

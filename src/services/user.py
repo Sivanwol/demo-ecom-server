@@ -58,19 +58,22 @@ class UserService:
         query = User.query
         if not filters['platform']:
             if len(filters['stores']) > 0:
-                query = query.filter(User.store_code.in_(code for code in filters['stores']))
+                query = query.filter(User.store_code.in_(tuple(filters['stores'])))
         else:
             query = query.filter_by(store_code=None)
         if len(filters['emails']) > 0:
-            query = query.filter(User.email.lower().in_(email.lower() for email in filters['emails']))
+            emails = []
+            for email in filters['emails']:
+                emails.append(email.lower())
+            query = query.filter(User.email.in_(emails))
         if len(filters['names']) > 0:
-            query = query.filter(or_(User.fullname.lower().like('%{}%'.format(v.lower())) for v in filters['names']))
+            query = query.filter(or_(User.fullname.ilike('%{}%'.format(v.lower())) for v in filters['names']))
         if len(filters['countries']) > 0:
             query = query.filter(User.country.in_(v for v in filters['countries']))
         if not is_inactive:
-            query = query.filter_by(is_active=False)
-        else:
             query = query.filter_by(is_active=True)
+        else:
+            query = query.filter_by(is_active=False)
         if len(orders) <= 0:
             query = query.order_by(User.created_at.desc())
         else:

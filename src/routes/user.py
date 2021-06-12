@@ -62,12 +62,26 @@ def get_users():
         is_inactive = True
 
     filters = {
-        'names': request.args.getlist('filter_fullnames'),
-        'emails': request.args.getlist('filter_emails'),
-        'stores': request.args.getlist('filter_stores'),
-        'countries': request.args.getlist('filter_countries'),
+        'names': [],
+        'emails': [],
+        'stores': [],
+        'countries': [],
         'platform': is_platform,
     }
+
+    if request.args.get('filter_stores') is not None and request.args.get('filter_stores') != 'None':
+        filters['stores'] = request.args.get('filter_stores').split(',')
+
+    if request.args.get('filter_emails') is not None and request.args.get('filter_emails') != 'None':
+        filters['emails'] = request.args.get('filter_emails').split(',')
+
+    if request.args.get('filter_countries') is not None and request.args.get('filter_countries') != 'None':
+        filters['countries'] = request.args.get('filter_countries').split(',')
+
+    if request.args.get('filter_names') is not None and request.args.get('filter_names') != 'None':
+        filters['names'] = request.args.get('filter_names').split(',')
+
+
     orders = request.args.getlist('order_by')
     result = valid_user_list_params(filters, orders)
     if not result:
