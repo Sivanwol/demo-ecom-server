@@ -53,8 +53,9 @@ class UserService:
             return self.user_schema.dump(user, many=False)
         return user
 
+    # todo: need add better filters with the store that include things like store name and more...
     @cache.memoize(50)
-    def get_users(self, filters, orders,per_page, page, is_inactive=True, show_store_users=False):
+    def get_users(self, filters, orders, per_page, page, is_inactive=True, show_store_users=False):
         query = User.query
         query_filters = []
         # setup filter params
@@ -78,10 +79,11 @@ class UserService:
         else:
             query = query.filter_by(is_active=False)
 
-        if show_store_users:
-            query = query.filter(User.store_code.isnot(None))
-        else:
-            query = query.filter_by(store_code=None)
+        if filters['platform']:
+            if show_store_users:
+                query = query.filter(or_(User.store_code.isnot(None), User.store_code == None))
+            else:
+                query = query.filter_by(store_code=None)
 
         if len(orders) <= 0:
             query = query.order_by(User.created_at.desc())

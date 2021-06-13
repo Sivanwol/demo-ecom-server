@@ -110,7 +110,7 @@ class UserTestUtills:
             for key, value in order_by[i].items():
                 object_mapping.append(value)
             order_by_str = order_by_str + '|'.join(object_mapping)
-            if i != 0:
-                order_by_str = ',' + order_by_str
+
+            order_by_str += ","
             i += 1
-        return order_by_str
+        return order_by_str[:-1]

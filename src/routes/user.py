@@ -62,7 +62,7 @@ def get_users():
         is_inactive = True
 
     show_store_users = False
-    if request.args.get('filter_store_users', type=int):
+    if request.args.get('filter_store_users', type=int) and request.args.get('filter_store_users', type=int)  == 1:
         show_store_users = True
 
     filters = {
