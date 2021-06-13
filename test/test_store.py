@@ -10,14 +10,6 @@ class FlaskTestCase(BaseTestCase):
     user_owner = 'store2.owner@store.user'
     store_owner_user = 'store.owner@store.user'
 
-    @unittest.skip
-    def setUp(self):
-        self.testSetUp()
-
-    @unittest.skip
-    def tearDown(self):
-        self.testTearDown()
-
     def test_create_store(self):
         with self.client:
             self.create_user(self.store_owner_user, self.fake.name(), [RolesTypes.StoreOwner.value], True)

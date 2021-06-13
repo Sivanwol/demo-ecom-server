@@ -10,13 +10,6 @@ from urllib.parse import urlencode
 
 
 class FlaskTestCase(BaseTestCase):
-    @unittest.skip
-    def setUp(self):
-        self.testSetUp()
-
-    @unittest.skip
-    def tearDown(self):
-        self.testTearDown()
 
     # region Test User List
 
