@@ -85,11 +85,16 @@ def get_users():
 
     if request.args.get('filter_names') is not None and request.args.get('filter_names') != 'None':
         filters['names'] = request.args.get('filter_names').split(',')
-
-    orders = request.args.getlist('order_by')
-    result = valid_user_list_params(filters, orders)
+    order_by = []
+    for order in request.args.get('order').split(','):
+        temp = order.split('|')
+        order_by.append({
+            'field': temp[0],
+            'sort': temp[1]
+        })
+    result = valid_user_list_params(filters, order_by)
     if not result and isinstance(result, (bool)):
-        return response_error("Error on incorrect params", {'filters': filters, 'orders': orders})
+        return response_error("Error on incorrect params", {'filters': filters, 'orders': order_by})
     filters = result['filters']
     orders = result['orders']
 

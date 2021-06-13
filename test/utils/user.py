@@ -101,3 +101,13 @@ class UserTestUtills:
             len(emails['support'])
         ))
         return emails
+
+    def convert_order_by_list_string(self, order_by):
+        order_by_str = ''
+        for idx, item in order_by:
+            for key, value in item.iteritems():
+                temp = [key, value]
+                order_by_str = order_by_str + '|'.join(temp)
+            if idx != 0:
+                order_by_str = ',' + order_by_str
+        return order_by_str

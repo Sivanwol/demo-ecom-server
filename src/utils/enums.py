@@ -14,7 +14,7 @@ class RolesTypes(Enum):
 
 
 class AllowUserColumnOrderBy(Enum):
-    CreateAt = "create_at"
+    CreateAt = "created_at"
     Fullname = "fullname"
     Email = "email"
     Country = "County"
