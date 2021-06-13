@@ -345,6 +345,53 @@ class FlaskTestCase(BaseTestCase):
             self.assertFalse(response_data.data.meta.next)
             self.assertFalse(response_data.data.meta.prev)
 
+    def test_get_user_list_platform_no_filters_email_order_asc_sort(self):
+        with self.client:
+            user_object = self.login_user(self.platform_owner_user)
+            token = user_object['idToken']
+            uid = user_object['uid']
+            self.userUtils.create_random_of_stores_users()
+            order_by = [{
+                'field': 'email',
+                'sort': 'asc'
+            }]
+            query_params = {
+                'filter_names': None,
+                'filter_emails': None,
+                'filter_stores': None,
+                'filter_countries': None,
+                'filter_store_users': 0,
+                'filter_inactive': 0,
+                'filter_platform': 1,
+                'order_by': self.userUtils.convert_order_by_list_string(order_by),
+                'per_page': 20,
+                'page': 1
+            }
+            query_string = urlencode(query_params)
+            response = self.request_get('/api/user/list', token, query_string)
+            self.assertRequestPassed(response, 'getting user list request failed')
+            response_data = Struct(response.json)
+            filters = {
+                'names': [],
+                'emails': [],
+                'stores': [],
+                'countries': [],
+                'store_users': False,
+                'platform': True
+            }
+            self.assertIsNotNone(response_data)
+            self.assertTrue(response_data.status)
+            self.assertIsNotNone(response_data.data)
+            result = valid_user_list_params(filters, order_by)
+            users = self.userService.get_users(filters, result['orders'], 20, 1, False)
+            schema = UserSchema()
+            data = schema.dump(users.items, many=True)
+            self.assertListEqual(data, response.json['data']['items'])
+            self.assertEqual(response_data.data.meta.pages, users.pages)
+            self.assertEqual(response_data.data.meta.total_items, users.total)
+            self.assertFalse(response_data.data.meta.next)
+            self.assertFalse(response_data.data.meta.prev)
+
     def test_get_user_list_platform_no_filters_email_order_desc_sort(self):
         with self.client:
             user_object = self.login_user(self.platform_owner_user)
