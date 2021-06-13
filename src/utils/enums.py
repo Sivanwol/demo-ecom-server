@@ -13,13 +13,26 @@ class RolesTypes(Enum):
     StoreSupport = 'store_support'
 
 
+class AllowUserColumnOrderBy(Enum):
+    CreateAt = "created_at"
+    Fullname = "fullname"
+    Email = "email"
+    Country = "County"
+    Store = "store_code"
+
+
+class AllowSortByDirection(Enum):
+    DESC = "desc"
+    ASC = "asc"
+
+
 class PerPageSupport(Enum):
-    Per20: 20
-    Per30: 30
-    Per50: 50
-    Per75: 75
-    Per100: 100
-    Per200: 200
+    Per20 = 20
+    Per30 = 30
+    Per50 = 50
+    Per75 = 75
+    Per100 = 100
+    Per200 = 200
 
 
 class MediaAssetsType(Enum):
@@ -27,4 +40,3 @@ class MediaAssetsType(Enum):
     Video = 2
     Document = 3
     Unknown = 4
-

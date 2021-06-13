@@ -1,5 +1,3 @@
-import json
-
 from flask import jsonify
 
 
@@ -12,7 +10,7 @@ def generic_response(code, data, message=None, params=None):
     }), code
 
 
-def response_error(message, params=None, status_code=500):
+def response_error(message, params=None, status_code=400):
     if params is None:
         params = {}
     return generic_response(status_code, None, message, params)

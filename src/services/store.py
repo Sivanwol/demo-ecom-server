@@ -9,7 +9,7 @@ from src.models.store_hours import StoreHours
 from src.models.store_locations import StoreLocations
 from src.models.stores import Store
 from src.schemas.store_schema import StoreSchema, StoreLocationSchema, StoreHourSchema
-from src.utils.validations import valid_currency
+from src.utils.validations import valid_currency_code
 
 storeSchema = StoreSchema()
 storeLocationSchema = StoreLocationSchema()
@@ -116,7 +116,7 @@ class StoreService:
         return self.get_store(owner_uid, store_code)
 
     def update_store_info(self, owner_uid, store_code, store_object):
-        if not valid_currency(store_object.currency_code):
+        if not valid_currency_code(store_object.currency_code):
             raise ParamsNotMatchCreateStore(owner_uid, store_object.name, store_object.currency_code, None, store_object.description)
         self.clear_stores_cache()
         store = self.get_store(owner_uid, store_code, True)
@@ -138,7 +138,7 @@ class StoreService:
         StoreHours.query.filter_by(store_id=store.id).delete()
 
     def create_store(self, owner_id, store_object):
-        if not valid_currency(store_object['currency_code']):
+        if not valid_currency_code(store_object['currency_code']):
             raise ParamsNotMatchCreateStore(owner_id, store_object['name'], store_object['currency_code'], store_object['description'])
         self.clear_stores_cache()
         store_code = "%s" % uuid.uuid4()

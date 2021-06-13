@@ -27,8 +27,8 @@ def upgrade():
                     sa.Column('address1', sa.String(length=255), nullable=True),
                     sa.Column('address2', sa.String(length=255), nullable=True),
                     sa.Column('is_active', sa.Boolean(), nullable=True),
-                    sa.Column('create_at', sa.DateTime(), default=sa.func.current_timestamp()),
-                    sa.Column('update_at', sa.DateTime(), onupdate=sa.ColumnDefault(sa.func.current_timestamp), default=sa.func.current_timestamp()),
+                    sa.Column('created_at', sa.DateTime(), default=sa.func.current_timestamp()),
+                    sa.Column('updated_at', sa.DateTime(), onupdate=sa.ColumnDefault(sa.func.current_timestamp), default=sa.func.current_timestamp()),
                     sa.PrimaryKeyConstraint('id')
                     )
     # ### end Alembic commands ###

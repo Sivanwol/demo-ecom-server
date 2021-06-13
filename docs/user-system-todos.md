@@ -11,15 +11,23 @@ Task for the user system
 - [x] Add Test for route that add user staff by the owner as passed
 - [x] Add Test for route that add user staff not by the owner as passed
 - [x] Add Test for route that add user staff bt platform support
-- [ ] Add Test for route that add user staff by the owner of different store as not passed
+- [x] Add Test for route that add user staff by the owner of different store as not passed
 
 ### Tests get user queries Route
 
 
-- [ ] create logic for getting user by platform and store via filters [ filters: store_code, platform , emails , full name , country] and order by  [ create_at , full name , email,  id, platform ,  stores ]
-    - [ ] Add Test For Get Platform And Stores User list
-    - [ ] Add Test For Get Platform User list With correct user
-    - [ ] Add Test For Get Platform User list With wrong correct user
-    - [ ] Add Test For Get Store Users
+- [x] create logic for getting user by platform and store via filters [ filters: store_code,  emails , full name , country] and order by  [ create_at , full name , email,   stores ]
+    - [x] Add Test For Get Platform User list With no filters
+    - [x] Add Test For Get Platform User list With email filters
+    - [x] Add Test For Get Platform User list With fullname filters
+    - [x] Add Test For Get Platform User list With inactive filters
+    - [x] Add Test For Get Platform User list With multi filters [ fullname, email]
+    - [x] Add Test For Get Platform User list get all stores with no filters
+    - [x] Add Test For Get Platform User list With stores filters
+    - [x] Add Test For Get Platform User list With order by ->  email order provided sort desc
+    - [x] Add Test For Get Platform User list With order by ->  email order provided sort asc
+    - [x] Add Test For Get Platform User list With order by ->  store,fullname order provided
+    - [x] Add Test For Get Platform User list paginate (test 3 pages)
+    - [x] Add Test For Get Stores User list With no filters
 
 

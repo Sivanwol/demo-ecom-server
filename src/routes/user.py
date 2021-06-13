@@ -5,29 +5,23 @@ from firebase_admin.auth import UserNotFoundError
 from firebase_admin.exceptions import FirebaseError
 from flask import request
 from marshmallow import ValidationError
-
 from config import settings
 from config.api import app as current_app
 from src.middlewares.check_role import check_role
 from src.middlewares.check_token import check_token_register_firebase_user, check_token_of_user
+from src.routes import userService, storeService, roleSerivce
 from src.schemas.requests.user import UserRolesList, CreateStoreStaffUser, UpdateUserInfo
-from src.services.roles import RolesService
-from src.services.store import StoreService
-from src.services.user import UserService
+from src.schemas.user_schema import UserSchema
 from src.utils.enums import RolesTypes
 from src.utils.general import Struct
 from src.utils.responses import response_error, response_success, response_success_paging
 from src.utils.common_methods import verify_uid
-from src.utils.validations import valid_countryCode, valid_currency, vaild_per_page
-
-roleSerivce = RolesService()
-userService = UserService()
-storeService = StoreService()
+from src.utils.validations import vaild_per_page, valid_user_list_by_permissions, valid_currency_code, valid_country_code, valid_user_list_params
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>"))
 def get(uid):
-    if verify_uid(uid):
+    if verify_uid(userService, uid):
         try:
             firebase_response = {
                 'display_name': '',
@@ -52,10 +46,77 @@ def get(uid):
     return response_error("Error on format of the params", {uid: uid})
 
 
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/list"))
+@check_token_of_user
+def get_users():
+    per_page = request.args.get('per_page', type=int)
+    page = request.args.get('page', type=int)
+    if not vaild_per_page(per_page) and isinstance(page, int):
+        return response_error("Error on support per page or page number invalid", {'per_page': 'per_page', page: page},400)
+    is_platform = False
+    if request.args.get('filter_platform', type=int):
+        is_platform = True
+
+    is_inactive = False
+    if request.args.get('filter_inactive', type=int):
+        is_inactive = True
+
+    show_store_users = False
+    if request.args.get('filter_store_users', type=int) and request.args.get('filter_store_users', type=int) == 1:
+        show_store_users = True
+
+    filters = {
+        'names': [],
+        'emails': [],
+        'stores': [],
+        'countries': [],
+        'store_users': show_store_users,
+        'platform': is_platform,
+    }
+
+    if request.args.get('filter_stores') is not None and request.args.get('filter_stores') != 'None':
+        filters['stores'] = request.args.get('filter_stores').split(',')
+
+    if request.args.get('filter_emails') is not None and request.args.get('filter_emails') != 'None':
+        filters['emails'] = request.args.get('filter_emails').split(',')
+
+    if request.args.get('filter_countries') is not None and request.args.get('filter_countries') != 'None':
+        filters['countries'] = request.args.get('filter_countries').split(',')
+
+    if request.args.get('filter_names') is not None and request.args.get('filter_names') != 'None':
+        filters['names'] = request.args.get('filter_names').split(',')
+    order_by = []
+
+    if request.args.get('order_by') is not None and request.args.get('order_by') != 'None' and request.args.get('order_by') != '':
+        for order in request.args.get('order_by').split(','):
+            temp = order.split('|')
+            order_by.append({
+                'field': temp[0],
+                'sort': temp[1]
+            })
+    result = valid_user_list_params(filters, order_by)
+    if not result and isinstance(result, (bool)):
+        return response_error("Error on incorrect params", {'filters': filters, 'orders': order_by}, 400)
+    filters = result['filters']
+    orders = result['orders']
+
+    result = valid_user_list_by_permissions(userService, request.uid, filters)
+    if not result:
+        return response_error("restricted access to some of the filter params", {'filters': filters, 'orders': orders}, 400)
+    if not isinstance(result, (bool)):
+        filters['platform'] = result['platform']
+        filters['stores'] = result['stores']
+        show_store_users = result['store_users']
+
+    result = userService.get_users(filters, orders, int(per_page), int(page), is_inactive, show_store_users)
+    schema = UserSchema()
+    return response_success_paging(schema.dump(result.items, many=True), result.total, result.pages, result.has_next, result.has_prev)
+
+
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/toggle_active"), methods=["PUT"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
 def user_toggle_active(uid):
-    if verify_uid(uid):
+    if verify_uid(userService, uid):
         try:
             userService.toggle_freeze_user(uid)
             return response_success({})
@@ -70,7 +131,7 @@ def user_toggle_active(uid):
     return response_error("Error on format of the params", {uid: uid})
 
 
-# Todo: Add test for this route
+# Todo: need refactor this
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/platform/list/<per_page>/<page>"), methods=["GET"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value, RolesTypes.Support.value])
 def get_platform_users(per_page, page):
@@ -81,7 +142,7 @@ def get_platform_users(per_page, page):
     return response_success_paging(result.items, result.total, result.pages, result.has_next, result.has_prev)
 
 
-# Todo: Add test for this route
+# Todo: Need refactor this
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/store/<store_code>/list/<per_page>/<page>"),
                    methods=["GET"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreAccount.value, RolesTypes.StoreOwner.value, RolesTypes.StoreSupport.value])
@@ -99,7 +160,7 @@ def get_store_users(store_code, per_page, page):
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/passed_tutorial"), methods=["PUT"])
 @check_token_of_user
 def mark_user_passed_tutorial(uid):
-    if verify_uid(uid):
+    if verify_uid(userService, uid):
         try:
             userService.mark_user_passed_tutorial(uid)
             return response_success({})
@@ -125,20 +186,19 @@ def update_user_info():
     except ValidationError as e:
         return response_error("Error on format of the params", {'params': request.json})
     data = Struct(data)
-    if not valid_currency(data.currency) or not valid_countryCode(data.country):
+    if not valid_currency_code(data.currency) or not valid_country_code(data.country):
         return response_error("Error on format of the params", {'params': request.json})
     uid = request.uid
     userService.update_user_info(uid, data)
     return response_success({})
 
 
-# Todo: Add test for this route
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/update"), methods=["PUT"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreSupport.value])
 def update_user_info_by_support_user(uid):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
-    if verify_uid(uid):
+    if verify_uid(userService, uid):
         if userService.user_has_role_matched(request.uid, [RolesTypes.StoreSupport.value]):
             user = userService.get_user(uid, True)
             requester_user = userService.get_user(request.uid, True)
@@ -151,7 +211,7 @@ def update_user_info_by_support_user(uid):
         except ValidationError as e:
             return response_error("Error on format of the params", {'params': request.json})
         data = Struct(data)
-        if not valid_currency(data.currency) or not valid_countryCode(data.country):
+        if not valid_currency_code(data.currency) or not valid_country_code(data.country):
             return response_error("Error on format of the params", {'params': request.json})
         userService.update_user_info(uid, data)
         return response_success({})
@@ -159,7 +219,7 @@ def update_user_info_by_support_user(uid):
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/staff/<store_code>"), methods=["POST"])
-@check_role([RolesTypes.Support.value,RolesTypes.StoreSupport.value, RolesTypes.StoreOwner.value])
+@check_role([RolesTypes.Support.value, RolesTypes.StoreSupport.value, RolesTypes.StoreOwner.value])
 def create_store_stuff(store_code):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
@@ -195,7 +255,7 @@ def create_store_stuff(store_code):
 def sync_platform_user_create(uid):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
-    if verify_uid(uid):
+    if verify_uid(userService, uid):
         try:
             body = request.json()
             bodyObj = {"role_names": ', '.join(body['role_names'])}
@@ -221,7 +281,7 @@ def sync_platform_user_create(uid):
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/bind/<store_code>"), methods=["POST"])
 @check_token_register_firebase_user
 def sync_store_user_create(uid, store_code):
-    if not verify_uid(uid):
+    if not verify_uid(userService, uid):
         try:
             has_store = storeService.store_exists(uid, store_code)
             if has_store is None:
@@ -243,7 +303,7 @@ def sync_user_from_firebase_user(uid, role_names, is_platform_user, store_code=N
     response = {'user': json.dumps(user_object, indent=4), 'extend_info': None}
     roles = roleSerivce.get_roles(role_names)
     email = user_object['email']
-    fullname = user_object['display_name']
-    userService.sync_firebase_user(uid, email, fullname, roles, is_platform_user, store_code, new_user)
+    fullname = user_object['displayName']
+    userService.sync_firebase_user(uid, roles, email, fullname, is_platform_user, store_code, new_user)
     response['extend_info'] = userService.get_user(uid)
     return response

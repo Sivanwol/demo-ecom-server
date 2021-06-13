@@ -6,24 +6,21 @@ from faker import Faker
 from firebase_admin import auth
 from flask_testing import TestCase
 
+from config import settings
 from config.api import app
 from config.database import db
+from src.routes import userService, storeService, roleSerivce
 from src.services.firebase import FirebaseService
-from src.services.roles import RolesService
-from src.services.store import StoreService
-from src.services.user import UserService
 from src.utils.enums import RolesTypes
 from src.utils.firebase_utils import create_firebase_user as create_fb_user, setup_firebase_client, login_user
 from src.utils.general import is_json_key_present, Struct
+from test.utils.user import UserTestUtills
 
 
 class BaseTestCase(TestCase):
     """A base test case."""
 
     fake = Faker()
-    userService = UserService()
-    roleService = RolesService()
-    storeService = StoreService()
     TESTING = True
     platform_owner_user = "test+owner@user.com"
     platform_support_user = "test+support@user.com"
@@ -34,18 +31,23 @@ class BaseTestCase(TestCase):
     global_password = "password!0101"
     firebase_client_object = None
     firebaseService = FirebaseService()
+    userService = userService
+    roleService = roleSerivce
+    storeService = storeService
 
     def create_app(self):
         # app.config.from_object('config.TestConfig')
         print(os.environ.get("FLASK_ENV", "development"))
+        print(settings[os.environ.get("FLASK_ENV", "development")].SQLALCHEMY_DATABASE_URI)
         self.firebase_client_object = setup_firebase_client()
         app.app_context().push()
         return app
 
-    def testSetUp(self):
+    def setUp(self):
         self.app_context = self.app.app_context()
         self.app_context.push()
         self.client = self.app.test_client()
+        self.userUtils = UserTestUtills(self)
         db.create_all()
         db.session.commit()
         self.roleService.insert_roles()
@@ -53,7 +55,7 @@ class BaseTestCase(TestCase):
         self.init_unit_data()
         Faker.seed(randint(0, 100))
 
-    def testTearDown(self):
+    def tearDown(self):
         db.session.remove()
         db.drop_all()
 
@@ -103,14 +105,18 @@ class BaseTestCase(TestCase):
         roles = self.roleService.get_roles([RolesTypes.Accounts.value])
         self.userService.sync_firebase_user(self.platform_accounts_object.uid, roles, self.platform_account_user, 'platform account', True)
 
-    def create_user(self, email, roles, initial_state=False, store_code=None):
+    def create_user(self, email, name, roles, initial_state=False, store_code=None, user_data=None, is_active=True):
         user = create_fb_user(email, self.global_password)
         self.assertIsNotNone(user)
         if user is not None:
             auth.delete_user(user.uid)  # we need make sure this user will be delete no point keep at as there a lot of tests
             user = create_fb_user(email, self.global_password)
         roles = self.roleService.get_roles(roles)
-        self.userService.sync_firebase_user(user.uid, roles, email, self.fake.name(), initial_state, store_code)
+        self.userService.sync_firebase_user(user.uid, roles, email, name, initial_state, store_code)
+        if user_data is not None:
+            self.userService.update_user_info(user.uid, user_data)
+        if not is_active:
+            self.userService.toggle_freeze_user(user.uid)
 
     def create_firebase_store_user(self, email):
         user = create_fb_user(email, self.global_password)
@@ -121,8 +127,8 @@ class BaseTestCase(TestCase):
         self.assertIsNotNone(user)
         return user
 
-    def create_store(self, email):
-        self.create_user(email, [RolesTypes.StoreOwner.value], True)
+    def create_store(self, email, name):
+        self.create_user(email, name, [RolesTypes.StoreOwner.value], True)
         user_object = self.login_user(email)
         uid = user_object['uid']
         user_object = self.login_user(self.platform_owner_user)
@@ -137,7 +143,7 @@ class BaseTestCase(TestCase):
             'description': 'store description',
             'currency_code': currency_code
         }
-        response = self.request_post('/api/store/%s/create' % uid, owner_token, None, post_data)
+        response = self.request_post('/api/store/%s/create' % uid, owner_token, None, None, post_data)
         self.assert200(response, 'create store request failed')
         user = self.userService.get_user(uid, True)
         response_data = Struct(response.json)
@@ -150,58 +156,74 @@ class BaseTestCase(TestCase):
         self.assertEqual(response_data.data.info.store_code, user.store_code)
         return response_data
 
-    def request_get(self, url, token, extra_headers=None):
+    def request_get(self, url, token, query_string=None, extra_headers=None):
         if extra_headers is None:
             extra_headers = {}
+        if query_string is None:
+            query_string = {}
         headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token} | extra_headers
         print('request get -> %s' % url)
+        print('request query string -> %s' % json.dumps(query_string))
         print('request headers -> %s' % json.dumps(headers))
         return self.client.get(
             url,
+            query_string=query_string,
             headers=headers
         )
 
-    def request_put(self, url, token, extra_headers=None, data=None):
+    def request_put(self, url, token, query_string=None, extra_headers=None, data=None):
         if data is None:
             data = {}
         if extra_headers is None:
             extra_headers = {}
+        if query_string is None:
+            query_string = {}
         headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token} | extra_headers
         print('request put -> %s' % url)
+        print('request query string -> %s' % json.dumps(query_string))
         print('request headers -> %s' % json.dumps(headers))
         print('request put data-> %s' % json.dumps(data))
         return self.client.put(
             url,
+            query_string=query_string,
             data=json.dumps(data),
             headers=headers
         )
 
-    def request_post(self, url, token, extra_headers=None, data=None):
+    def request_post(self, url, token, query_string=None, extra_headers=None, data=None):
         if extra_headers is None:
             extra_headers = {}
         if data is None:
             data = {}
+        if query_string is None:
+            query_string = {}
         headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token} | extra_headers
         print('request post -> %s' % url)
+        print('request query string -> %s' % json.dumps(query_string))
         print('request headers -> %s' % json.dumps(headers))
         print('request post data-> %s' % json.dumps(data))
         return self.client.post(
             url,
             data=json.dumps(data),
+            query_string=query_string,
             headers=headers
         )
 
-    def request_delete(self, url, token, extra_headers=None):
+    def request_delete(self, url, token, query_string=None, extra_headers=None):
         if extra_headers is None:
             extra_headers = {}
+        if query_string is None:
+            query_string = {}
         headers = {'Content-Type': 'application/json', 'Authorization': 'Bearer %s' % token} | extra_headers
         print('request delete -> %s' % url)
+        print('request query string -> %s' % json.dumps(query_string))
         print('request headers -> %s' % json.dumps(headers))
         return self.client.delete(
             url,
+            query_string=query_string,
             headers=headers
         )
 
     def assertRequestPassed(self, response, message):
-        print('response headers -> %s' % response.data)
+        print('response data -> %s' % response.data)
         self.assert200(response, message)

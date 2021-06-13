@@ -1,12 +1,13 @@
 import firebase_admin
 from firebase_admin import auth
-from sqlalchemy import or_
+from sqlalchemy import or_, desc, asc
 
 from config.api import cache
 from config.database import db
 from src.models import User
 from src.models.stores import Store
 from src.schemas.user_schema import UserSchema
+from src.utils.enums import AllowSortByDirection
 from src.utils.firebase_utils import create_firebase_user
 from src.utils.responses import response_error
 from src.utils.singleton import singleton
@@ -52,15 +53,47 @@ class UserService:
             return self.user_schema.dump(user, many=False)
         return user
 
+    # todo: need add better filters with the store that include things like store name and more...
     @cache.memoize(50)
-    def get_users(self, filter_active=False, return_model=False):
+    def get_users(self, filters, orders, per_page, page, is_inactive=False, show_store_users=False):
         query = User.query
-        if filter_active:
+        query_filters = []
+        # setup filter params
+        if not filters['platform']:
+            if len(filters['stores']) > 0:
+                query_filters.append(User.store_code.in_(tuple(filters['stores'])))
+        if len(filters['emails']) > 0:
+            query_filters.append(User.email.in_(tuple(filters['emails'])))
+        if len(filters['names']) > 0:
+            for name in filters['names']:
+                query_filters.append(User.fullname.ilike('%{}%'.format(name.lower())))
+        if len(filters['countries']) > 0:
+            query_filters.append(User.country.in_(tuple(filters['countries'])))
+
+        # building the query filter
+
+        # for query_filter in query_filters:
+        query = query.filter(or_(*query_filters))
+        if not is_inactive:
             query = query.filter_by(is_active=True)
-        users = query.order_by(User.created_at.desc()).all()
-        if not return_model:
-            return self.user_schema.dump(users, many=True)
-        return users
+        else:
+            query = query.filter_by(is_active=False)
+
+        if filters['platform']:
+            if show_store_users:
+                query = query.filter(or_(User.store_code.isnot(None), User.store_code == None))
+            else:
+                query = query.filter_by(store_code=None)
+
+        if len(orders) <= 0:
+            query = query.order_by(User.created_at.desc())
+        else:
+            for order in orders:
+                if order['sort'] == AllowSortByDirection.DESC:
+                    query = query.order_by(desc(order['field'].value))
+                else:
+                    query = query.order_by(asc(order['field'].value))
+        return query.paginate(page=page, per_page=per_page, error_out=False)
 
     @cache.memoize(50)
     def get_active_user(self, uid, return_model=False):
@@ -146,6 +179,7 @@ class UserService:
         self.sync_firebase_user(uid, roles, email, fullname, True, store_code, True)
         return self.get_user(uid)
 
+    # TODO: Remove this method
     def query_platform_users(self, filters, per_page, page, include_stores=False):
         users = User.query
         if not include_stores:
@@ -157,11 +191,12 @@ class UserService:
         users.order_by(User.store_code.desc(), User.fullname.desc())
         return users.paginate(page, per_page, False)
 
+    # TODO: Remove this method
     def query_store_users(self, store_code, filters, per_page, page):
         users = User.query.filter_by(store_code=store_code)
         names = filters['names']
         if len(names) > 0:
-            users.filter(or_(User.fullname.like('%{}%'.format(v)) for v in names))
+            users.filter(or_(User.fullname.lower().like('%{}%'.format(v.lower()) for v in names)))
         users.order_by(User.fullname.desc())
         return users.paginate(page, per_page, False)
 
