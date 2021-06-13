@@ -7,6 +7,7 @@ from src.utils.general import Struct
 from test.common.Basecase import BaseTestCase
 from urllib.parse import urlencode
 
+
 class FlaskTestCase(BaseTestCase):
     def setUp(self):
         self.testSetUp()
@@ -285,7 +286,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertIsNotNone(response_data)
             self.assertTrue(response_data.status)
             self.assertIsNotNone(response_data.data)
-            users = self.userService.get_users(filters, [], 20, 1, True)
+            users = self.userService.get_users(filters, [], 20, 1, True, True)
             schema = UserSchema()
             data = schema.dump(users.items, many=True)
             self.assertListEqual(data, response.json['data']['items'])
