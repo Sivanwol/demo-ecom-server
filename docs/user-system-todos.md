@@ -22,18 +22,14 @@ Task for the user system
     - [x] Add Test For Get Platform User list With fullname filters
     - [x] Add Test For Get Platform User list With inactive filters
     - [x] Add Test For Get Platform User list With multi filters [ fullname, email]
-    - [ ] Add Test For Get Platform User list With stores filters
-    - [ ] Add Test For Get Platform User list With multi filters [ stores,fullname]
+    - [x] Add Test For Get Platform User list With stores filters
+    - [ ] Add Test For Get Platform User list With order by ->  email order provided
+    - [ ] Add Test For Get Platform User list With order by ->  store,fullname order provided
     - [ ] Add Test For Get Stores User list With no filters
     - [ ] Add Test For Get Stores User list With email filters
     - [ ] Add Test For Get Stores User list With fullname filters
     - [ ] Add Test For Get Stores User list With inactive filters
     - [ ] Add Test For Get Stores User list With multi filters [ fullname, stores]
-    - [ ] Add Test For Get Stores User list With order by ->  no order provided
-    - [ ] Add Test For Get Stores User list With order by ->  email order provided
-    - [ ] Add Test For Get Stores User list With order by ->  fullname order provided
-    - [ ] Add Test For Get Stores User list With order by ->  store order provided
-    - [ ] Add Test For Get Stores User list With order by ->  create_at order provided
     - [ ] Add Test For Get Platform User list With multi order by ->  store,email order provided
     - [ ] Add Test For Get Stores User list With unknown column  order by-> get 400 (invalid params)
     - [ ] Add Test For Get Stores User list paginate (test 3 pages)

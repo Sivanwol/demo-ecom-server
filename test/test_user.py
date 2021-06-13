@@ -286,7 +286,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertIsNotNone(response_data)
             self.assertTrue(response_data.status)
             self.assertIsNotNone(response_data.data)
-            users = self.userService.get_users(filters, [], 20, 1, True, True)
+            users = self.userService.get_users(filters, [], 20, 1, False, True)
             schema = UserSchema()
             data = schema.dump(users.items, many=True)
             self.assertListEqual(data, response.json['data']['items'])
