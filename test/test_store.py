@@ -10,9 +10,11 @@ class FlaskTestCase(BaseTestCase):
     user_owner = 'store2.owner@store.user'
     store_owner_user = 'store.owner@store.user'
 
+    @unittest.skip
     def setUp(self):
         self.testSetUp()
 
+    @unittest.skip
     def tearDown(self):
         self.testTearDown()
 
