@@ -9,7 +9,8 @@ class UserTestUtills:
         emails = {
             'accounts': [],
             'support': [],
-            'stores': []
+            'stores': [],
+            'stores_staff': []
         }
         for i in range(6, 15):
             name = self.test_object.fake.name()
@@ -52,6 +53,30 @@ class UserTestUtills:
             emails['support'].append(user_info)
             self.test_object.create_user(email, name, [RolesTypes.Support.value], True, None, None, False)
 
+    def create_store_users(self):
+        emails = self.create_platforms_users()
+        name = self.test_object.fake.name()
+        email = self.test_object.fake.email()
+        store_info = self.test_object.create_store(email, name)
+        user_info = {
+            'email': email,
+            'name': name,
+            'store_code': store_info.data.info.store_code
+        }
+        emails['stores'].append(user_info)
+        for i in range(5):
+            name = self.test_object.fake.name()
+            email = self.test_object.fake.email()
+            self.test_object.create_user(email, name, [RolesTypes.StoreSupport.value], False, store_info.data.info.store_code)
+            user_info = {
+                'email': email,
+                'name': name,
+                'store_code': store_info.data.info.store_code
+            }
+            emails['stores_staff'].append(user_info)
+
+        return emails
+
     def create_random_of_stores_users(self):
         emails = self.create_platforms_users()
 
@@ -71,7 +96,8 @@ class UserTestUtills:
         emails = {
             'accounts': [],
             'support': [],
-            'stores': []
+            'stores': [],
+            'stores_staff': []
         }
 
         for i in range(2, 5):

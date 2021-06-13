@@ -557,6 +557,49 @@ class FlaskTestCase(BaseTestCase):
             self.assertFalse(response_data.data.meta.next)
             self.assertTrue(response_data.data.meta.prev)
 
+    def test_get_user_list_store_stores_filters_no_order(self):
+        with self.client:
+            self.assertEqual.__self__.maxDiff = None
+            user_object = self.login_user(self.platform_owner_user)
+            token = user_object['idToken']
+            uid = user_object['uid']
+            users = self.userUtils.create_store_users()
+            query_params = {
+                'filter_names': None,
+                'filter_emails': None,
+                'filter_stores': users['stores'][0]['store_code'],
+                'filter_countries': None,
+                'filter_store_users': 0,
+                'filter_inactive': 0,
+                'filter_platform': 0,
+                'order_by': '',
+                'per_page': 20,
+                'page': 1
+            }
+            query_string = urlencode(query_params)
+            response = self.request_get('/api/user/list', token, query_string)
+            self.assertRequestPassed(response, 'getting user list request failed')
+            response_data = Struct(response.json)
+            filters = {
+                'names': [],
+                'emails': [],
+                'stores': [users['stores'][0]['store_code']],
+                'countries': [],
+                'store_users': False,
+                'platform': False
+            }
+            self.assertIsNotNone(response_data)
+            self.assertTrue(response_data.status)
+            self.assertIsNotNone(response_data.data)
+            users = self.userService.get_users(filters, [], 20, 1)
+            schema = UserSchema()
+            data = schema.dump(users.items, many=True)
+            self.assertListEqual(data, response.json['data']['items'])
+            self.assertEqual(response_data.data.meta.pages, users.pages)
+            self.assertEqual(response_data.data.meta.total_items, users.total)
+            self.assertFalse(response_data.data.meta.next)
+            self.assertFalse(response_data.data.meta.prev)
+
     # region Test User Actions
 
     def test_check_user_not_active(self):

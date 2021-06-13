@@ -55,7 +55,7 @@ class UserService:
 
     # todo: need add better filters with the store that include things like store name and more...
     @cache.memoize(50)
-    def get_users(self, filters, orders, per_page, page, is_inactive=True, show_store_users=False):
+    def get_users(self, filters, orders, per_page, page, is_inactive=False, show_store_users=False):
         query = User.query
         query_filters = []
         # setup filter params

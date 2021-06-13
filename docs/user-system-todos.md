@@ -28,6 +28,6 @@ Task for the user system
     - [x] Add Test For Get Platform User list With order by ->  email order provided sort asc
     - [x] Add Test For Get Platform User list With order by ->  store,fullname order provided
     - [x] Add Test For Get Platform User list paginate (test 3 pages)
-    - [ ] Add Test For Get Stores User list With no filters
+    - [x] Add Test For Get Stores User list With no filters
 
 

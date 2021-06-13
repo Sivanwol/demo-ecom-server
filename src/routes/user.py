@@ -87,7 +87,7 @@ def get_users():
         filters['names'] = request.args.get('filter_names').split(',')
     order_by = []
 
-    if request.args.get('order_by') is not None and request.args.get('order_by') != 'None':
+    if request.args.get('order_by') is not None and request.args.get('order_by') != 'None' and request.args.get('order_by') != '':
         for order in request.args.get('order_by').split(','):
             temp = order.split('|')
             order_by.append({
