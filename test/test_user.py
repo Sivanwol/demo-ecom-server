@@ -717,11 +717,12 @@ class FlaskTestCase(BaseTestCase):
         self.assertEqual(user.currency, currency)
 
     def test_user_update_info_as_store_support_invalid(self):
-        store_customer_user = "customer@gmail.com"
-        store_owner_user = "user2@gmail.com"
-        store_support_user = "support_store@gmail.com"
+        store_customer_user = self.fake.email()
+        store_owner_user = self.fake.email()
+        store_diff_owner_user = self.fake.email()
+        store_support_user = self.fake.email()
         store_info = self.create_store(store_owner_user, self.fake.name())
-        diff_store_info = self.create_store(store_owner_user, self.fake.name())
+        diff_store_info = self.create_store(store_diff_owner_user, self.fake.name())
 
         self.create_user(store_customer_user, self.fake.name(), [RolesTypes.StoreCustomer.value], False, diff_store_info.data.info.store_code)
         self.create_user(store_support_user, self.fake.name(), [RolesTypes.StoreSupport.value], False, store_info.data.info.store_code)
@@ -744,7 +745,7 @@ class FlaskTestCase(BaseTestCase):
             'country': country
         }
         response = self.request_put('/api/user/{}/update'.format(uid), token, None, None, post_data)
-        self.assert500(response, 'update user info passed with invalid user store entered (diff store_code)')
+        self.assert400(response, 'update user info passed with invalid user store entered (diff store_code)')
 
     def test_add_store_staff_by_store_owner(self):
         store_owner_user = "user@gmail.com"
@@ -844,7 +845,7 @@ class FlaskTestCase(BaseTestCase):
 
         }
         response = self.request_post('/api/user/staff/%s' % store_info.data.info.store_code, token, None, None, post_data)
-        self.assert500(response, 'update store staff user request passed with invalid user store entered (diff store_code)')
+        self.assert400(response, 'update store staff user request passed with invalid user store entered (diff store_code)')
 
     # endregion
 

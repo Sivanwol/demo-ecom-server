@@ -52,7 +52,7 @@ def get_users():
     per_page = request.args.get('per_page', type=int)
     page = request.args.get('page', type=int)
     if not vaild_per_page(per_page) and isinstance(page, int):
-        return response_error("Error on support per page or page number invalid", {'per_page': 'per_page', page: page})
+        return response_error("Error on support per page or page number invalid", {'per_page': 'per_page', page: page},400)
     is_platform = False
     if request.args.get('filter_platform', type=int):
         is_platform = True
@@ -62,7 +62,7 @@ def get_users():
         is_inactive = True
 
     show_store_users = False
-    if request.args.get('filter_store_users', type=int) and request.args.get('filter_store_users', type=int)  == 1:
+    if request.args.get('filter_store_users', type=int) and request.args.get('filter_store_users', type=int) == 1:
         show_store_users = True
 
     filters = {
@@ -96,13 +96,13 @@ def get_users():
             })
     result = valid_user_list_params(filters, order_by)
     if not result and isinstance(result, (bool)):
-        return response_error("Error on incorrect params", {'filters': filters, 'orders': order_by})
+        return response_error("Error on incorrect params", {'filters': filters, 'orders': order_by}, 400)
     filters = result['filters']
     orders = result['orders']
 
     result = valid_user_list_by_permissions(userService, request.uid, filters)
     if not result:
-        return response_error("restricted access to some of the filter params", {'filters': filters, 'orders': orders}, 401)
+        return response_error("restricted access to some of the filter params", {'filters': filters, 'orders': orders}, 400)
     if not isinstance(result, (bool)):
         filters['platform'] = result['platform']
         filters['stores'] = result['stores']

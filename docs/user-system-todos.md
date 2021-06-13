@@ -28,17 +28,6 @@ Task for the user system
     - [x] Add Test For Get Platform User list With order by ->  email order provided sort asc
     - [x] Add Test For Get Platform User list With order by ->  store,fullname order provided
     - [ ] Add Test For Get Stores User list With no filters
-    - [ ] Add Test For Get Stores User list With email filters
-    - [ ] Add Test For Get Stores User list With fullname filters
-    - [ ] Add Test For Get Stores User list With inactive filters
-    - [ ] Add Test For Get Stores User list With multi filters [ fullname, stores]
-    - [ ] Add Test For Get Platform User list With multi order by ->  store,email order provided
-    - [ ] Add Test For Get Stores User list With unknown column  order by-> get 400 (invalid params)
     - [ ] Add Test For Get Stores User list paginate (test 3 pages)
-  - [ ] User test Permissions for Get List of Users
-    - [ ] Add Test For Get Platform User list  , Role Platform user  , platform Filters , no order by
-    - [ ] Add Test For Get Platform User list  , Role Store Staff user -> show error   , platform Filters , no order by
-    - [ ] Add Test For Get Stores User list  , Role Platform user    , stores Filters , no order by
-    - [ ] Add Test For Get Stores User list With store staff user  , stores Filters , no order by
 
 
