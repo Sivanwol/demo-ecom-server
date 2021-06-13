@@ -4,6 +4,7 @@ import unittest
 from src.schemas.user_schema import UserSchema
 from src.utils.enums import RolesTypes
 from src.utils.general import Struct
+from src.utils.validations import valid_user_list_params
 from test.common.Basecase import BaseTestCase
 from urllib.parse import urlencode
 
@@ -349,7 +350,7 @@ class FlaskTestCase(BaseTestCase):
             user_object = self.login_user(self.platform_owner_user)
             token = user_object['idToken']
             uid = user_object['uid']
-            self.userUtils.create_platforms_users()
+            self.userUtils.create_random_of_stores_users()
             order_by = [{
                 'field': 'email',
                 'sort': 'desc'
@@ -362,7 +363,7 @@ class FlaskTestCase(BaseTestCase):
                 'filter_store_users': 0,
                 'filter_inactive': 0,
                 'filter_platform': 1,
-                'order_by': self.userUtils.convert_order_by_list_string(order_by) ,
+                'order_by': self.userUtils.convert_order_by_list_string(order_by),
                 'per_page': 20,
                 'page': 1
             }
@@ -381,7 +382,8 @@ class FlaskTestCase(BaseTestCase):
             self.assertIsNotNone(response_data)
             self.assertTrue(response_data.status)
             self.assertIsNotNone(response_data.data)
-            users = self.userService.get_users(filters, order_by, 20, 1, False)
+            result = valid_user_list_params(filters, order_by)
+            users = self.userService.get_users(filters, result['orders'], 20, 1, False)
             schema = UserSchema()
             data = schema.dump(users.items, many=True)
             self.assertListEqual(data, response.json['data']['items'])

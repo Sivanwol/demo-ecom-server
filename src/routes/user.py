@@ -86,12 +86,14 @@ def get_users():
     if request.args.get('filter_names') is not None and request.args.get('filter_names') != 'None':
         filters['names'] = request.args.get('filter_names').split(',')
     order_by = []
-    for order in request.args.get('order').split(','):
-        temp = order.split('|')
-        order_by.append({
-            'field': temp[0],
-            'sort': temp[1]
-        })
+
+    if request.args.get('order_by') is not None and request.args.get('order_by') != 'None':
+        for order in request.args.get('order_by').split(','):
+            temp = order.split('|')
+            order_by.append({
+                'field': temp[0],
+                'sort': temp[1]
+            })
     result = valid_user_list_params(filters, order_by)
     if not result and isinstance(result, (bool)):
         return response_error("Error on incorrect params", {'filters': filters, 'orders': order_by})
@@ -108,7 +110,7 @@ def get_users():
 
     result = userService.get_users(filters, orders, int(per_page), int(page), is_inactive, show_store_users)
     schema = UserSchema()
-    return response_success_paging(filters, orders, schema.dump(result.items, many=True), result.total, result.pages, result.has_next, result.has_prev)
+    return response_success_paging(schema.dump(result.items, many=True), result.total, result.pages, result.has_next, result.has_prev)
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/toggle_active"), methods=["PUT"])

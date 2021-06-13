@@ -104,10 +104,13 @@ class UserTestUtills:
 
     def convert_order_by_list_string(self, order_by):
         order_by_str = ''
-        for idx, item in order_by:
-            for key, value in item.iteritems():
-                temp = [key, value]
-                order_by_str = order_by_str + '|'.join(temp)
-            if idx != 0:
+        i = 0
+        while i < len(order_by):
+            object_mapping = []
+            for key, value in order_by[i].items():
+                object_mapping.append(value)
+            order_by_str = order_by_str + '|'.join(object_mapping)
+            if i != 0:
                 order_by_str = ',' + order_by_str
+            i += 1
         return order_by_str

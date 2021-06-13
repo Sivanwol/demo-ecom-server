@@ -1,6 +1,6 @@
 import firebase_admin
 from firebase_admin import auth
-from sqlalchemy import or_
+from sqlalchemy import or_, desc, asc
 
 from config.api import cache
 from config.database import db
@@ -80,14 +80,17 @@ class UserService:
 
         if show_store_users:
             query = query.filter(User.store_code.isnot(None))
+        else:
+            query = query.filter_by(store_code=None)
+
         if len(orders) <= 0:
             query = query.order_by(User.created_at.desc())
         else:
             for order in orders:
                 if order['sort'] == AllowSortByDirection.DESC:
-                    query = query.order_by(User.c[order['field'].value].desc())
+                    query = query.order_by(desc(order['field'].value))
                 else:
-                    query = query.order_by(User.c[order['field'].value].asc())
+                    query = query.order_by(asc(order['field'].value))
         return query.paginate(page=page, per_page=per_page, error_out=False)
 
     @cache.memoize(50)
