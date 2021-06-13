@@ -418,7 +418,7 @@ class FlaskTestCase(BaseTestCase):
         user = self.userService.get_user(uid, True)
         self.assertIsNone(user.store_code)
         store_name = self.fake.company()
-        currency_code = self.fake.currency_code()
+        currency_code = 'USD'
         post_data = {
             'name': store_name,
             'description': 'store description',
@@ -437,13 +437,13 @@ class FlaskTestCase(BaseTestCase):
         token = user_object['idToken']
         store_code = response_data.data.info.store_code
         store_name = self.fake.company()
-        currency_code = self.fake.currency_code()
+        currency_code = 'USD'
         post_data = {
             'name': store_name,
             'description': 'store description updated',
             'currency_code': currency_code
         }
-        response = self.request_put('/api/store/{}/{}/update'.format(uid, store_code), token, None, post_data)
+        response = self.request_put('/api/store/{}/{}/update'.format(uid, store_code), token, None, None, post_data)
 
         self.assert200(response, 'update store info request failed')
         response_data = Struct(response.json)

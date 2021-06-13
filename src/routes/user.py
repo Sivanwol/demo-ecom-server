@@ -303,7 +303,7 @@ def sync_user_from_firebase_user(uid, role_names, is_platform_user, store_code=N
     response = {'user': json.dumps(user_object, indent=4), 'extend_info': None}
     roles = roleSerivce.get_roles(role_names)
     email = user_object['email']
-    fullname = user_object['display_name']
-    userService.sync_firebase_user(uid, email, fullname, roles, is_platform_user, store_code, new_user)
+    fullname = user_object['displayName']
+    userService.sync_firebase_user(uid, roles, email, fullname, is_platform_user, store_code, new_user)
     response['extend_info'] = userService.get_user(uid)
     return response
