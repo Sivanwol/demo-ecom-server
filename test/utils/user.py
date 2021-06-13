@@ -82,19 +82,22 @@ class UserTestUtills:
                 'name': name,
                 'store_code': None
             }
-            emails['accounts'].append(user_info)
             self.test_object.create_user(email, name, [RolesTypes.Accounts.value], True)
+            emails['accounts'].append(user_info)
 
-        for i in range(58, 66):
-            name = self.test_object.fake.name()
-            email = self.test_object.fake.email()
-            user_info = {
-                'email': email,
-                'name': name,
-                'store_code': None
-            }
-            emails['support'].append(user_info)
-            self.test_object.create_user(email, name, [RolesTypes.Support.value], True)
+        for r in range(53):
+            try:
+                name = self.test_object.fake.name()
+                email = self.test_object.fake.email()
+                user_info = {
+                    'email': email,
+                    'name': name,
+                    'store_code': None
+                }
+                self.test_object.create_user(email, name, [RolesTypes.Support.value], True)
+                emails['support'].append(user_info)
+            except:
+                pass
         print('Total Users {} , Total Account Users {} , Total Support Users {}'.format(
             len(emails['accounts']) + len(emails['support']),
             len(emails['accounts']),

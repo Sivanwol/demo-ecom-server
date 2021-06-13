@@ -303,12 +303,6 @@ class FlaskTestCase(BaseTestCase):
             token = user_object['idToken']
             uid = user_object['uid']
             users = self.userUtils.create_random_of_stores_users()
-
-            # selected_params_stores = [
-            #     users['stores'][2]['store_code'],
-            #     users['stores'][1]['store_code'],
-            #     users['stores'][0]['store_code']
-            # ]
             query_params = {
                 'filter_names': None,
                 'filter_emails': None,
@@ -488,6 +482,80 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.meta.total_items, users.total)
             self.assertFalse(response_data.data.meta.next)
             self.assertFalse(response_data.data.meta.prev)
+
+    def test_get_user_list_platform_no_filters_name_order_3pages(self):
+        with self.client:
+            user_object = self.login_user(self.platform_owner_user)
+            token = user_object['idToken']
+            uid = user_object['uid']
+            self.userUtils.create_3pages_platform_users()
+            order_by = [{
+                'field': 'fullname',
+                'sort': 'desc'
+            }]
+            query_params = {
+                'filter_names': None,
+                'filter_emails': None,
+                'filter_stores': None,
+                'filter_countries': None,
+                'filter_store_users': 0,
+                'filter_inactive': 0,
+                'filter_platform': 1,
+                'order_by': self.userUtils.convert_order_by_list_string(order_by),
+                'per_page': 20,
+                'page': 1
+            }
+            query_string = urlencode(query_params)
+            response = self.request_get('/api/user/list', token, query_string)
+            self.assertRequestPassed(response, 'getting user list page->1 request failed')
+            response_data = Struct(response.json)
+            filters = {
+                'names': [],
+                'emails': [],
+                'stores': [],
+                'countries': [],
+                'store_users': False,
+                'platform': True
+            }
+            self.assertIsNotNone(response_data)
+            self.assertTrue(response_data.status)
+            self.assertIsNotNone(response_data.data)
+            result = valid_user_list_params(filters, order_by)
+            users = self.userService.get_users(filters, result['orders'], 20, 1, False)
+            schema = UserSchema()
+            data = schema.dump(users.items, many=True)
+            self.assertListEqual(data, response.json['data']['items'])
+            self.assertEqual(response_data.data.meta.pages, users.pages)
+            self.assertEqual(response_data.data.meta.total_items, users.total)
+            self.assertTrue(response_data.data.meta.next)
+            self.assertFalse(response_data.data.meta.prev)
+            query_params['page'] = 2
+            query_string = urlencode(query_params)
+            response = self.request_get('/api/user/list', token, query_string)
+            self.assertRequestPassed(response, 'getting user list page->2 request failed')
+            response_data = Struct(response.json)
+            users = self.userService.get_users(filters, result['orders'], 20, 2, False)
+            schema = UserSchema()
+            data = schema.dump(users.items, many=True)
+            self.assertListEqual(data, response.json['data']['items'])
+            self.assertEqual(response_data.data.meta.pages, users.pages)
+            self.assertEqual(response_data.data.meta.total_items, users.total)
+            self.assertTrue(response_data.data.meta.next)
+            self.assertTrue(response_data.data.meta.prev)
+
+            query_params['page'] = 3
+            query_string = urlencode(query_params)
+            response = self.request_get('/api/user/list', token, query_string)
+            self.assertRequestPassed(response, 'getting user list page->3 request failed')
+            response_data = Struct(response.json)
+            users = self.userService.get_users(filters, result['orders'], 20, 3, False)
+            schema = UserSchema()
+            data = schema.dump(users.items, many=True)
+            self.assertListEqual(data, response.json['data']['items'])
+            self.assertEqual(response_data.data.meta.pages, users.pages)
+            self.assertEqual(response_data.data.meta.total_items, users.total)
+            self.assertFalse(response_data.data.meta.next)
+            self.assertTrue(response_data.data.meta.prev)
 
     # region Test User Actions
 
