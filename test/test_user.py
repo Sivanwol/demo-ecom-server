@@ -15,6 +15,7 @@ class FlaskTestCase(BaseTestCase):
 
     def test_get_user_list_platform_no_filters_no_order(self):
         with self.client:
+            self.assertEqual.__self__.maxDiff = None
             user_object = self.login_user(self.platform_owner_user)
             token = user_object['idToken']
             uid = user_object['uid']
@@ -57,6 +58,7 @@ class FlaskTestCase(BaseTestCase):
 
     def test_get_user_list_platform_email_filters_no_order(self):
         with self.client:
+            self.assertEqual.__self__.maxDiff = None
             user_object = self.login_user(self.platform_owner_user)
             token = user_object['idToken']
             uid = user_object['uid']
@@ -104,6 +106,7 @@ class FlaskTestCase(BaseTestCase):
 
     def test_get_user_list_platform_names_filters_no_order(self):
         with self.client:
+            self.assertEqual.__self__.maxDiff = None
             user_object = self.login_user(self.platform_owner_user)
             token = user_object['idToken']
             uid = user_object['uid']
@@ -151,6 +154,7 @@ class FlaskTestCase(BaseTestCase):
 
     def test_get_user_list_platform_inactive_filters_no_order(self):
         with self.client:
+            self.assertEqual.__self__.maxDiff = None
             user_object = self.login_user(self.platform_owner_user)
             token = user_object['idToken']
             uid = user_object['uid']
@@ -193,6 +197,7 @@ class FlaskTestCase(BaseTestCase):
 
     def test_get_user_list_platform_multi_filters_no_order(self):
         with self.client:
+            self.assertEqual.__self__.maxDiff = None
             user_object = self.login_user(self.platform_owner_user)
             token = user_object['idToken']
             uid = user_object['uid']
@@ -336,6 +341,7 @@ class FlaskTestCase(BaseTestCase):
 
     def test_get_user_list_platform_no_filters_email_order_asc_sort(self):
         with self.client:
+            self.assertEqual.__self__.maxDiff = None
             user_object = self.login_user(self.platform_owner_user)
             token = user_object['idToken']
             uid = user_object['uid']
@@ -383,6 +389,7 @@ class FlaskTestCase(BaseTestCase):
 
     def test_get_user_list_platform_no_filters_email_order_desc_sort(self):
         with self.client:
+            self.assertEqual.__self__.maxDiff = None
             user_object = self.login_user(self.platform_owner_user)
             token = user_object['idToken']
             uid = user_object['uid']
@@ -430,6 +437,7 @@ class FlaskTestCase(BaseTestCase):
 
     def test_get_user_list_platform_no_filters_multi_order(self):
         with self.client:
+            self.assertEqual.__self__.maxDiff = None
             user_object = self.login_user(self.platform_owner_user)
             token = user_object['idToken']
             uid = user_object['uid']
@@ -480,6 +488,7 @@ class FlaskTestCase(BaseTestCase):
 
     def test_get_user_list_platform_no_filters_name_order_3pages(self):
         with self.client:
+            self.assertEqual.__self__.maxDiff = None
             user_object = self.login_user(self.platform_owner_user)
             token = user_object['idToken']
             uid = user_object['uid']
