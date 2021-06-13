@@ -61,8 +61,6 @@ class UserService:
         if not filters['platform']:
             if len(filters['stores']) > 0:
                 query_filters.append(User.store_code.in_(tuple(filters['stores'])))
-        else:
-            query = query.filter_by(store_code=None)
         if len(filters['emails']) > 0:
             query_filters.append(User.email.in_(tuple(filters['emails'])))
         if len(filters['names']) > 0:
