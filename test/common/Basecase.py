@@ -127,8 +127,8 @@ class BaseTestCase(TestCase):
         self.assertIsNotNone(user)
         return user
 
-    def create_store(self, email):
-        self.create_user(email, self.fake.name(), [RolesTypes.StoreOwner.value], True)
+    def create_store(self, email, name):
+        self.create_user(email, name, [RolesTypes.StoreOwner.value], True)
         user_object = self.login_user(email)
         uid = user_object['uid']
         user_object = self.login_user(self.platform_owner_user)
@@ -143,7 +143,7 @@ class BaseTestCase(TestCase):
             'description': 'store description',
             'currency_code': currency_code
         }
-        response = self.request_post('/api/store/%s/create' % uid, owner_token, None, post_data)
+        response = self.request_post('/api/store/%s/create' % uid, owner_token, None, None, post_data)
         self.assert200(response, 'create store request failed')
         user = self.userService.get_user(uid, True)
         response_data = Struct(response.json)

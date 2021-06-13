@@ -7,7 +7,6 @@ from src.utils.general import Struct
 from test.common.Basecase import BaseTestCase
 from urllib.parse import urlencode
 
-
 class FlaskTestCase(BaseTestCase):
     def setUp(self):
         self.testSetUp()
@@ -28,6 +27,7 @@ class FlaskTestCase(BaseTestCase):
                 'filter_emails': None,
                 'filter_stores': None,
                 'filter_countries': None,
+                'filter_store_users': 0,
                 'filter_inactive': 0,
                 'filter_platform': 1,
                 'order_by[]': [],
@@ -43,6 +43,7 @@ class FlaskTestCase(BaseTestCase):
                 'emails': [],
                 'stores': [],
                 'countries': [],
+                'store_users': False,
                 'platform': True
             }
             self.assertIsNotNone(response_data)
@@ -73,6 +74,7 @@ class FlaskTestCase(BaseTestCase):
                 'filter_emails': ','.join(selected_params),
                 'filter_stores': None,
                 'filter_countries': None,
+                'filter_store_users': 0,
                 'filter_inactive': 0,
                 'filter_platform': 1,
                 'order_by[]': [],
@@ -85,13 +87,10 @@ class FlaskTestCase(BaseTestCase):
             response_data = Struct(response.json)
             filters = {
                 'names': [],
-                'emails': [
-                    users['accounts'][0]['email'],
-                    users['accounts'][1]['email'],
-                    users['support'][0]['email']
-                ],
+                'emails': selected_params,
                 'stores': [],
                 'countries': [],
+                'store_users': False,
                 'platform': True
             }
             self.assertIsNotNone(response_data)
@@ -105,7 +104,6 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.meta.total_items, users.total)
             self.assertFalse(response_data.data.meta.next)
             self.assertFalse(response_data.data.meta.prev)
-
 
     def test_get_user_list_platform_names_filters_no_order(self):
         with self.client:
@@ -123,6 +121,7 @@ class FlaskTestCase(BaseTestCase):
                 'filter_emails': None,
                 'filter_stores': None,
                 'filter_countries': None,
+                'filter_store_users': 0,
                 'filter_inactive': 0,
                 'filter_platform': 1,
                 'order_by[]': [],
@@ -134,14 +133,11 @@ class FlaskTestCase(BaseTestCase):
             self.assertRequestPassed(response, 'getting user list request failed')
             response_data = Struct(response.json)
             filters = {
-                'names': [
-                    users['accounts'][0]['name'],
-                    users['accounts'][1]['name'],
-                    users['support'][0]['name']
-                ],
+                'names': selected_params,
                 'emails': [],
                 'stores': [],
                 'countries': [],
+                'store_users': False,
                 'platform': True
             }
             self.assertIsNotNone(response_data)
@@ -167,6 +163,7 @@ class FlaskTestCase(BaseTestCase):
                 'filter_emails': None,
                 'filter_stores': None,
                 'filter_countries': None,
+                'filter_store_users': 0,
                 'filter_inactive': 1,
                 'filter_platform': 1,
                 'order_by[]': [],
@@ -182,6 +179,7 @@ class FlaskTestCase(BaseTestCase):
                 'emails': [],
                 'stores': [],
                 'countries': [],
+                'store_users': False,
                 'platform': True
             }
             self.assertIsNotNone(response_data)
@@ -216,6 +214,7 @@ class FlaskTestCase(BaseTestCase):
                 'filter_emails': ','.join(selected_params_email),
                 'filter_stores': None,
                 'filter_countries': None,
+                'filter_store_users': 0,
                 'filter_inactive': 0,
                 'filter_platform': 1,
                 'order_by[]': [],
@@ -227,23 +226,66 @@ class FlaskTestCase(BaseTestCase):
             self.assertRequestPassed(response, 'getting user list request failed')
             response_data = Struct(response.json)
             filters = {
-                'names': [
-                    users['accounts'][2]['name'].split(' ')[0],
-                    users['support'][1]['name'].split(' ')[0]
-                ],
-                'emails': [
-                    users['accounts'][0]['email'],
-                    users['accounts'][1]['email'],
-                    users['support'][0]['email']
-                ],
+                'names': selected_params_name,
+                'emails': selected_params_email,
                 'stores': [],
                 'countries': [],
+                'store_users': False,
                 'platform': True
             }
             self.assertIsNotNone(response_data)
             self.assertTrue(response_data.status)
             self.assertIsNotNone(response_data.data)
             users = self.userService.get_users(filters, [], 20, 1, False)
+            schema = UserSchema()
+            data = schema.dump(users.items, many=True)
+            self.assertListEqual(data, response.json['data']['items'])
+            self.assertEqual(response_data.data.meta.pages, users.pages)
+            self.assertEqual(response_data.data.meta.total_items, users.total)
+            self.assertFalse(response_data.data.meta.next)
+            self.assertFalse(response_data.data.meta.prev)
+
+    def test_get_user_list_platform_stores_filters_no_order(self):
+        with self.client:
+            self.assertEqual.__self__.maxDiff = None
+            user_object = self.login_user(self.platform_owner_user)
+            token = user_object['idToken']
+            uid = user_object['uid']
+            users = self.userUtils.create_random_of_stores_users()
+
+            # selected_params_stores = [
+            #     users['stores'][2]['store_code'],
+            #     users['stores'][1]['store_code'],
+            #     users['stores'][0]['store_code']
+            # ]
+            query_params = {
+                'filter_names': None,
+                'filter_emails': None,
+                'filter_stores': None,
+                'filter_countries': None,
+                'filter_store_users': 1,
+                'filter_inactive': 0,
+                'filter_platform': 1,
+                'order_by[]': [],
+                'per_page': 20,
+                'page': 1
+            }
+            query_string = urlencode(query_params)
+            response = self.request_get('/api/user/list', token, query_string)
+            self.assertRequestPassed(response, 'getting user list request failed')
+            response_data = Struct(response.json)
+            filters = {
+                'names': [],
+                'emails': [],
+                'stores': [],
+                'countries': [],
+                'store_users': True,
+                'platform': True
+            }
+            self.assertIsNotNone(response_data)
+            self.assertTrue(response_data.status)
+            self.assertIsNotNone(response_data.data)
+            users = self.userService.get_users(filters, [], 20, 1, True)
             schema = UserSchema()
             data = schema.dump(users.items, many=True)
             self.assertListEqual(data, response.json['data']['items'])
@@ -317,7 +359,7 @@ class FlaskTestCase(BaseTestCase):
         with self.client:
             store_owner_user = "user@gmail.com"
             store_customer_user = "customer@gmail.com"
-            store_info = self.create_store(store_owner_user)
+            store_info = self.create_store(store_owner_user, self.fake.name())
             self.create_firebase_store_user(store_customer_user)
             user_object = self.login_user(store_customer_user)
             uid = user_object['uid']
@@ -338,7 +380,7 @@ class FlaskTestCase(BaseTestCase):
 
     def test_service_user_part_of_store_valid(self):
         new_user = "user@gmail.com"
-        store_info = self.create_store(new_user)
+        store_info = self.create_store(new_user, self.fake.name())
         user_object = self.login_user(new_user)
         uid = user_object['uid']
         self.assertTrue(self.userService.check_user_part_store(uid, store_info.data.info.store_code))
@@ -346,7 +388,7 @@ class FlaskTestCase(BaseTestCase):
     def test_service_user_part_of_store_staff_valid(self):
         user_staff = "staff@gmail.com"
         new_user = "user@gmail.com"
-        store_info = self.create_store(new_user)
+        store_info = self.create_store(new_user, self.fake.name())
         self.create_user(user_staff, self.fake.name(), [RolesTypes.StoreAccount.value], False, store_info.data.info.store_code)
         user_object = self.login_user(user_staff)
         uid = user_object['uid']
@@ -356,7 +398,7 @@ class FlaskTestCase(BaseTestCase):
         user_not_active = "noactive@user.com"
         self.create_user(user_not_active, self.fake.name(), [RolesTypes.Support.value], True)
         new_user = "user@gmail.com"
-        store_info = self.create_store(new_user)
+        store_info = self.create_store(new_user, self.fake.name())
         user_object = self.login_user(user_not_active)
         uid = user_object['uid']
         self.assertFalse(self.userService.check_user_part_store(uid, store_info.data.info.store_code))
@@ -364,7 +406,7 @@ class FlaskTestCase(BaseTestCase):
     def test_mark_user_finish_tutrial(self):
         store_owner_user = "user@gmail.com"
         store_customer_user = "customer@gmail.com"
-        store_info = self.create_store(store_owner_user)
+        store_info = self.create_store(store_owner_user, self.fake.name())
         self.create_firebase_store_user(store_customer_user)
         user_object = self.login_user(store_customer_user)
         uid = user_object['uid']
@@ -412,7 +454,7 @@ class FlaskTestCase(BaseTestCase):
         store_owner_user = "user@gmail.com"
         user_object = self.login_user(self.platform_support_user)
         token = user_object['idToken']
-        store_info = self.create_store(store_owner_user)
+        store_info = self.create_store(store_owner_user, self.fake.name())
         self.create_user(store_customer_user, self.fake.name(), [RolesTypes.StoreCustomer.value], False, store_info.data.info.store_code)
         user_object = self.login_user(store_customer_user)
         uid = user_object['uid']
@@ -445,7 +487,7 @@ class FlaskTestCase(BaseTestCase):
         store_customer_user = "customer@gmail.com"
         store_owner_user = "user@gmail.com"
         store_support_user = "support_store@gmail.com"
-        store_info = self.create_store(store_owner_user)
+        store_info = self.create_store(store_owner_user, self.fake.name())
 
         self.create_user(store_customer_user, self.fake.name(), [RolesTypes.StoreCustomer.value], False, store_info.data.info.store_code)
         self.create_user(store_support_user, self.fake.name(), [RolesTypes.StoreSupport.value], False, store_info.data.info.store_code)
@@ -483,8 +525,8 @@ class FlaskTestCase(BaseTestCase):
         store_customer_user = "customer@gmail.com"
         store_owner_user = "user2@gmail.com"
         store_support_user = "support_store@gmail.com"
-        store_info = self.create_store(store_owner_user)
-        diff_store_info = self.create_store(store_owner_user)
+        store_info = self.create_store(store_owner_user, self.fake.name())
+        diff_store_info = self.create_store(store_owner_user, self.fake.name())
 
         self.create_user(store_customer_user, self.fake.name(), [RolesTypes.StoreCustomer.value], False, diff_store_info.data.info.store_code)
         self.create_user(store_support_user, self.fake.name(), [RolesTypes.StoreSupport.value], False, store_info.data.info.store_code)
@@ -512,7 +554,7 @@ class FlaskTestCase(BaseTestCase):
     def test_add_store_staff_by_store_owner(self):
         store_owner_user = "user@gmail.com"
         store_staff_user = self.fake.ascii_company_email()
-        store_info = self.create_store(store_owner_user)
+        store_info = self.create_store(store_owner_user, self.fake.name())
         user_object = self.login_user(store_owner_user)
         token = user_object['idToken']
         uid = user_object['uid']
@@ -539,7 +581,7 @@ class FlaskTestCase(BaseTestCase):
         store_owner_user = "user@gmail.com"
         store_support_user = "support_store@gmail.com"
         store_staff_user = self.fake.ascii_company_email()
-        store_info = self.create_store(store_owner_user)
+        store_info = self.create_store(store_owner_user, self.fake.name())
         self.create_user(store_support_user, self.fake.name(), [RolesTypes.StoreSupport.value], False, store_info.data.info.store_code)
         user_object = self.login_user(store_support_user)
         token = user_object['idToken']
@@ -566,7 +608,7 @@ class FlaskTestCase(BaseTestCase):
     def test_add_store_staff_by_store_platform_staff(self):
         store_owner_user = "user@gmail.com"
         store_staff_user = self.fake.ascii_company_email()
-        store_info = self.create_store(store_owner_user)
+        store_info = self.create_store(store_owner_user, self.fake.name())
         user_object = self.login_user(self.platform_support_user)
         token = user_object['idToken']
         uid = user_object['uid']
@@ -593,8 +635,8 @@ class FlaskTestCase(BaseTestCase):
         store_owner_user1 = "user1@gmail.com"
         store_support_user = self.fake.ascii_company_email()
         store_staff_user = self.fake.ascii_company_email()
-        store_info = self.create_store(store_owner_user)
-        diff_store_info = self.create_store(store_owner_user1)
+        store_info = self.create_store(store_owner_user, self.fake.name())
+        diff_store_info = self.create_store(store_owner_user1, self.fake.name())
         self.create_user(store_support_user, self.fake.name(), [RolesTypes.StoreSupport.value], False, diff_store_info.data.info.store_code)
         user_object = self.login_user(store_support_user)
         token = user_object['idToken']

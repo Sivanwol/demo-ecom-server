@@ -22,6 +22,8 @@ Task for the user system
     - [x] Add Test For Get Platform User list With fullname filters
     - [x] Add Test For Get Platform User list With inactive filters
     - [x] Add Test For Get Platform User list With multi filters [ fullname, email]
+    - [ ] Add Test For Get Platform User list With stores filters
+    - [ ] Add Test For Get Platform User list With multi filters [ stores,fullname]
     - [ ] Add Test For Get Stores User list With no filters
     - [ ] Add Test For Get Stores User list With email filters
     - [ ] Add Test For Get Stores User list With fullname filters

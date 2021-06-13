@@ -4,7 +4,7 @@ from marshmallow import Schema, fields, validate
 class RequestStoreCreate(Schema):
     name = fields.Str(required=True, validate=validate.Length(min=3, max=100, error='field name not valid'))
     description = fields.Str(required=False, validate=validate.Length(max=255, error='field description not valid'))
-    currency_code = fields.Str(required=True, validate=validate.Length(min=2, max=3, error='field currency_code noy valid'))
+    currency_code = fields.Str(required=True, validate=validate.Length(min=2, max=3, error='field currency_code not valid'))
 
 
 class RequestStoreUpdate(RequestStoreCreate):

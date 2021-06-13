@@ -102,7 +102,7 @@ def valid_user_list_by_permissions(userService, requester_uid, filters):
         RolesTypes.Reports.value,
     ]
     if userService.user_has_any_role_matched(requester_uid, platform_roles):
-        return True
+        return filters
     # check if requester user is store user filter the stores filter to his register store_code and remove the rest
     store_roles = [
         RolesTypes.StoreOwner.value,
@@ -113,5 +113,6 @@ def valid_user_list_by_permissions(userService, requester_uid, filters):
     if userService.user_has_any_role_matched(requester_uid, store_roles) and user.store_code is not None:
         filters['stores'] = [user.store_code]  # we reset this flag allow only search by his own store not global search
         filters['platform'] = False
+        filters['store_users'] = False
         return filters
     return False  # if this from customer or any type or role that not cover will auto reject

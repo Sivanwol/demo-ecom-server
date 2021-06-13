@@ -54,7 +54,7 @@ class UserService:
         return user
 
     @cache.memoize(50)
-    def get_users(self, filters, orders,per_page, page, is_inactive=True):
+    def get_users(self, filters, orders,per_page, page, is_inactive=True, show_store_users=False):
         query = User.query
         query_filters = []
         # setup filter params
@@ -79,6 +79,9 @@ class UserService:
             query = query.filter_by(is_active=True)
         else:
             query = query.filter_by(is_active=False)
+
+        if show_store_users:
+            query = query.filter(User.store_code.isnot(None))
         if len(orders) <= 0:
             query = query.order_by(User.created_at.desc())
         else:

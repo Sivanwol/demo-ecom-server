@@ -8,14 +8,16 @@ class UserTestUtills:
     def create_platforms_users(self):
         emails = {
             'accounts': [],
-            'support': []
+            'support': [],
+            'stores': []
         }
         for i in range(6, 15):
             name = self.test_object.fake.name()
             email = self.test_object.fake.email()
             user_info = {
                 'email': email,
-                'name': name
+                'name': name,
+                'store_code': None
             }
             emails['accounts'].append(user_info)
             self.test_object.create_user(email, name, [RolesTypes.Accounts.value], True)
@@ -25,7 +27,8 @@ class UserTestUtills:
             email = self.test_object.fake.email()
             user_info = {
                 'email': email,
-                'name': name
+                'name': name,
+                'store_code': None
             }
             emails['support'].append(user_info)
             self.test_object.create_user(email, name, [RolesTypes.Support.value], True)
@@ -43,15 +46,32 @@ class UserTestUtills:
             email = self.test_object.fake.email()
             user_info = {
                 'email': email,
-                'name': name
+                'name': name,
+                'store_code': None
             }
             emails['support'].append(user_info)
             self.test_object.create_user(email, name, [RolesTypes.Support.value], True, None, None, False)
 
+    def create_random_of_stores_users(self):
+        emails = self.create_platforms_users()
+
+        for i in range(5, 10):
+            name = self.test_object.fake.name()
+            email = self.test_object.fake.email()
+            store_info = self.test_object.create_store(email, name)
+            user_info = {
+                'email': email,
+                'name': name,
+                'store_code': store_info.data.info.store_code
+            }
+            emails['stores'].append(user_info)
+        return emails
+
     def create_3pages_platform_users(self):
         emails = {
             'accounts': [],
-            'support': []
+            'support': [],
+            'stores': []
         }
 
         for i in range(2, 5):
@@ -59,7 +79,8 @@ class UserTestUtills:
             email = self.test_object.fake.email()
             user_info = {
                 'email': email,
-                'name': name
+                'name': name,
+                'store_code': None
             }
             emails['accounts'].append(user_info)
             self.test_object.create_user(email, name, [RolesTypes.Accounts.value], True)
@@ -69,7 +90,8 @@ class UserTestUtills:
             email = self.test_object.fake.email()
             user_info = {
                 'email': email,
-                'name': name
+                'name': name,
+                'store_code': None
             }
             emails['support'].append(user_info)
             self.test_object.create_user(email, name, [RolesTypes.Support.value], True)

@@ -61,11 +61,16 @@ def get_users():
     if request.args.get('filter_inactive', type=int):
         is_inactive = True
 
+    show_store_users = False
+    if request.args.get('filter_store_users', type=int):
+        show_store_users = True
+
     filters = {
         'names': [],
         'emails': [],
         'stores': [],
         'countries': [],
+        'store_users': show_store_users,
         'platform': is_platform,
     }
 
@@ -81,18 +86,22 @@ def get_users():
     if request.args.get('filter_names') is not None and request.args.get('filter_names') != 'None':
         filters['names'] = request.args.get('filter_names').split(',')
 
-
     orders = request.args.getlist('order_by')
     result = valid_user_list_params(filters, orders)
-    if not result:
+    if not result and isinstance(result, (bool)):
         return response_error("Error on incorrect params", {'filters': filters, 'orders': orders})
+    filters = result['filters']
+    orders = result['orders']
+
     result = valid_user_list_by_permissions(userService, request.uid, filters)
     if not result:
         return response_error("restricted access to some of the filter params", {'filters': filters, 'orders': orders}, 401)
     if not isinstance(result, (bool)):
-        filters = result['filters']
-        orders = result['orders']
-    result = userService.get_users(filters, orders, int(per_page), int(page), is_inactive)
+        filters['platform'] = result['platform']
+        filters['stores'] = result['stores']
+        show_store_users = result['store_users']
+
+    result = userService.get_users(filters, orders, int(per_page), int(page), is_inactive, show_store_users)
     schema = UserSchema()
     return response_success_paging(filters, orders, schema.dump(result.items, many=True), result.total, result.pages, result.has_next, result.has_prev)
 
