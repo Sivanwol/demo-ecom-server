@@ -2,6 +2,7 @@ import logging
 import os
 
 import sentry_sdk
+from celery import Celery
 from flask import Flask
 from flask_caching import Cache
 from flask_cors import CORS
@@ -42,12 +43,19 @@ def load_application():
 
 app = load_application()
 
+redis_url =  "redis://{password}@{hostname}:{port}/{db}".format(
+    password=settings[os.environ.get("FLASK_ENV", "development")].REDIS_PASSWORD,
+    hostname=settings[os.environ.get("FLASK_ENV", "development")].REDIS_HOST,
+    port=settings[os.environ.get("FLASK_ENV", "development")].REDIS_PORT,
+    db=settings[os.environ.get("FLASK_ENV", "development")].REDIS_DB,
+)
 
 # on level of testing we dont need redis also need disable the caching system
 if os.environ.get("FLASK_ENV", "development") == 'testing':
     cache = Cache(app, config={
         'CACHE_TYPE': 'NullCache'
     })
+    celery = Celery(__name__)
 else:
     cache = Cache(app, config={
         'CACHE_TYPE': 'RedisCache',
@@ -57,4 +65,5 @@ else:
         'CACHE_REDIS_DB': settings[os.environ.get("FLASK_ENV", "development")].REDIS_DB,
         'CACHE_REDIS_PASSWORD': settings[os.environ.get("FLASK_ENV", "development")].REDIS_PASSWORD
     })
+    celery = Celery(__name__, backend=redis_url, broker=redis_url)
 cache.init_app(app)

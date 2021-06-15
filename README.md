@@ -134,3 +134,7 @@ To upgrade the database with the newest migrations version, use:
 ```angular2html
 $ python manage.py db upgrade head
 ```
+
+### Task Controls
+
+as any system there is a need for task control system for this the system use a Google functions and Cloud Tasks
