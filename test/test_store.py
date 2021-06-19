@@ -45,6 +45,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.info.default_currency_code, store.default_currency_code)
             self.assertEqual(len(response_data.data.locations), 0)
             self.assertEqual(len(response_data.data.hours), 0)
+            self.assertTrue(self.fileSystemService.folder_existed(self.getEntityUploadPath(store.store_code)))
 
     def test_freeze_store(self):
         with self.client:

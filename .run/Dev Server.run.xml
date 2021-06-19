@@ -10,7 +10,7 @@
             <env name="FIRESTORE_EMULATOR_HOST" value="localhost:8080"/>
             <env name="FIRESTORE_STORAGE_EMULATOR_HOST" value="localhost:9199"/>
         </envs>
-        <option name="SDK_HOME" value="C:\Users\Admin\Dropbox\Projects\Apps\demo_shop_server\venv\Scripts\python.exe"/>
+        <option name="SDK_HOME" value="C:\Users\Admin\iCloudDrive\Apps\demo_shop_server\venv\Scripts\python.exe"/>
         <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$"/>
         <option name="IS_MODULE_SDK" value="false"/>
         <option name="ADD_CONTENT_ROOTS" value="true"/>

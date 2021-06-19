@@ -9,7 +9,7 @@ from flask_testing import TestCase
 from config import settings
 from config.api import app, socketio
 from config.database import db
-from src.routes import userService, storeService, roleSerivce
+from src.routes import userService, storeService, roleSerivce, fileSystemService
 from src.services.firebase import FirebaseService
 from src.utils.enums import RolesTypes
 from src.utils.firebase_utils import create_firebase_user as create_fb_user, setup_firebase_client, login_user
@@ -34,6 +34,7 @@ class BaseTestCase(TestCase):
     userService = userService
     roleService = roleSerivce
     storeService = storeService
+    fileSystemService = fileSystemService
 
     def create_app(self):
         # app.config.from_object('config.TestConfig')
@@ -231,3 +232,8 @@ class BaseTestCase(TestCase):
     def assertRequestPassed(self, response, message):
         print('response data -> %s' % response.data)
         self.assert200(response, message)
+
+    def getEntityUploadPath(self, entity_id):
+        upload_path = settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER
+        upload_path += "/%s/%s" % (settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER, entity_id)
+        return upload_path

@@ -11,7 +11,7 @@ from src.utils.enums import AllowSortByDirection
 from src.utils.firebase_utils import create_firebase_user
 from src.utils.responses import response_error
 from src.utils.singleton import singleton
-
+from src.routes import fileSystemService
 
 @singleton
 class UserService:
@@ -190,6 +190,7 @@ class UserService:
         user_obj = create_firebase_user(email, password)
         uid = user_obj.uid
         self.sync_firebase_user(uid, roles, email, fullname, True, store_code, True)
+        fileSystemService.create_user_folder(uid)
         return self.get_user(uid)
 
     # TODO: Remove this method
@@ -264,3 +265,4 @@ class UserService:
         user.add_user_roles(roles)
         db.session.add(user)
         db.session.commit()
+        fileSystemService.create_user_folder(uid)

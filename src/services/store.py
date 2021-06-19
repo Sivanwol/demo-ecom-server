@@ -8,6 +8,7 @@ from src.exceptions.params_not_match_create_store import ParamsNotMatchCreateSto
 from src.models.store_hours import StoreHours
 from src.models.store_locations import StoreLocations
 from src.models.stores import Store
+from src.routes import fileSystemService
 from src.schemas.store_schema import StoreSchema, StoreLocationSchema, StoreHourSchema
 from src.utils.validations import valid_currency_code
 
@@ -145,6 +146,7 @@ class StoreService:
         store = Store(store_code, owner_id, store_object['name'], store_object['currency_code'], None, store_object['description'])
         db.session.add(store)
         db.session.commit()
+        fileSystemService.create_store_folder(store_code)
         return self.get_store_by_status_code(store_code)
 
     def freeze_store(self, uid, store_code):
