@@ -7,7 +7,7 @@ from firebase_admin import auth
 from flask_testing import TestCase
 
 from config import settings
-from config.api import app
+from config.api import app, socketio
 from config.database import db
 from src.routes import userService, storeService, roleSerivce
 from src.services.firebase import FirebaseService
@@ -48,12 +48,16 @@ class BaseTestCase(TestCase):
         self.app_context.push()
         self.client = self.app.test_client()
         self.userUtils = UserTestUtills(self)
+        self.ws_client = socketio.test_client(self.app)
         db.create_all()
         db.session.commit()
         self.roleService.insert_roles()
         print(self.roleService.get_all_roles())
         self.init_unit_data()
         Faker.seed(randint(0, 100))
+
+    def ws_renew_connection(self, namespace=None):
+        self.ws_client.connect(namespace=namespace)
 
     def tearDown(self):
         db.session.remove()

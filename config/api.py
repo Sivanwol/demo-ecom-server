@@ -70,4 +70,4 @@ else:
     })
     celery = Celery(__name__, backend=redis_url, broker=redis_url)
 cache.init_app(app)
-socketio = SocketIO(app, logger=True, engineio_logger=APP_DEBUG_MODE)
+socketio = SocketIO(app, logger=True, debug=APP_DEBUG_MODE, host="0.0.0.0", engineio_logger=APP_DEBUG_MODE)

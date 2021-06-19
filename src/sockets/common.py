@@ -1,12 +1,11 @@
 from flask import request
-from socketio import Namespace
 
 from config.api import socketio
 from src.routes import userService
 
 
-class CommonSocketConnection(Namespace):
-    def on_connect(self, auth):
+class CommonSocketConnection():
+    def on_connect(self):
         pass
 
     def on_disconnect(self):
@@ -16,7 +15,7 @@ class CommonSocketConnection(Namespace):
         pass
 
 
-class CommonAuthSocketConnection(CommonSocketConnection):
+class CommonAuthSocketConnection():
     def on_connect(self, auth):
         res = userService.check_user_auth_socket(auth, True)
         if res is None:

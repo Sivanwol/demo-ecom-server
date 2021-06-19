@@ -58,12 +58,12 @@ def get_user_files():
 # Todo: get users files on a folder
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<uid>/files/<folder_id>"), methods=["GET"])
 @check_token_of_user
-def get_user_files():
+def get_user_files_from_folder():
     pass
 
 
 # Todo: will download a folder (will zip and send to client) or just send the file depend what the entity_id
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<uid>/download/<entity_id>"), methods=["GET"])
 @check_token_of_user
-def get_user_files():
+def download_files():
     pass
