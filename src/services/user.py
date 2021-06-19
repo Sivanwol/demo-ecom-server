@@ -141,6 +141,19 @@ class UserService:
         except:
             return response_error('Invalid token provided', None, 400)
 
+    def check_user_auth_socket(self, token, existed_on_system):
+        token = token.replace('Bearer ', '')
+        firebase_obj = auth.verify_id_token(token)
+        try:
+            if existed_on_system:
+                uid = firebase_obj["uid"]
+                user_exist = self.user_exists(uid)
+                if not user_exist:
+                    return None
+            return firebase_obj["uid"]
+        except:
+            return None
+
     def update_user_info(self, uid, user_data):
         user = self.get_user(uid, True)
         user.fullname = user_data.fullname

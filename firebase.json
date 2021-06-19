@@ -14,18 +14,6 @@
             "port": 9099,
             "host": "0.0.0.0"
         },
-        "firestore": {
-            "port": 8080,
-            "host": "0.0.0.0"
-        },
-        "database": {
-            "port": 9000,
-            "host": "0.0.0.0"
-        },
-        "pubsub": {
-            "port": 8085,
-            "host": "0.0.0.0"
-        },
         "ui": {
             "enabled": true,
             "host": "0.0.0.0"

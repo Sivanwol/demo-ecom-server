@@ -7,6 +7,7 @@ from flask import Flask
 from flask_caching import Cache
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from flask_socketio import SocketIO
 from sentry_sdk.integrations.flask import FlaskIntegration
 from config import settings
 from config.database import db, migration
@@ -43,13 +44,15 @@ def load_application():
 
 app = load_application()
 
-redis_url =  "redis://{password}@{hostname}:{port}/{db}".format(
+redis_url = "redis://{password}@{hostname}:{port}/{db}".format(
     password=settings[os.environ.get("FLASK_ENV", "development")].REDIS_PASSWORD,
     hostname=settings[os.environ.get("FLASK_ENV", "development")].REDIS_HOST,
     port=settings[os.environ.get("FLASK_ENV", "development")].REDIS_PORT,
     db=settings[os.environ.get("FLASK_ENV", "development")].REDIS_DB,
 )
-
+APP_DEBUG_MODE = False
+if os.environ.get("FLASK_ENV", "development") == 'development' or os.environ.get("FLASK_ENV", "development") == 'testing':
+    APP_DEBUG_MODE = True
 # on level of testing we dont need redis also need disable the caching system
 if os.environ.get("FLASK_ENV", "development") == 'testing':
     cache = Cache(app, config={
@@ -67,3 +70,4 @@ else:
     })
     celery = Celery(__name__, backend=redis_url, broker=redis_url)
 cache.init_app(app)
+socketio = SocketIO(app, logger=True, engineio_logger=APP_DEBUG_MODE)
