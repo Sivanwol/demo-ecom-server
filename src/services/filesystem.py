@@ -38,7 +38,7 @@ class FileSystemService:
                 folders.append(os.path.join(dirname, subdirname))
         return folders
 
-    def getFolderPath(self, type, entity_id):
+    def getFolderPath(self, type, entity_id, sub_folder=None):
         user_path = settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER
         system_path = settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER
         store_path = settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER
@@ -47,6 +47,10 @@ class FileSystemService:
             upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
                                        type,
                                        entity_id)
+            if sub_folder is not None:
+                upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+                                           type,
+                                           entity_id, sub_folder)
         return upload_path
 
     def create_folder(self, src, force_create=False):

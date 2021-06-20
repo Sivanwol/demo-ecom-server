@@ -34,7 +34,14 @@ the file upload work flow is work as follows:
 
 Solution I pick mostly for cost reason is monolith server mostly stuff will build on top of the system and not use the cloud as for cost (have almost zero ability to pay atm)
 
-- [ ] install web socket
-- [ ] install signals
-- [ ] unit test for socket io -> https://github.com/miguelgrinberg/flack/blob/master/tests/tests.py
-- [ ] 
+- [x] install web socket
+- [x] install signals - not required and not useful
+- [x] unit test for socket io -> https://github.com/miguelgrinberg/flack/blob/master/tests/tests.py
+
+### Tests
+- [ ] Check create root user folder
+  - [ ] check sup folder creation
+- [ ] Check create root store folder
+  - [ ] check sup folder creation
+- [ ] Check create root system folder
+  - [ ] check sup folder creation
