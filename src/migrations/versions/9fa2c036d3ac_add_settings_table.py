@@ -24,11 +24,9 @@ def upgrade():
                     sa.Column('description', sa.Text(), nullable=False, default=4),
                     sa.Column('is_json', sa.Boolean(), default=False),
                     sa.Column('value', sa.Text(), nullable=True),
-                    sa.Column('valueJSON', sa.JSON(), nullable=True),
                     sa.Column('created_at', sa.DateTime(), default=sa.func.current_timestamp()),
                     sa.Column('updated_at', sa.DateTime(), onupdate=sa.ColumnDefault(sa.func.current_timestamp), default=sa.func.current_timestamp()),
-                    sa.PrimaryKeyConstraint('id')
-                    )
+                    sa.PrimaryKeyConstraint(['key', 'environment']))
     # ### end Alembic commands ###
 
 
