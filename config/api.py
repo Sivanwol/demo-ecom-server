@@ -1,4 +1,3 @@
-import logs
 import os
 
 import sentry_sdk
@@ -11,6 +10,7 @@ from flask_socketio import SocketIO
 from sentry_sdk.integrations.flask import FlaskIntegration
 from config import settings
 from config.database import db, migration
+from config.logs import logging
 from src.services.firebase import FirebaseService
 
 
@@ -38,7 +38,7 @@ def load_application():
 
     # Database Migrations Initialization
     migration.init_app(app, db)
-    app.logger = logs.logging.getLogger('console')
+    app.logger = logging.getLogger('console')
     return app
 
 
