@@ -72,6 +72,8 @@ class Config:
     # EMAIL_PORT = os.environ.get('EMAIL_PORT')
     # EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
     # EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+    # Testing settings
+    CLEAR_FOLDER_UPLOAD = False
 
 
 class DevelopmentConfig(Config):
@@ -87,6 +89,7 @@ class TestingConfig(Config):
     DEBUG = True
     SENTRY_ENABLE = False
     TESTING = True
+    CLEAR_FOLDER_UPLOAD = os.getenv('CLEAR_FOLDER_UPLOAD')
 
 
 class ProductionConfig(Config):

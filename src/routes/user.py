@@ -9,7 +9,7 @@ from config import settings
 from config.api import app as current_app
 from src.middlewares.check_role import check_role
 from src.middlewares.check_token import check_token_register_firebase_user, check_token_of_user
-from src.routes import userService, storeService, roleSerivce
+from src.routes import userService, storeService, roleSerivce, fileSystemService
 from src.schemas.requests.user import UserRolesList, CreateStoreStaffUser, UpdateUserInfo
 from src.schemas.user_schema import UserSchema
 from src.utils.enums import RolesTypes
@@ -52,7 +52,7 @@ def get_users():
     per_page = request.args.get('per_page', type=int)
     page = request.args.get('page', type=int)
     if not vaild_per_page(per_page) and isinstance(page, int):
-        return response_error("Error on support per page or page number invalid", {'per_page': 'per_page', page: page},400)
+        return response_error("Error on support per page or page number invalid", {'per_page': 'per_page', page: page}, 400)
     is_platform = False
     if request.args.get('filter_platform', type=int):
         is_platform = True
@@ -239,7 +239,7 @@ def create_store_stuff(store_code):
 
     try:
         roles = roleSerivce.get_roles(data.roles)
-        return response_success(userService.create_user(data.email, data.fullname, data.password, roles, store_code))
+        return response_success(userService.create_user(fileSystemService, data.email, data.fullname, data.password, roles, store_code))
     except ValueError:
         return response_error("Error on format of the params", request.data)
     except UserNotFoundError:
@@ -304,6 +304,6 @@ def sync_user_from_firebase_user(uid, role_names, is_platform_user, store_code=N
     roles = roleSerivce.get_roles(role_names)
     email = user_object['email']
     fullname = user_object['displayName']
-    userService.sync_firebase_user(uid, roles, email, fullname, is_platform_user, store_code, new_user)
+    userService.sync_firebase_user(fileSystemService, uid, roles, email, fullname, is_platform_user, store_code, new_user)
     response['extend_info'] = userService.get_user(uid)
     return response

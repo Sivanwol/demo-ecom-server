@@ -12,7 +12,7 @@ from src.utils.enums import RolesTypes
 from src.utils.general import Struct
 from src.utils.responses import response_success, response_error
 from src.utils.validations import valid_currency_code
-from src.routes import userService, storeService
+from src.routes import userService, storeService, fileSystemService
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<store_code>/info"))
@@ -43,7 +43,7 @@ def create_store(uid):
         except ValidationError as e:
             return response_error("Error on format of the params", {'params': request.json, 'errors': e.messages})
 
-        store = storeService.create_store(uid, data)
+        store = storeService.create_store(fileSystemService, uid, data)
         userService.update_user_store_owner(uid, store['info']['store_code'])
         return response_success(store)
     return response_error("Error on format of the params", {'uid': uid})

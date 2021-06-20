@@ -8,7 +8,6 @@ from src.exceptions.params_not_match_create_store import ParamsNotMatchCreateSto
 from src.models.store_hours import StoreHours
 from src.models.store_locations import StoreLocations
 from src.models.stores import Store
-from src.routes import fileSystemService
 from src.schemas.store_schema import StoreSchema, StoreLocationSchema, StoreHourSchema
 from src.utils.validations import valid_currency_code
 
@@ -138,7 +137,7 @@ class StoreService:
         store = self.get_store(owner_uid, store_code, True)
         StoreHours.query.filter_by(store_id=store.id).delete()
 
-    def create_store(self, owner_id, store_object):
+    def create_store(self, fileSystemService, owner_id, store_object):
         if not valid_currency_code(store_object['currency_code']):
             raise ParamsNotMatchCreateStore(owner_id, store_object['name'], store_object['currency_code'], store_object['description'])
         self.clear_stores_cache()

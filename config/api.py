@@ -1,4 +1,4 @@
-import logging
+import logs
 import os
 
 import sentry_sdk
@@ -38,7 +38,7 @@ def load_application():
 
     # Database Migrations Initialization
     migration.init_app(app, db)
-    app.logger = logging.getLogger('console')
+    app.logger = logs.logging.getLogger('console')
     return app
 
 

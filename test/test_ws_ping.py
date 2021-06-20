@@ -1,4 +1,4 @@
-# tests/test_basic.py
+# test/test_ws_ping.py
 import unittest
 from test.common.Basecase import BaseTestCase
 

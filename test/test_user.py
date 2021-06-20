@@ -1,4 +1,4 @@
-# tests/test_basic.py
+# test/test_user.py
 import unittest
 
 from src.schemas.user_schema import UserSchema
@@ -687,6 +687,9 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.extend_info.store_code, user.store_code)
             self.assertEqual(response_data.data.extend_info.uid, uid)
             self.assertFalse(user.is_pass_tutorial)
+            path = self.fileSystemService.getFolderPath('users',uid)
+            self.assertIsNotNone(path)
+            self.assertTrue(self.fileSystemService.folder_existed(path))
 
     def test_service_user_part_of_store_valid(self):
         with self.client:
@@ -695,6 +698,9 @@ class FlaskTestCase(BaseTestCase):
             user_object = self.login_user(new_user)
             uid = user_object['uid']
             self.assertTrue(self.userService.check_user_part_store(uid, store_info.data.info.store_code))
+            path = self.fileSystemService.getFolderPath('users',uid)
+            self.assertIsNotNone(path)
+            self.assertTrue(self.fileSystemService.folder_existed(path))
 
     def test_service_user_part_of_store_staff_valid(self):
         with self.client:

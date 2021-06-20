@@ -1,7 +1,7 @@
 from __future__ import with_statement
 
-import logging
-from logging.config import fileConfig
+import logs
+from logs.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
@@ -15,7 +15,7 @@ config = context.config
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
-logger = logging.getLogger('alembic.env')
+logger = logs.getLogger('alembic.env')
 
 # add your model's MetaData object here
 # for 'autogenerate' support

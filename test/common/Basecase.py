@@ -56,6 +56,30 @@ class BaseTestCase(TestCase):
         print(self.roleService.get_all_roles())
         self.init_unit_data()
         Faker.seed(randint(0, 100))
+        if settings[os.environ.get("FLASK_ENV", "development")].CLEAR_FOLDER_UPLOAD:
+            self.clear_uploads_folders()
+
+    def clear_uploads_folders(self):
+        # let clear system folders
+        upload_system_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+                                          settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER)
+        folders = self.fileSystemService.getFolderList(upload_system_path)
+        for folder in folders:
+            self.fileSystemService.remove_folders(folder)
+
+        # let clear users folders
+        upload_system_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+                                          settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER)
+        folders = self.fileSystemService.getFolderList(upload_system_path)
+        for folder in folders:
+            self.fileSystemService.remove_folders(folder)
+
+        # let clear stores folders
+        upload_system_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+                                          settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER)
+        folders = self.fileSystemService.getFolderList(upload_system_path)
+        for folder in folders:
+            self.fileSystemService.remove_folders(folder)
 
     def ws_renew_connection(self, namespace=None):
         self.ws_client.connect(namespace=namespace)
@@ -92,7 +116,7 @@ class BaseTestCase(TestCase):
         if self.platform_owner_object is not None:
             self.assertNotEqual(self.platform_owner_object.uid, '')
         roles = self.roleService.get_roles([RolesTypes.Owner.value])
-        self.userService.sync_firebase_user(self.platform_owner_object.uid, roles, self.platform_owner_user, 'platform owner', True)
+        self.userService.sync_firebase_user(self.fileSystemService, self.platform_owner_object.uid, roles, self.platform_owner_user, 'platform owner', True)
 
     def setup_support_user(self):
         self.platform_support_object = create_fb_user(self.platform_support_user, self.global_password)
@@ -100,7 +124,8 @@ class BaseTestCase(TestCase):
         if self.platform_support_object is not None:
             self.assertNotEqual(self.platform_support_object.uid, '')
         roles = self.roleService.get_roles([RolesTypes.Support.value])
-        self.userService.sync_firebase_user(self.platform_support_object.uid, roles, self.platform_support_user, 'platform support', True)
+        self.userService.sync_firebase_user(self.fileSystemService, self.platform_support_object.uid, roles, self.platform_support_user, 'platform support',
+                                            True)
 
     def setup_account_user(self):
         self.platform_accounts_object = create_fb_user(self.platform_account_user, self.global_password)
@@ -108,7 +133,8 @@ class BaseTestCase(TestCase):
         if self.platform_accounts_object is not None:
             self.assertNotEqual(self.platform_accounts_object.uid, '')
         roles = self.roleService.get_roles([RolesTypes.Accounts.value])
-        self.userService.sync_firebase_user(self.platform_accounts_object.uid, roles, self.platform_account_user, 'platform account', True)
+        self.userService.sync_firebase_user(self.fileSystemService, self.platform_accounts_object.uid, roles, self.platform_account_user, 'platform account',
+                                            True)
 
     def create_user(self, email, name, roles, initial_state=False, store_code=None, user_data=None, is_active=True):
         user = create_fb_user(email, self.global_password)
@@ -117,7 +143,7 @@ class BaseTestCase(TestCase):
             auth.delete_user(user.uid)  # we need make sure this user will be delete no point keep at as there a lot of tests
             user = create_fb_user(email, self.global_password)
         roles = self.roleService.get_roles(roles)
-        self.userService.sync_firebase_user(user.uid, roles, email, name, initial_state, store_code)
+        self.userService.sync_firebase_user(self.fileSystemService, user.uid, roles, email, name, initial_state, store_code)
         if user_data is not None:
             self.userService.update_user_info(user.uid, user_data)
         if not is_active:
@@ -232,8 +258,3 @@ class BaseTestCase(TestCase):
     def assertRequestPassed(self, response, message):
         print('response data -> %s' % response.data)
         self.assert200(response, message)
-
-    def getEntityUploadPath(self, entity_id):
-        upload_path = settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER
-        upload_path += "/%s/%s" % (settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER, entity_id)
-        return upload_path
