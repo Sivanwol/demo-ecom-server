@@ -7,26 +7,6 @@ from src.middlewares.check_token import check_token_of_user
 from src.utils.responses import response_success
 
 # Todo: upload media files that include the file meta data and every thing else
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/setup/store"), methods=["POST"])
-@check_token_of_user
-def setup_store():
-    countries = {}
-    for country in list(pycountry.countries):
-        obj = {"{}".format(country.alpha_3): country.__dict__['_fields']}
-        countries.update(obj)
-    return response_success(countries)
-
-# Todo: upload media files that include the file meta data and every thing else
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/setup/user/<uid>"), methods=["POST"])
-@check_token_of_user
-def setup_user(uid):
-    countries = {}
-    for country in list(pycountry.countries):
-        obj = {"{}".format(country.alpha_3): country.__dict__['_fields']}
-        countries.update(obj)
-    return response_success(countries)
-
-# Todo: upload media files that include the file meta data and every thing else
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/uploads"), methods=["POST"])
 @check_token_of_user
 def upload_media():
