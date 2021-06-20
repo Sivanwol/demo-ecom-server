@@ -50,14 +50,14 @@ class BaseTestCase(TestCase):
         self.client = self.app.test_client()
         self.userUtils = UserTestUtills(self)
         self.ws_client = socketio.test_client(self.app)
+        if settings[os.environ.get("FLASK_ENV", "development")].CLEAR_FOLDER_UPLOAD:
+            self.clear_uploads_folders()
         db.create_all()
         db.session.commit()
         self.roleService.insert_roles()
         print(self.roleService.get_all_roles())
         self.init_unit_data()
         Faker.seed(randint(0, 100))
-        if settings[os.environ.get("FLASK_ENV", "development")].CLEAR_FOLDER_UPLOAD:
-            self.clear_uploads_folders()
 
     def clear_uploads_folders(self):
         # let clear system folders
