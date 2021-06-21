@@ -298,7 +298,7 @@ def sync_store_user_create(uid, store_code):
             if has_store is None:
                 response_error("error store not existed", {uid: uid, store_code: store_code})
             return response_success(
-                sync_user_from_firebase_user( uid, [RolesTypes.StoreCustomer.value], False, store_code))
+                sync_user_from_firebase_user(uid, [RolesTypes.StoreCustomer.value], False, store_code))
         except ValueError:
             return response_error("Error on format of the params", {uid: uid})
         except UserNotFoundError:
@@ -310,15 +310,14 @@ def sync_store_user_create(uid, store_code):
     return response_error("Error user exist", {uid: uid})
 
 
-def sync_user_from_firebase_user( uid, role_names, is_platform_user, store_code=None, new_user=True):
+def sync_user_from_firebase_user(uid, role_names, is_platform_user, store_code=None, new_user=True):
     userService = container[UserService]
     roleSerivce = container[RolesService]
-    fileSystemService = container[FileSystemService]
     user_object = userService.get_firebase_user(uid).__dict__['_data']
     response = {'user': json.dumps(user_object, indent=4), 'extend_info': None}
     roles = roleSerivce.get_roles(role_names)
     email = user_object['email']
     fullname = user_object['displayName']
-    userService.sync_firebase_user(fileSystemService, uid, roles, email, fullname, is_platform_user, store_code, new_user)
+    userService.sync_firebase_user(uid, roles, email, fullname, is_platform_user, store_code, new_user)
     response['extend_info'] = userService.get_user(uid)
     return response

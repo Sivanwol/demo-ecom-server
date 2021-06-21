@@ -116,7 +116,7 @@ class BaseTestCase(TestCase):
         if self.platform_owner_object is not None:
             self.assertNotEqual(self.platform_owner_object.uid, '')
         roles = self.roleService.get_roles([RolesTypes.Owner.value])
-        self.userService.sync_firebase_user(self.fileSystemService, self.platform_owner_object.uid, roles, self.platform_owner_user, 'platform owner', True)
+        self.userService.sync_firebase_user(self.platform_owner_object.uid, roles, self.platform_owner_user, 'platform owner', True)
 
     def setup_support_user(self):
         self.platform_support_object = create_fb_user(self.platform_support_user, self.global_password)
@@ -124,7 +124,7 @@ class BaseTestCase(TestCase):
         if self.platform_support_object is not None:
             self.assertNotEqual(self.platform_support_object.uid, '')
         roles = self.roleService.get_roles([RolesTypes.Support.value])
-        self.userService.sync_firebase_user(self.fileSystemService, self.platform_support_object.uid, roles, self.platform_support_user, 'platform support',
+        self.userService.sync_firebase_user(self.platform_support_object.uid, roles, self.platform_support_user, 'platform support',
                                             True)
 
     def setup_account_user(self):
@@ -133,7 +133,7 @@ class BaseTestCase(TestCase):
         if self.platform_accounts_object is not None:
             self.assertNotEqual(self.platform_accounts_object.uid, '')
         roles = self.roleService.get_roles([RolesTypes.Accounts.value])
-        self.userService.sync_firebase_user(self.fileSystemService, self.platform_accounts_object.uid, roles, self.platform_account_user, 'platform account',
+        self.userService.sync_firebase_user(self.platform_accounts_object.uid, roles, self.platform_account_user, 'platform account',
                                             True)
 
     def create_user(self, email, name, roles, initial_state=False, store_code=None, user_data=None, is_active=True):
@@ -143,7 +143,7 @@ class BaseTestCase(TestCase):
             auth.delete_user(user.uid)  # we need make sure this user will be delete no point keep at as there a lot of tests
             user = create_fb_user(email, self.global_password)
         roles = self.roleService.get_roles(roles)
-        self.userService.sync_firebase_user(self.fileSystemService, user.uid, roles, email, name, initial_state, store_code)
+        self.userService.sync_firebase_user(user.uid, roles, email, name, initial_state, store_code)
         if user_data is not None:
             self.userService.update_user_info(user.uid, user_data)
         if not is_active:

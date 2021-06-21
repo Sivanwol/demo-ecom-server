@@ -4,18 +4,15 @@ from flask_socketio import SocketIO
 from lagom import Singleton, Container
 from lagom.integrations.flask import FlaskIntegration
 from .api import app
-from src.services.filesystem import FileSystemService
-from src.services.media import MediaService
-from src.services.roles import RolesService
-from src.services.store import StoreService
-from src.services.user import UserService
+from src.services import FileSystemService, MediaService, RolesService, StoreService, UserService, SettingsService
 
 container = Container()
 container[FileSystemService] = FileSystemService(app.logger)
-container[RolesService] = Singleton(lambda: RolesService())
-container[UserService] = Singleton(lambda: UserService())
-container[StoreService] = Singleton(lambda: StoreService())
-container[MediaService] = Singleton(lambda: MediaService())
+container[RolesService] = RolesService(app.logger)
+container[UserService] = UserService(app.logger, container[FileSystemService])
+container[StoreService] = StoreService(app.logger, container[FileSystemService])
+container[SettingsService] = SettingsService(app.logger)
+container[MediaService] = MediaService(app.logger)
 app = FlaskIntegration(app, container)
 APP_DEBUG_MODE = False
 if os.environ.get("FLASK_ENV", "development") == 'development' or os.environ.get("FLASK_ENV", "development") == 'testing':

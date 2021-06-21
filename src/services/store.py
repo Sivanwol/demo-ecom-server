@@ -1,3 +1,5 @@
+from logging import Logger
+
 from sqlalchemy import desc
 
 from config.api import cache
@@ -7,6 +9,7 @@ import uuid
 from src.exceptions import ParamsNotMatchCreateStore
 from src.models import StoreHours, StoreLocations, Store
 from src.schemas import StoreSchema, StoreLocationSchema, StoreHourSchema
+from src.services import FileSystemService
 from src.utils.validations import valid_currency_code
 
 storeSchema = StoreSchema()
@@ -15,6 +18,10 @@ storeHourSchema = StoreHourSchema()
 
 
 class StoreService:
+    def __init__(self, logger: Logger, fileSystemService: FileSystemService):
+        self.logger = logger
+        self.fileSystemService = fileSystemService
+
     @cache.memoize(50)
     def get_stores(self, return_model=False):
         stores = Store.query.order_by(desc(Store.created_at)).all()
@@ -135,7 +142,7 @@ class StoreService:
         store = self.get_store(owner_uid, store_code, True)
         StoreHours.query.filter_by(store_id=store.id).delete()
 
-    def create_store(self, fileSystemService, owner_id, store_object):
+    def create_store(self, owner_id, store_object):
         if not valid_currency_code(store_object['currency_code']):
             raise ParamsNotMatchCreateStore(owner_id, store_object['name'], store_object['currency_code'], store_object['description'])
         self.clear_stores_cache()
@@ -143,7 +150,7 @@ class StoreService:
         store = Store(store_code, owner_id, store_object['name'], store_object['currency_code'], None, store_object['description'])
         db.session.add(store)
         db.session.commit()
-        fileSystemService.create_store_folder(store_code)
+        self.fileSystemService.create_store_folder(store_code)
         return self.get_store_by_status_code(store_code)
 
     def freeze_store(self, uid, store_code):

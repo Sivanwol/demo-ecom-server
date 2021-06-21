@@ -1,8 +1,14 @@
+from logging import Logger
+
 from src.models import Roles
 from sqlalchemy.sql import or_
 
 
 class RolesService:
+
+    def __init__(self, logger: Logger):
+        self.logger = logger
+
 
     def get_all_roles(self):
         return Roles.query.all()

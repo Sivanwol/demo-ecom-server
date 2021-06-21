@@ -1,6 +1,7 @@
 import json
 import os
 from distutils.util import strtobool
+from logging import Logger
 
 from config.api import redis_connection
 from src.exceptions import SettingsNotSync
@@ -9,6 +10,9 @@ from src.utils.general import Struct
 
 
 class SettingsService:
+    def __init__(self, logger: Logger):
+        self.logger = logger
+
     def getItem(self, key):
         value = None
         if not redis_connection.exists('sync_in_progress'):

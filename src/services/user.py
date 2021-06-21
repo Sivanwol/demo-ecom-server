@@ -1,3 +1,5 @@
+from logging import Logger
+
 import firebase_admin
 from firebase_admin import auth
 from sqlalchemy import or_, desc, asc
@@ -6,14 +8,17 @@ from config.api import cache
 from config.database import db
 from src.models import User, Store
 from src.schemas import UserSchema
+from src.services import FileSystemService
 from src.utils.enums import AllowSortByDirection
 from src.utils.firebase_utils import create_firebase_user
 from src.utils.responses import response_error
-from src.utils.singleton import singleton
 
 
-@singleton
 class UserService:
+    def __init__(self, logger: Logger, fileSystemService: FileSystemService):
+        self.logger = logger
+        self.fileSystemService = fileSystemService
+
     user_schema = UserSchema()
     """Verifies the signature and data for the provided JWT.
 
@@ -185,11 +190,10 @@ class UserService:
 
     ''' Will create staff user for the store (this will not for customer as he work on different workflow'''
 
-    def create_user(self, fileSystemService, email, fullname, password, roles, store_code):
+    def create_user(self, email, fullname, password, roles, store_code):
         user_obj = create_firebase_user(email, password)
         uid = user_obj.uid
-        self.sync_firebase_user(fileSystemService, uid, roles, email, fullname, True, store_code, True)
-        fileSystemService.create_user_folder(uid)
+        self.sync_firebase_user(uid, roles, email, fullname, True, store_code, True)
         return self.get_user(uid)
 
     # TODO: Remove this method
@@ -253,7 +257,7 @@ class UserService:
             # All requirements have been met: return True
         return True
 
-    def sync_firebase_user(self, fileSystemService, uid, roles, email, fullname, is_platform_user, store_code=None, is_new_user=True):
+    def sync_firebase_user(self, uid, roles, email, fullname, is_platform_user, store_code=None, is_new_user=True):
         user = User(uid, email, fullname, True, is_new_user)
         if not is_platform_user:
             if store_code is not None:
@@ -264,4 +268,4 @@ class UserService:
         user.add_user_roles(roles)
         db.session.add(user)
         db.session.commit()
-        fileSystemService.create_user_folder(uid)
+        self.fileSystemService.create_user_folder(uid)
