@@ -1,10 +1,13 @@
 import os
+
 import sentry_sdk
 from celery import Celery
+from fakeredis import FakeStrictRedis
 from flask import Flask
 from flask_caching import Cache
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from redis import Redis
 from sentry_sdk.integrations.flask import FlaskIntegration
 from config import settings
 from config.database import db, migration
@@ -54,13 +57,20 @@ if os.environ.get("FLASK_ENV", "development") == 'testing':
         'CACHE_TYPE': 'NullCache'
     })
     celery = Celery(__name__)
+    redis_connection = FakeStrictRedis()
 else:
+    redis_connection = Redis(
+        password=settings[os.environ.get("FLASK_ENV", "development")].REDIS_PASSWORD,
+        host=settings[os.environ.get("FLASK_ENV", "development")].REDIS_HOST,
+        port=settings[os.environ.get("FLASK_ENV", "development")].REDIS_PORT,
+        db=settings[os.environ.get("FLASK_ENV", "development")].REDIS_DB
+    )
     cache = Cache(app, config={
         'CACHE_TYPE': 'RedisCache',
         'CACHE_KEY_PREFIX': settings[os.environ.get("FLASK_ENV", "development")].CACHE_KEY_PREFIX,
         'CACHE_REDIS_HOST': settings[os.environ.get("FLASK_ENV", "development")].REDIS_HOST,
         'CACHE_REDIS_PORT': settings[os.environ.get("FLASK_ENV", "development")].REDIS_PORT,
-        'CACHE_REDIS_DB': settings[os.environ.get("FLASK_ENV", "development")].REDIS_DB,
+        'CACHE_REDIS_DB': settings[os.environ.get("FLASK_ENV", "development")].REDIS_CACHE_DB,
         'CACHE_REDIS_PASSWORD': settings[os.environ.get("FLASK_ENV", "development")].REDIS_PASSWORD
     })
     celery = Celery(__name__, backend=redis_url, broker=redis_url)

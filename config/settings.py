@@ -39,6 +39,7 @@ class Config:
     REDIS_HOST = os.getenv('REDIS_HOST')  # docker network
     REDIS_PORT = os.getenv('REDIS_PORT')
     REDIS_DB = os.getenv('REDIS_DB')
+    REDIS_CACHE_DB = os.getenv('REDIS_CACHE_DB')
     REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
     CACHE_KEY_PREFIX = os.getenv('CACHE_KEY_PREFIX')
 

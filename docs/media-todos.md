@@ -38,8 +38,19 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
 - [x] install signals - not required and not useful
 - [x] unit test for socket io -> https://github.com/miguelgrinberg/flack/blob/master/tests/tests.py
 
+### Tasks
+- [ ] Add command line that will work once a day that will sync what existed in setting and dump it into the redis
+- [ ] add service that will get setting include casting from str to object (if it json) or to int, bool, float
+- [ ] sync process will work as follow: will have general flag in redis that flag params need go to old values the update will happen as follows  
+        old value will save same key with the prefix [key]_temp  and new will override the [key] with new value once done reset flag in case of failure there need add flow for
+        rollback that will fatch the  [key]_temp and return to the [key] as well reset flag
+
 ### Tests
-- [ ] DI Checks overall system check that all still work as intended
+- [x] DI Checks overall system check that all still work as intended
+- [ ] check task sync from settings
+- [ ] check get settings
+- [ ] check none existed settings
+- [ ] check force sync settings via service
 - [ ] Check create root user folder
   - [ ] check sup folder creation
 - [ ] Check create root store folder

@@ -14,11 +14,10 @@ from src.utils.responses import response_success, response_error
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/uploads"), methods=["POST"])
 @check_token_of_user
 def upload_media():
-    countries = {}
-    for country in list(pycountry.countries):
-        obj = {"{}".format(country.alpha_3): country.__dict__['_fields']}
-        countries.update(obj)
-    return response_success(countries)
+    files = request.files.getlist("files")
+    for file in files:
+        pass
+    return response_success([])
 
 
 # Todo: create folder
