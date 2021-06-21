@@ -3,7 +3,7 @@ import unittest
 
 from src.utils.general import Struct
 from test.common.Basecase import BaseTestCase
-from utils.enums import RolesTypes
+from src.utils.enums import RolesTypes
 
 
 class FlaskTestCase(BaseTestCase):

@@ -3,7 +3,6 @@ from datetime import datetime
 from sqlalchemy import Integer, String, Boolean, Text, Float
 
 from config.database import db
-from src.models import User
 from src.models.media_folder import MediaFolder
 from src.models.mixin.TimestampMixin import TimestampMixin
 from src.utils.enums import MediaAssetsType

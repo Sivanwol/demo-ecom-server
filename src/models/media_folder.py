@@ -3,7 +3,6 @@ from datetime import datetime
 from sqlalchemy import Integer, String, Boolean, Text
 
 from config.database import db
-from src.models import User
 from src.models.mixin.TimestampMixin import TimestampMixin
 
 
@@ -15,9 +14,9 @@ class MediaFolder(TimestampMixin, db.Model):
 
     id = db.Column(Integer, primary_key=True)
     code = db.Column(String(100), nullable=False)
-    alias = db.Column(String(255), db.ForeignKey(User.id))
-    name = db.Column(String(255), db.ForeignKey(User.id))
-    description = db.Column(Text(), db.ForeignKey(User.id), nullable=True)
+    alias = db.Column(String(255))
+    name = db.Column(String(255))
+    description = db.Column(Text(), nullable=True)
     is_system_folder = db.Column(Boolean, nullable=True, default=False)
     parent_folder_id = db.Column(Integer, nullable=True)
 
