@@ -4,7 +4,7 @@ from flask import request
 from marshmallow import ValidationError
 
 from config import settings
-from config.containers import app as current_app
+from config.containers import app as current_app, container
 from src.middlewares.check_role import check_role
 from src.schemas.requests.store import RequestStoreCreate, RequestStoreUpdate, RequestStoreLocationSchema, RequestStoreHourSchema
 from src.services.filesystem import FileSystemService
@@ -18,7 +18,8 @@ from src.utils.validations import valid_currency_code
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<store_code>/info"))
-def get_store_info(store_code, storeService: StoreService):
+def get_store_info(store_code):
+    storeService = container[StoreService]
     store = storeService.get_store_by_status_code(store_code)
     if store is None:
         response_error("error store not existed", {store_code: store_code})
@@ -28,14 +29,18 @@ def get_store_info(store_code, storeService: StoreService):
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/list"))
 @check_role([RolesTypes.Support.value, RolesTypes.Owner.value, RolesTypes.Accounts.value, RolesTypes.Reports.value])
-def list_stores(storeService: StoreService):
+def list_stores():
+    storeService = container[StoreService]
     stores = storeService.get_stores()
     return response_success(stores)
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/create"), methods=["POST"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
-def create_store(uid, userService: UserService, storeService: StoreService, fileSystemService: FileSystemService):
+def create_store(uid):
+    userService = container[UserService]
+    storeService = container[StoreService]
+    fileSystemService = container[FileSystemService]
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(userService, uid):
@@ -53,7 +58,9 @@ def create_store(uid, userService: UserService, storeService: StoreService, file
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>"), methods=["DELETE"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
-def delete_store(uid, store_code, userService: UserService, storeService: StoreService):
+def delete_store(uid, store_code):
+    userService = container[UserService]
+    storeService = container[StoreService]
     if verify_uid(userService, uid):
         if not storeService.store_exists(uid, store_code):
             response_error("store not exist", {uid: uid, store_code: store_code})
@@ -66,7 +73,9 @@ def delete_store(uid, store_code, userService: UserService, storeService: StoreS
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/toggle/maintenance"), methods=["PUT"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
-def toggle_store_maintenance(uid, store_code, userService: UserService, storeService: StoreService):
+def toggle_store_maintenance(uid, store_code):
+    userService = container[UserService]
+    storeService = container[StoreService]
     if verify_uid(userService, uid):
         if not storeService.store_exists(uid, store_code):
             response_error("store not exist", {uid: uid, store_code: store_code})
@@ -79,7 +88,9 @@ def toggle_store_maintenance(uid, store_code, userService: UserService, storeSer
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/update"), methods=["PUT"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value, RolesTypes.StoreAccount.value])
-def update_store_support(uid, store_code, userService: UserService, storeService: StoreService):
+def update_store_support(uid, store_code):
+    userService = container[UserService]
+    storeService = container[StoreService]
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(userService, uid):
@@ -101,7 +112,9 @@ def update_store_support(uid, store_code, userService: UserService, storeService
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/locations"), methods=["POST"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value, RolesTypes.StoreAccount.value])
-def update_store_location(uid, store_code, userService: UserService, storeService: StoreService):
+def update_store_location(uid, store_code):
+    userService = container[UserService]
+    storeService = container[StoreService]
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(userService, uid):
@@ -121,7 +134,9 @@ def update_store_location(uid, store_code, userService: UserService, storeServic
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/store/<uid>/<store_code>/hours"), methods=["POST"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value, RolesTypes.StoreAccount.value])
-def update_store_hours(uid, store_code, userService: UserService, storeService: StoreService):
+def update_store_hours(uid, store_code):
+    userService = container[UserService]
+    storeService = container[StoreService]
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(userService, uid):

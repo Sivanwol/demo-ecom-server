@@ -2,7 +2,7 @@ from functools import wraps
 
 from flask import request
 
-from config.containers import app
+from config.containers import container
 from src.services.user import UserService
 from src.utils.common_methods import verify_response
 
@@ -11,7 +11,7 @@ from src.utils.common_methods import verify_response
 def check_token_of_user(f):
     @wraps(f)
     def decorator(*args, **kwargs):
-        userService = app[UserService]
+        userService = container[UserService]
         response = verify_response()
         if response is None:
             result =  userService.check_user_auth(request, True)

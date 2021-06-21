@@ -46,8 +46,8 @@ class BaseTestCase(TestCase):
         print(os.environ.get("FLASK_ENV", "development"))
         print(settings[os.environ.get("FLASK_ENV", "development")].SQLALCHEMY_DATABASE_URI)
         self.firebase_client_object = setup_firebase_client()
-        app.app_context().push()
-        return app
+        app.flask_app.app_context().push()
+        return app.flask_app
 
     def setUp(self):
         self.app_context = self.app.app_context()
