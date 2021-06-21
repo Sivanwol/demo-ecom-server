@@ -4,9 +4,9 @@ import pycountry
 from flask import request
 
 from config import settings
-from config.api import app as current_app
-from src.routes import fileSystemService
+from config.containers import app as current_app
 from src.middlewares.check_token import check_token_of_user
+from src.services.filesystem import FileSystemService
 from src.utils.responses import response_success, response_error
 
 
@@ -24,7 +24,7 @@ def upload_media():
 # Todo: create folder
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<entity_id>/<type>/folder/create"), methods=["POST"])
 @check_token_of_user
-def create_virtual_directory(entity_id, type):
+def create_virtual_directory(entity_id, type, fileSystemService: FileSystemService):
     path = fileSystemService.getFolderPath(entity_id, type)
     if path is None:
         return response_error("Error on format of the params", {type, entity_id})

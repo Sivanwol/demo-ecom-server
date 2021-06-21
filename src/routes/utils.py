@@ -2,7 +2,7 @@ import os
 
 import pycountry
 from config import settings
-from config.api import app as current_app
+from config.containers import app as current_app
 from src.utils.responses import response_success
 
 

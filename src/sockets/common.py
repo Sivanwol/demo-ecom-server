@@ -1,7 +1,7 @@
 from flask import request
 
-from config.api import socketio
-from src.routes import userService
+from config.containers import socketio
+from src.services.user import UserService
 
 
 class CommonSocketConnection():
@@ -16,7 +16,7 @@ class CommonSocketConnection():
 
 
 class CommonAuthSocketConnection():
-    def on_connect(self, auth):
+    def on_connect(self, auth, userService: UserService):
         res = userService.check_user_auth_socket(auth, True)
         if res is None:
             raise ConnectionRefusedError('unauthorized!')
