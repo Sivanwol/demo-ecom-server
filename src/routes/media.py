@@ -5,8 +5,8 @@ from flask import request
 
 from config import settings
 from config.containers import app as current_app
-from src.middlewares.check_token import check_token_of_user
-from src.services.filesystem import FileSystemService
+from src.middlewares import check_token_of_user
+from src.services import FileSystemService
 from src.utils.responses import response_success, response_error
 
 

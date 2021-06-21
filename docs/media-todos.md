@@ -42,8 +42,8 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
 - [ ] Add command line that will work once a day that will sync what existed in setting and dump it into the redis
 - [ ] add service that will get setting include casting from str to object (if it json) or to int, bool, float
 - [ ] sync process will work as follow: will have general flag in redis that flag params need go to old values the update will happen as follows  
-        old value will save same key with the prefix [key]_temp  and new will override the [key] with new value once done reset flag in case of failure there need add flow for
-        rollback that will fatch the  [key]_temp and return to the [key] as well reset flag
+        old value will save same key with the prefix env_[key]_temp  and new will override the env_[key] with new value once done reset flag in case of failure there need add flow for
+        rollback that will fetch the  env_[key]_temp and return to the env_[key] as well reset flag
 
 ### Tests
 - [x] DI Checks overall system check that all still work as intended

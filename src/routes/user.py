@@ -7,14 +7,10 @@ from flask import request
 from marshmallow import ValidationError
 from config import settings
 from config.containers import app as current_app, container
-from src.middlewares.check_role import check_role
-from src.middlewares.check_token import check_token_register_firebase_user, check_token_of_user
-from src.schemas.requests.user import UserRolesList, CreateStoreStaffUser, UpdateUserInfo
-from src.schemas.user_schema import UserSchema
-from src.services.filesystem import FileSystemService
-from src.services.roles import RolesService
-from src.services.store import StoreService
-from src.services.user import UserService
+from src.middlewares import check_role, check_token_register_firebase_user, check_token_of_user
+from src.schemas.requests import UserRolesList, CreateStoreStaffUser, UpdateUserInfo
+from src.schemas import UserSchema
+from src.services import FileSystemService, RolesService, StoreService, UserService
 from src.utils.enums import RolesTypes
 from src.utils.general import Struct
 from src.utils.responses import response_error, response_success, response_success_paging

@@ -5,11 +5,9 @@ from marshmallow import ValidationError
 
 from config import settings
 from config.containers import app as current_app, container
-from src.middlewares.check_role import check_role
-from src.schemas.requests.store import RequestStoreCreate, RequestStoreUpdate, RequestStoreLocationSchema, RequestStoreHourSchema
-from src.services.filesystem import FileSystemService
-from src.services.store import StoreService
-from src.services.user import UserService
+from src.middlewares import check_role
+from src.schemas.requests import RequestStoreCreate, RequestStoreUpdate, RequestStoreLocationSchema, RequestStoreHourSchema
+from src.services import FileSystemService, StoreService, UserService
 from src.utils.common_methods import verify_uid
 from src.utils.enums import RolesTypes
 from src.utils.general import Struct

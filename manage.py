@@ -1,7 +1,7 @@
 from flask_migrate import MigrateCommand
 from flask_script import Manager
 from app import app
-from src.commands.gunicorn_server import GunicornServer
+from src.commands import GunicornServer
 from src.utils.common_methods import scan_routes, setup_owner_user, setup_accounts_user, setup_support_user
 from src.utils.firebase_utils import login_user
 

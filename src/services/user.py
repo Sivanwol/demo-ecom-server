@@ -4,9 +4,8 @@ from sqlalchemy import or_, desc, asc
 
 from config.api import cache
 from config.database import db
-from src.models import User
-from src.models.stores import Store
-from src.schemas.user_schema import UserSchema
+from src.models import User, Store
+from src.schemas import UserSchema
 from src.utils.enums import AllowSortByDirection
 from src.utils.firebase_utils import create_firebase_user
 from src.utils.responses import response_error

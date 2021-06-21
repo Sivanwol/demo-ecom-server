@@ -1,4 +1,3 @@
-from config.database import db
 from src.models import Roles
 from sqlalchemy.sql import or_
 

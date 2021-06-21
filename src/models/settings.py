@@ -30,7 +30,7 @@ class Settings(db.Model):
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
-    def getValue(self):
+    def get_value(self):
         if self.is_json:
             return json.loads(self.value)
         return self.value
