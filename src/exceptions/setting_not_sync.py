@@ -9,5 +9,5 @@ class SettingsNotSync(Error):
             email -- user email that try creating into
         """
 
-    def __init__(self, roles_name):
+    def __init__(self):
         self.message = 'Setting workflow not sync with redis please sync'
