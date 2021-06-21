@@ -7,10 +7,14 @@ from firebase_admin import auth
 from flask_testing import TestCase
 
 from config import settings
-from config.api import app, socketio
+from config.containers import app, socketio
 from config.database import db
-from src.routes import userService, storeService, roleSerivce, fileSystemService
+from src.services.filesystem import FileSystemService
 from src.services.firebase import FirebaseService
+from src.services.media import MediaService
+from src.services.roles import RolesService
+from src.services.store import StoreService
+from src.services.user import UserService
 from src.utils.enums import RolesTypes
 from src.utils.firebase_utils import create_firebase_user as create_fb_user, setup_firebase_client, login_user
 from src.utils.general import is_json_key_present, Struct
@@ -31,10 +35,11 @@ class BaseTestCase(TestCase):
     global_password = "password!0101"
     firebase_client_object = None
     firebaseService = FirebaseService()
-    userService = userService
-    roleService = roleSerivce
-    storeService = storeService
-    fileSystemService = fileSystemService
+    userService = UserService()
+    roleService = RolesService()
+    storeService = StoreService()
+    fileSystemService = FileSystemService()
+    mediaSerivce = MediaService()
 
     def create_app(self):
         # app.config.from_object('config.TestConfig')

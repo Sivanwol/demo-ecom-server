@@ -39,6 +39,7 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
 - [x] unit test for socket io -> https://github.com/miguelgrinberg/flack/blob/master/tests/tests.py
 
 ### Tests
+- [ ] DI Checks overall system check that all still work as intended
 - [ ] Check create root user folder
   - [ ] check sup folder creation
 - [ ] Check create root store folder
