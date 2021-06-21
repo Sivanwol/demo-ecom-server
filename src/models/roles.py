@@ -8,7 +8,7 @@ class Roles(db.Model):
     This is a base user Model
     """
     __tablename__ = 'roles'
-
+    __table_args__ = {'extend_existing': True}
     id = db.Column(Integer, primary_key=True)
     name = db.Column(String(100), nullable=False)
     is_global = db.Column(Boolean, nullable=False, default=False)
@@ -41,12 +41,12 @@ class Roles(db.Model):
             {'name': 'support', 'is_active': True},
         ]
 
-        for r in roles:
-            role = Roles.query.filter_by(name=r['name']).first()
-            if role is None:
-                role = Roles(r['name'], r['is_active'])
+        for role in roles:
+            role_db = Roles.query.filter_by(name=role['name']).first()
+            if role_db is None:
+                record = Roles(role['name'], role['is_active'])
+                db.session.add(record)
             # role.reset_permissions()
             # for perm in roles[r]:
             #     role.add_permission(perm)
-            db.session.add(role)
         db.session.commit()

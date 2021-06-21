@@ -1,12 +1,15 @@
 import os
 import pathlib
 import shutil
+from logging import Logger
 
 from config import settings
-from config.api import app
 
 
 class FileSystemService:
+    def __init__(self, logger: Logger):
+        self.logger = logger
+
     def file_existed(self, src):
         file = pathlib.Path(src)
         if file.exists() and file.is_file():
@@ -21,11 +24,11 @@ class FileSystemService:
 
     def remove_folders(self, src):
         try:
-            app.logger.info('delete folder %s' % src)
+            self.logger.info('delete folder %s' % src)
             shutil.rmtree(src)
         except OSError as e:
             print("Error: %s : %s" % (src, e.strerror))
-            app.logger.error("Error: %s : %s" % (src, e.strerror), {
+            self.logger.error("Error: %s : %s" % (src, e.strerror), {
                 'path': src,
                 'error': e.strerror
             })
@@ -61,7 +64,7 @@ class FileSystemService:
                 os.mkdir(src)
             except OSError as e:
                 print("Error: %s : %s" % (src, e.strerror))
-                app.logger.error("Error: %s : %s" % (src, e.strerror), {
+                self.logger.error("Error: %s : %s" % (src, e.strerror), {
                     'path': src,
                     'error': e.strerror
                 })
@@ -70,12 +73,12 @@ class FileSystemService:
         upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
                                    settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER,
                                    entity_id)
-        app.logger.info('create user folder %s (entity id: %s)' % (upload_path, entity_id))
+        self.logger.info('create user folder %s (entity id: %s)' % (upload_path, entity_id))
         self.create_folder(upload_path)
 
     def create_store_folder(self, entity_id):
         upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
                                    settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER,
                                    entity_id)
-        app.logger.info('create store folder %s (entity id: %s)' % (upload_path, entity_id))
+        self.logger.info('create store folder %s (entity id: %s)' % (upload_path, entity_id))
         self.create_folder(upload_path)

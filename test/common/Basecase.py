@@ -5,16 +5,10 @@ from random import randint
 from faker import Faker
 from firebase_admin import auth
 from flask_testing import TestCase
-
 from config import settings
-from config.containers import app, socketio
+from config.containers import app, socketio, container
 from config.database import db
-from src.services.filesystem import FileSystemService
-from src.services.firebase import FirebaseService
-from src.services.media import MediaService
-from src.services.roles import RolesService
-from src.services.store import StoreService
-from src.services.user import UserService
+from src.services import FileSystemService, FirebaseService, MediaService, RolesService, StoreService, UserService, SettingsService
 from src.utils.enums import RolesTypes
 from src.utils.firebase_utils import create_firebase_user as create_fb_user, setup_firebase_client, login_user
 from src.utils.general import is_json_key_present, Struct
@@ -35,11 +29,12 @@ class BaseTestCase(TestCase):
     global_password = "password!0101"
     firebase_client_object = None
     firebaseService = FirebaseService()
-    userService = UserService()
-    roleService = RolesService()
-    storeService = StoreService()
-    fileSystemService = FileSystemService()
-    mediaSerivce = MediaService()
+    userService = container[UserService]
+    roleService = container[RolesService]
+    storeService = container[StoreService]
+    fileSystemService = container[FileSystemService]
+    mediaService = container[MediaService]
+    settingsService = container[SettingsService]
 
     def create_app(self):
         # app.config.from_object('config.TestConfig')

@@ -1,9 +1,7 @@
-from datetime import datetime
-
 from sqlalchemy import Integer, String, Boolean, Text
 
 from config.database import db
-from src.models.mixin.TimestampMixin import TimestampMixin
+from src.models.mixin import TimestampMixin
 
 
 class MediaFolder(TimestampMixin, db.Model):

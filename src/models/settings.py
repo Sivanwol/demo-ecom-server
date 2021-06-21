@@ -9,7 +9,7 @@ class Settings(db.Model):
     """
     This is a base user Model
     """
-    __tablename__ = 'roles'
+    __tablename__ = 'settings'
 
     key = db.Column(String(255), primary_key=True)
     environment = db.Column(String(50), primary_key=True)
@@ -29,8 +29,3 @@ class Settings(db.Model):
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-
-    def get_value(self):
-        if self.is_json:
-            return json.loads(self.value)
-        return self.value

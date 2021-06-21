@@ -1,11 +1,9 @@
-from datetime import datetime
-
 from sqlalchemy import Integer, String, Boolean
 
 from config.database import db
-from src.models import User
+from src.models.user import User
 from src.models.media_files import MediaFile
-from src.models.mixin.TimestampMixin import TimestampMixin
+from src.models.mixin import TimestampMixin
 
 
 class Store(TimestampMixin, db.Model):

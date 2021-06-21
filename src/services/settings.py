@@ -5,6 +5,7 @@ from distutils.util import strtobool
 from config.api import redis_connection
 from src.exceptions import SettingsNotSync
 from src.models import Settings
+from src.utils.general import Struct
 
 
 class SettingsService:
@@ -20,7 +21,7 @@ class SettingsService:
             value = redis_connection.get(key)
             is_json = strtobool(redis_connection.get(key_is_json))
             if is_json:
-                value = json.loads(value)
+                value = Struct(json.loads(value))
         else:
             key_temp = "%s_temp" % key
             key_temp_is_json = "%s_is_json" % key_temp
@@ -29,7 +30,7 @@ class SettingsService:
             value = redis_connection.get(key_temp)
             is_json = (redis_connection.get(key_temp_is_json))
             if is_json:
-                value = json.loads(value)
+                value = Struct(json.loads(value))
         return value
 
     def forceSync(self):
@@ -45,7 +46,7 @@ class SettingsService:
             settings = Settings.query.filter_by(environment=env).all()
             for item in settings:
                 key = "%s_%s" % (env, item.key)
-                value = item.get_value()
+                value = item.value
                 is_json = item.is_json
                 self.updateSettingItem(key, is_json, value)
             redis_connection.set('sync_in_progress', False)

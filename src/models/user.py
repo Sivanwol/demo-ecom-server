@@ -1,10 +1,8 @@
-from datetime import datetime
-
 from sqlalchemy import Integer, String, Boolean
 
 from config.database import db
 from src.models.media_files import MediaFile
-from src.models.mixin.TimestampMixin import TimestampMixin
+from src.models.mixin import TimestampMixin
 
 
 class User(TimestampMixin, db.Model):
