@@ -4,6 +4,7 @@ from sqlalchemy import Integer, String, Boolean
 
 from config.database import db
 from src.models import User
+from src.models.media_files import MediaFile
 from src.models.mixin.TimestampMixin import TimestampMixin
 
 
@@ -16,7 +17,7 @@ class Store(TimestampMixin, db.Model):
     id = db.Column(Integer, primary_key=True)
     store_code = db.Column(String(100), nullable=False)
     owner_id = db.Column(Integer, db.ForeignKey(User.id))
-    logo_id = db.Column(Integer, nullable=True)
+    logo_id = db.Column(Integer, db.ForeignKey(MediaFile.id), nullable=True)
     name = db.Column(String(100), nullable=False)
     description = db.Column(String(255), nullable=True)
     default_currency_code = db.Column(String(3), nullable=False)
@@ -24,7 +25,7 @@ class Store(TimestampMixin, db.Model):
     is_maintenance = db.Column(Boolean, nullable=False, default=False)
 
     owner = db.relationship(User, uselist=False)
-
+    logo = db.relationship(MediaFile, uselist=False)
     def __init__(self, store_code, owner_id, name, default_currency_code, logo_id=None, description=None, is_maintenance=False):
         self.store_code = store_code
         self.owner_id = owner_id
