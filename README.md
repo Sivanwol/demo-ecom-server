@@ -86,6 +86,16 @@ $ set FIRESTORE_EMULATOR_HOST=localhost:9099
 $ python manage.py list_routes
 ```
 
+###### sync the system settings table with redis (able do so in cli)
+```angular2html
+$ python manage.py sync_system
+```
+
+###### generate init settings for the system to operate
+```angular2html
+$ python manage.py init_system
+```
+
 ###### set up of master account on Role of owner
 ```angular2html
 $ python manage.py setup_owner email@domain.com password

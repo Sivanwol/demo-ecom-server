@@ -29,3 +29,12 @@ class Settings(db.Model):
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    @staticmethod
+    def setupSystem():
+        environments = ['development', 'testing']
+        for environment in environments:
+            db.session.add(Settings('UPLOAD_MAX_SIZE', environment, 'MAX upload size of the system', False, 10 * 1024 * 1024))
+            db.session.add(
+                Settings('UPLOAD_ALLOW_FILES_TYPES', environment, 'Type of files allow in upload', False, 'jpg,jpeg,png,gif,doc,docx,xls,pdf,avi,mp4'))
+        db.session.commit()

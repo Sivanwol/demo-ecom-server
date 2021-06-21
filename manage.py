@@ -2,7 +2,8 @@ from flask_migrate import MigrateCommand
 from flask_script import Manager
 from app import app
 from src.commands import GunicornServer
-from src.utils.common_methods import scan_routes, setup_owner_user, setup_accounts_user, setup_support_user
+from src.utils.common_methods import scan_routes, setup_owner_user, setup_accounts_user, setup_support_user, \
+    init_system_settings, sync_system_settings
 from src.utils.firebase_utils import login_user
 
 manager = Manager(app)
@@ -21,6 +22,16 @@ def server(host, port, workers):
 @manager.command
 def list_routes():
     scan_routes(app)
+
+
+@manager.command
+def sync_system():
+    sync_system_settings()
+
+
+@manager.command
+def init_system():
+    init_system_settings()
 
 
 @manager.command

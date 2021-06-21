@@ -57,6 +57,7 @@ class BaseTestCase(TestCase):
         self.roleService.insert_roles()
         print(self.roleService.get_all_roles())
         self.init_unit_data()
+        self.settingsService.init_system_settings()
         Faker.seed(randint(0, 100))
 
     def clear_uploads_folders(self):
