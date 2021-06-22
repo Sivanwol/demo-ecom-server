@@ -26,7 +26,7 @@ def check_token_of_user(f):
 def check_token_register_firebase_user(f):
     @wraps(f)
     def decorator(*args, **kwargs):
-        userService = app[UserService]
+        userService = container[UserService]
         response = verify_response()
         if response is None:
             result =  userService.check_user_auth(request, False)

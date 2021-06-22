@@ -246,7 +246,7 @@ def create_store_stuff(store_code):
 
     try:
         roles = roleSerivce.get_roles(data.roles)
-        return response_success(userService.create_user(fileSystemService, data.email, data.fullname, data.password, roles, store_code))
+        return response_success(userService.create_user(data.email, data.fullname, data.password, roles, store_code))
     except ValueError:
         return response_error("Error on format of the params", request.data)
     except UserNotFoundError:
