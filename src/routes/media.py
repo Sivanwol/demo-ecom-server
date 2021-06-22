@@ -2,11 +2,14 @@ import os
 
 import pycountry
 from flask import request
+from marshmallow import ValidationError
 
 from config import settings
-from config.containers import app as current_app
+from config.containers import app as current_app, container
+from src.exceptions import UnableCreateFolder
 from src.middlewares import check_token_of_user
-from src.services import FileSystemService
+from src.schemas.requests import RequestMediaCreateFolderSchema
+from src.services import MediaService
 from src.utils.responses import response_success, response_error
 
 
@@ -21,20 +24,22 @@ def upload_media():
 
 
 # Todo: create folder
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<entity_id>/<type>/folder/create"), methods=["POST"])
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/folder/create"), methods=["POST"])
 @check_token_of_user
-def create_virtual_directory(entity_id, type, fileSystemService: FileSystemService):
-    path = fileSystemService.get_folder_path(entity_id, type)
-    if path is None:
-        return response_error("Error on format of the params", {type, entity_id})
-    # uploaded_files = request.files.getlist('files')
-    parent_folder = request.json['parent_folder']
-    create_folder = request.json['folder']
-    if parent_folder is None:
-        path = fileSystemService.get_folder_path(entity_id, type, create_folder)
-    else:
-        path = fileSystemService.get_folder_path(entity_id, type, os.path.join(parent_folder, create_folder))
-    fileSystemService.create_folder(path)
+def create_virtual_directory():
+    mediaService = container[MediaService]
+    if not request.is_json:
+        return response_error("Request Data must be in json format", request.data)
+    try:
+        schema = RequestMediaCreateFolderSchema()
+        data = schema.load(request.json)
+        result = mediaService.create_virtual_folder(data, False)
+        return response_success(result)
+    except ValidationError as e:
+        return response_error("Error on format of the params", {'params': request.json})
+    except UnableCreateFolder as e:
+        current_app.logger.error("User failed create folder", {'params': request.json, 'e': e.message})
+        return response_error("Error on create folder it may try create folder under same name or internal issue", {'params': request.json})
 
 
 # Todo: delete folder (will be do any child entity will be mark for deletion (once it set use have N hours to prevent if not will delete if prevent will

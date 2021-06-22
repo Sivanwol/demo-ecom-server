@@ -8,7 +8,6 @@ class RoleSchema(SQLAlchemySchema):
         model = Roles
         include_fk = True
         load_instance = True
-    id = auto_field()
     name = auto_field()
     is_active = auto_field()
     user = auto_field()

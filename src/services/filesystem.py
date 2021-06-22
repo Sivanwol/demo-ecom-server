@@ -11,13 +11,13 @@ class FileSystemService:
     def __init__(self, logger: Logger):
         self.logger = logger
 
-    def file_existed(self, src):
+    def file_existed(self, src) -> bool:
         file = pathlib.Path(src)
         if file.exists() and file.is_file():
             return True
         return False
 
-    def acutal_folder_existed(self, src):
+    def acutal_folder_existed(self, src) -> bool:
         folder = pathlib.Path(src)
         if folder.exists() and folder.is_dir():
             return True
@@ -53,7 +53,7 @@ class FileSystemService:
                                            type, sub_folder, entity_id)
         return upload_path
 
-    def folder_exists(self, type, entity_id=None, sub_folder=None):
+    def folder_exists(self, type, entity_id=None, sub_folder=None) -> bool:
         if not media_type_valid(type) or (sub_folder is not None and entity_id is None):
             return False
 
@@ -62,13 +62,17 @@ class FileSystemService:
         if sub_folder is not None and entity_id is not None:
             upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
                                        type, entity_id, sub_folder)
-        return self.acutal_folder_existed(upload_path)
+        result = self.acutal_folder_existed(upload_path)
+        self.logger.info('checking %s folder existed (%s)' % (type, result))
+        return result
 
-    def system_folder_exists(self, sub_folder=None):
+    def system_folder_exists(self, sub_folder=None) -> bool:
         upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER)
         if sub_folder is not None:
             upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER, sub_folder)
-        return self.acutal_folder_existed(upload_path)
+        result = self.acutal_folder_existed(upload_path)
+        self.logger.info('checking system folder existed (%s)' % result)
+        return result
 
     def create_folder(self, src, sub_path=None, force_create=False):
         if sub_path is not None:
@@ -77,6 +81,7 @@ class FileSystemService:
             if force_create:
                 self.remove_folders(src)
             try:
+                self.logger.info("create folder (%s)" % src)
                 os.mkdir(src)
             except OSError as e:
                 print("Error: %s : %s" % (src, e.strerror))
