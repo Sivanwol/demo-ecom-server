@@ -1003,7 +1003,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.user_data.is_pass_tutorial, user.is_pass_tutorial)
             self.assertEqual(response_data.data.user_data.email, user.email)
             self.assertEqual(response_data.data.user_data.fullname, user.fullname)
-            self.assertEqual(response_data.data.user_data.roles[0].id, user.roles[0].id)
+            self.assertEqual(response_data.data.user_data.roles[0].name, user.roles[0].name)
 
 
 if __name__ == '__main__':
