@@ -44,16 +44,40 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
 - [x] sync process will work as follow: will have general flag in redis that flag params need go to old values the update will happen as follows  
         old value will save same key with the prefix env_[key]_temp  and new will override the env_[key] with new value once done reset flag in case of failure there need add flow for
         rollback that will fetch the  env_[key]_temp and return to the env_[key] as well reset flag
-
+#### Upload files
+- [ ] Upload files with relevant metadata
+- [ ] Check if folder exist (unless it root)
+- [ ] Check if entity_id existed (if type is user or store)
+- [ ] check permission if type=user (it his own user or support allow to upload files directly)
+- [ ] check permission if type=store (you within the group allow uploading) or/and you are the within staff/owner of the store or you support user allow to upload as well
+- [ ] check permission if type=system if you within staff platform
+- [ ] 
+#### Delete Folder workflow logic overall
+- [ ] Locate all relevant file both on sub path and the dest folder
+- [ ] Locate all sup folders
+- [ ] Remove all db files records
+- [ ] Remove All Relevant files
+- [ ] Remove folder and sub folder records
+- [ ] remove the folders itself
+##### Step I
+- [ ] Locate all sup folders
+- [ ] Remove folder and sub folder records
+- [ ] remove the folders itself
+##### Step II
+- [ ] Locate all relevant file both on sub path and the dest folder
+- [ ] Remove all db files records
+- [ ] Remove All Relevant files
 ### Tests
 - [x] DI Checks overall system check that all still work as intended
 - [x] check task sync from settings
 - [x] check get settings
 - [x] check none existed settings
 - [x] check force sync settings via service
+#### Create Folder
 - [ ] Check create root user folder
   - [ ] check sup folder creation
 - [ ] Check create root store folder
   - [ ] check sup folder creation
 - [ ] Check create root system folder
   - [ ] check sup folder creation
+#### Delete Folders

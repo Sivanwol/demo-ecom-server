@@ -1,11 +1,11 @@
 from sqlalchemy import Integer, String, Boolean, Text, Float
 from config.database import db
 from src.models.media_folder import MediaFolder
-from src.models.mixin import TimestampMixin
+from src.models.mixin import TimestampWithOwnerUserMixin
 from src.utils.enums import MediaAssetsType
 
 
-class MediaFile(TimestampMixin, db.Model):
+class MediaFile(TimestampWithOwnerUserMixin, db.Model):
     """
     This is a base user Model
     """
@@ -14,7 +14,7 @@ class MediaFile(TimestampMixin, db.Model):
     id = db.Column(Integer, primary_key=True)
     code = db.Column(String(100))
     type = db.Column(String(100))
-    owner_entity_id = db.Column(Integer, nullable=True)
+    entity_id = db.Column(Integer, nullable=True)
     folder_id = db.Column(Integer, db.ForeignKey(MediaFolder.id))
     file_location = db.Column(String(255))
     file_type = db.Column(Integer, default=MediaAssetsType.Document.value)
@@ -31,13 +31,14 @@ class MediaFile(TimestampMixin, db.Model):
 
     folder = db.relationship(MediaFolder, uselist=False)
 
-    def __init__(self, code, type, folder_id, file_location, file_type, file_size, file_name, file_ext, is_published=None, is_system_file=None):
+    def __init__(self, code, owner_uid, type, folder_id, file_location, file_type, file_size, file_name, file_ext, is_published=None, is_system_file=None):
         if is_published is None:
             is_published = False
         if is_system_file is None:
             is_system_file = False
 
         self.code = code
+        self.owner_user_uid = owner_uid
         self.type = type
         self.folder_id = folder_id
         self.file_location = file_location
@@ -49,10 +50,11 @@ class MediaFile(TimestampMixin, db.Model):
         self.is_system_file = is_system_file
 
     def __repr__(self):
-        return "<MediaFile(id='{}', code='{}', type='{}', folder_id='{}' file_name='{}' file_ext='{}' file_location='{}' is_published={} is_system_file={} " \
-               "created_at='{}' updated_at='{}'>".format(
+        return "<MediaFile(id='{}', code='{}', owner_user_uid='{}', type='{}', folder_id='{}' file_name='{}' file_ext='{}' file_location='{}' " \
+               "is_published={} is_system_file={} created_at='{}' updated_at='{}'>".format(
             self.id,
             self.code,
+            self.owner_user_uid,
             self.type,
             self.folder_id,
             self.file_name,

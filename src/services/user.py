@@ -51,7 +51,7 @@ class UserService:
         return auth.get_user(uid)
 
     @cache.memoize(50)
-    def get_user(self, uid, return_model=False):
+    def get_user(self, uid, return_model=False) -> User | UserSchema:
         user = User.query.filter_by(uid=uid).first()
         if not return_model:
             return self.user_schema.dump(user, many=False)
@@ -100,14 +100,14 @@ class UserService:
         return query.paginate(page=page, per_page=per_page, error_out=False)
 
     @cache.memoize(50)
-    def get_active_user(self, uid, return_model=False):
+    def get_active_user(self, uid, return_model=False) -> User | UserSchema:
         user = User.query.filter_by(uid=uid, is_active=True).first()
         if not return_model:
             return self.user_schema.dump(user, many=False)
         return user
 
     @cache.memoize(50)
-    def user_exists(self, uid):
+    def user_exists(self, uid) -> bool:
         user = User.query.filter_by(uid=uid, is_active=True).first()
         if user is None:
             return False
@@ -117,16 +117,16 @@ class UserService:
         user = self.get_user(uid, True)
         return user.has_any_role(roles)
 
-    def user_has_role_matched(self, uid, roles):
+    def user_has_role_matched(self, uid, roles) -> bool:
         user = self.get_user(uid, True)
         return user.has_role(roles)
 
-    def check_user_part_store(self, uid, store_code):
+    def check_user_part_store(self, uid, store_code) -> bool:
         store = Store.query.filter_by(store_code=store_code).first()
         user = self.get_user(uid, True)
         if store is None or user is None:
             return False
-        if store.owner_id == uid or user.store_code == store_code:
+        if store.owner_user_uid == uid or user.store_code == store_code:
             return True
         return False
 

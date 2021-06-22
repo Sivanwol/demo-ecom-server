@@ -1,10 +1,10 @@
 from sqlalchemy import Integer, String, Boolean, Text
 
 from config.database import db
-from src.models.mixin import TimestampMixin
+from src.models.mixin import TimestampWithOwnerUserMixin
 
 
-class MediaFolder(TimestampMixin, db.Model):
+class MediaFolder(TimestampWithOwnerUserMixin, db.Model):
     """
     This is a base user Model
     """
@@ -18,8 +18,9 @@ class MediaFolder(TimestampMixin, db.Model):
     is_system_folder = db.Column(Boolean, nullable=True, default=False)
     parent_folder_code = db.Column(String(100), nullable=True)
 
-    def __init__(self, code, name, alias=None, description=None, is_system_folder=None, parent_folder_code=None):
+    def __init__(self, code, owner_uid, name, alias=None, description=None, is_system_folder=None, parent_folder_code=None):
         self.code = code
+        self.owner_user_uid = owner_uid
         self.alias = alias
         self.name = name
         self.description = description
@@ -27,9 +28,11 @@ class MediaFolder(TimestampMixin, db.Model):
         self.parent_folder_code = parent_folder_code
 
     def __repr__(self):
-        return "<MediaFolder(id='{}', code='{}', alias='{}', name='{}' is_system_folder={} parent_folder_code={} created_at='{}' updated_at='{}'>".format(
+        return "<MediaFolder(id='{}', owner_user_uid='{}', code='{}', alias='{}', " \
+               "name='{}' is_system_folder={} parent_folder_code={} created_at='{}' updated_at='{}'>".format(
             self.id,
             self.code,
+            self.owner_user_uid,
             self.alias,
             self.name,
             self.is_system_folder,

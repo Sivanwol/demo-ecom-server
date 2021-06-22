@@ -32,7 +32,7 @@ class StoreService:
 
     @cache.memoize(50)
     def get_store(self, owner_uid, store_code, return_model=False):
-        store = Store.query.filter_by(owner_id=owner_uid, store_code=store_code).first()
+        store = Store.query.filter_by(owner_user_uid=owner_uid, store_code=store_code).first()
         store_data = self.get_store_data(store)
         if not return_model:
             return {
@@ -171,7 +171,7 @@ class StoreService:
         stores = self.get_stores(True)
         cache.delete_memoized(self.get_stores)
         for store in stores:
-            self.clear_store_cache(store.owner_id, store.store_code)
+            self.clear_store_cache(store.owner_user_id, store.store_code)
 
     def clear_store_cache(self, owner_uid, store_code):
         cache.delete_memoized(self.get_store, owner_uid, store_code)
