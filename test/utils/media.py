@@ -8,7 +8,7 @@ class MediaTestUtills:
     def __init__(self, test_object):
         self.test_object = test_object
 
-    def create_media_folder_parents(self, uid):
+    def create_media_folder_parents(self, uid, limit_only_level=0):
         list_of_folders = []
         root_code = str(uuid4())
         db.session.add(MediaFolder(root_code, uid, "root-1", 'root-1', None, True, 1, None))
@@ -22,12 +22,17 @@ class MediaTestUtills:
         list_of_folders.append(root_code)
         db.session.add(MediaFolder(root_code, uid, "root-2", 'root-2', None, True, 1, None))
         for i in range(3):
+            level = 2
             chile_lvl1_code = str(uuid4())
-            list_of_folders.append(chile_lvl1_code)
+            if limit_only_level == level or limit_only_level == 0:
+                list_of_folders.append(chile_lvl1_code)
             db.session.add(MediaFolder(chile_lvl1_code, uid, "root-2-child-2-lvl-1", 'root-2-child-2-lvl-1', None, True, 2, root_code))
             for r in range(3):
+                level = 3
                 chile_lvl2_code = str(uuid4())
-                list_of_folders.append(chile_lvl2_code)
+                if limit_only_level == level or limit_only_level == 0:
+                    list_of_folders.append(chile_lvl2_code)
                 db.session.add(MediaFolder(chile_lvl2_code, uid, "root-2-child-2-lvl-2", 'root-2-child-2-lvl-2', None, True, 3, chile_lvl1_code))
+
         db.session.commit()
         return list_of_folders

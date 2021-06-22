@@ -49,10 +49,15 @@ class MediaFolder(TimestampMixin, db.Model):
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
-    def get_all_child_folders(self):
+    def get_all_child_folders(self, limit_next_level=False):
         beginning_getter = db.session.query(MediaFolder). \
             filter(MediaFolder.parent_folder_code == self.code).cte(name='children_for', recursive=True)
         with_recursive = beginning_getter.union_all(
             db.session.query(MediaFolder).filter(MediaFolder.parent_folder_code == beginning_getter.c.code)
         )
+        if limit_next_level:
+            with_recursive = beginning_getter.union_all(
+                db.session.query(MediaFolder).filter(MediaFolder.parent_folder_code == beginning_getter.c.code,
+                                                     MediaFolder.parent_level == MediaFolder.parent_level + 1)
+            )
         return db.session.query(with_recursive).all()
