@@ -39,6 +39,7 @@ class Config:
     REDIS_HOST = os.getenv('REDIS_HOST')  # docker network
     REDIS_PORT = os.getenv('REDIS_PORT')
     REDIS_DB = os.getenv('REDIS_DB')
+    REDIS_CACHE_DB = os.getenv('REDIS_CACHE_DB')
     REDIS_PASSWORD = os.getenv('REDIS_PASSWORD')
     CACHE_KEY_PREFIX = os.getenv('CACHE_KEY_PREFIX')
 
@@ -58,6 +59,13 @@ class Config:
     #     'echo_pool': True
     # }
 
+    # Upload System Settings
+
+    UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER')
+    UPLOAD_SYSTEM_FOLDER = os.getenv('UPLOAD_SYSTEM_FOLDER')
+    UPLOAD_USERS_FOLDER = os.getenv('UPLOAD_USERS_FOLDER')
+    UPLOAD_STORES_FOLDER = os.getenv('UPLOAD_STORES_FOLDER')
+    UPLOAD_TYPE_OPTIONS = [UPLOAD_SYSTEM_FOLDER, UPLOAD_USERS_FOLDER, UPLOAD_STORES_FOLDER]
     # SMTP server config
     # --------------------------------------------------------------------
     # SERVER_EMAIL = 'Sivan Wolberg <sivan.wolberg@wolberg.pro>'
@@ -66,6 +74,10 @@ class Config:
     # EMAIL_PORT = os.environ.get('EMAIL_PORT')
     # EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
     # EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+    # Testing settings
+    CLEAR_FOLDER_UPLOAD = False
+    # General Settings
+    MAX_PARENT_LEVEL = os.getenv('MAX_PARENT_LEVEL')
 
 
 class DevelopmentConfig(Config):
@@ -81,6 +93,7 @@ class TestingConfig(Config):
     DEBUG = True
     SENTRY_ENABLE = False
     TESTING = True
+    CLEAR_FOLDER_UPLOAD = os.getenv('CLEAR_FOLDER_UPLOAD')
 
 
 class ProductionConfig(Config):

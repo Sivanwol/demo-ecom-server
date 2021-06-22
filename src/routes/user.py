@@ -6,12 +6,11 @@ from firebase_admin.exceptions import FirebaseError
 from flask import request
 from marshmallow import ValidationError
 from config import settings
-from config.api import app as current_app
-from src.middlewares.check_role import check_role
-from src.middlewares.check_token import check_token_register_firebase_user, check_token_of_user
-from src.routes import userService, storeService, roleSerivce
-from src.schemas.requests.user import UserRolesList, CreateStoreStaffUser, UpdateUserInfo
-from src.schemas.user_schema import UserSchema
+from config.containers import app as current_app, container
+from src.middlewares import check_role, check_token_register_firebase_user, check_token_of_user
+from src.schemas.requests import UserRolesList, CreateStoreStaffUser, UpdateUserInfo
+from src.schemas import UserSchema
+from src.services import FileSystemService, RolesService, StoreService, UserService
 from src.utils.enums import RolesTypes
 from src.utils.general import Struct
 from src.utils.responses import response_error, response_success, response_success_paging
@@ -21,6 +20,7 @@ from src.utils.validations import vaild_per_page, valid_user_list_by_permissions
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>"))
 def get(uid):
+    userService = container[UserService]
     if verify_uid(userService, uid):
         try:
             firebase_response = {
@@ -49,10 +49,11 @@ def get(uid):
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/list"))
 @check_token_of_user
 def get_users():
+    userService = container[UserService]
     per_page = request.args.get('per_page', type=int)
     page = request.args.get('page', type=int)
     if not vaild_per_page(per_page) and isinstance(page, int):
-        return response_error("Error on support per page or page number invalid", {'per_page': 'per_page', page: page},400)
+        return response_error("Error on support per page or page number invalid", {'per_page': 'per_page', page: page}, 400)
     is_platform = False
     if request.args.get('filter_platform', type=int):
         is_platform = True
@@ -116,6 +117,7 @@ def get_users():
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/toggle_active"), methods=["PUT"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
 def user_toggle_active(uid):
+    userService = container[UserService]
     if verify_uid(userService, uid):
         try:
             userService.toggle_freeze_user(uid)
@@ -131,10 +133,10 @@ def user_toggle_active(uid):
     return response_error("Error on format of the params", {uid: uid})
 
 
-# Todo: need refactor this
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/platform/list/<per_page>/<page>"), methods=["GET"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value, RolesTypes.Support.value])
 def get_platform_users(per_page, page):
+    userService = container[UserService]
     if not vaild_per_page(per_page):
         return response_error("Error on support per page", {per_page: per_page})
     filter = {'names': request.args.getlist('filter_fullname')}
@@ -142,11 +144,10 @@ def get_platform_users(per_page, page):
     return response_success_paging(result.items, result.total, result.pages, result.has_next, result.has_prev)
 
 
-# Todo: Need refactor this
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/store/<store_code>/list/<per_page>/<page>"),
                    methods=["GET"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreAccount.value, RolesTypes.StoreOwner.value, RolesTypes.StoreSupport.value])
-def get_store_users(store_code, per_page, page):
+def get_store_users(store_code, per_page, page, userService: UserService, storeService: StoreService):
     if not vaild_per_page(per_page):
         return response_error("Error on support per page", {per_page: per_page})
     uid = request.uid
@@ -160,6 +161,7 @@ def get_store_users(store_code, per_page, page):
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/passed_tutorial"), methods=["PUT"])
 @check_token_of_user
 def mark_user_passed_tutorial(uid):
+    userService = container[UserService]
     if verify_uid(userService, uid):
         try:
             userService.mark_user_passed_tutorial(uid)
@@ -178,6 +180,7 @@ def mark_user_passed_tutorial(uid):
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/update"), methods=["PUT"])
 @check_token_of_user
 def update_user_info():
+    userService = container[UserService]
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     try:
@@ -196,6 +199,7 @@ def update_user_info():
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/update"), methods=["PUT"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreSupport.value])
 def update_user_info_by_support_user(uid):
+    userService = container[UserService]
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(userService, uid):
@@ -221,6 +225,9 @@ def update_user_info_by_support_user(uid):
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/staff/<store_code>"), methods=["POST"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreSupport.value, RolesTypes.StoreOwner.value])
 def create_store_stuff(store_code):
+    userService = container[UserService]
+    roleSerivce = container[RolesService]
+    fileSystemService = container[FileSystemService]
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     try:
@@ -253,6 +260,8 @@ def create_store_stuff(store_code):
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>"), methods=["POST"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
 def sync_platform_user_create(uid):
+    userService = container[UserService]
+    roleSerivce = container[RolesService]
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(userService, uid):
@@ -281,12 +290,15 @@ def sync_platform_user_create(uid):
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/user/<uid>/bind/<store_code>"), methods=["POST"])
 @check_token_register_firebase_user
 def sync_store_user_create(uid, store_code):
+    userService = container[UserService]
+    storeService = container[StoreService]
     if not verify_uid(userService, uid):
         try:
             has_store = storeService.store_exists(uid, store_code)
             if has_store is None:
                 response_error("error store not existed", {uid: uid, store_code: store_code})
-            return response_success(sync_user_from_firebase_user(uid, [RolesTypes.StoreCustomer.value], False, store_code))
+            return response_success(
+                sync_user_from_firebase_user(uid, [RolesTypes.StoreCustomer.value], False, store_code))
         except ValueError:
             return response_error("Error on format of the params", {uid: uid})
         except UserNotFoundError:
@@ -299,6 +311,8 @@ def sync_store_user_create(uid, store_code):
 
 
 def sync_user_from_firebase_user(uid, role_names, is_platform_user, store_code=None, new_user=True):
+    userService = container[UserService]
+    roleSerivce = container[RolesService]
     user_object = userService.get_firebase_user(uid).__dict__['_data']
     response = {'user': json.dumps(user_object, indent=4), 'extend_info': None}
     roles = roleSerivce.get_roles(role_names)

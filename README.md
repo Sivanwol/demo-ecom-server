@@ -86,6 +86,16 @@ $ set FIRESTORE_EMULATOR_HOST=localhost:9099
 $ python manage.py list_routes
 ```
 
+###### sync the system settings table with redis (able do so in cli)
+```angular2html
+$ python manage.py sync_system
+```
+
+###### generate init settings for the system to operate
+```angular2html
+$ python manage.py init_system
+```
+
 ###### set up of master account on Role of owner
 ```angular2html
 $ python manage.py setup_owner email@domain.com password
@@ -134,3 +144,7 @@ To upgrade the database with the newest migrations version, use:
 ```angular2html
 $ python manage.py db upgrade head
 ```
+
+### Task Controls
+
+as any system there is a need for task control system for this the system use a Google functions and Cloud Tasks

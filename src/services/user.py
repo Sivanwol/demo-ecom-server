@@ -1,20 +1,24 @@
+from logging import Logger
+
 import firebase_admin
 from firebase_admin import auth
 from sqlalchemy import or_, desc, asc
 
 from config.api import cache
 from config.database import db
-from src.models import User
-from src.models.stores import Store
-from src.schemas.user_schema import UserSchema
+from src.models import User, Store
+from src.schemas import UserSchema
+from src.services import FileSystemService
 from src.utils.enums import AllowSortByDirection
 from src.utils.firebase_utils import create_firebase_user
 from src.utils.responses import response_error
-from src.utils.singleton import singleton
 
 
-@singleton
 class UserService:
+    def __init__(self, logger: Logger, fileSystemService: FileSystemService):
+        self.logger = logger
+        self.fileSystemService = fileSystemService
+
     user_schema = UserSchema()
     """Verifies the signature and data for the provided JWT.
 
@@ -103,7 +107,7 @@ class UserService:
         return user
 
     @cache.memoize(50)
-    def user_exists(self, uid):
+    def user_exists(self, uid) -> bool:
         user = User.query.filter_by(uid=uid, is_active=True).first()
         if user is None:
             return False
@@ -113,16 +117,16 @@ class UserService:
         user = self.get_user(uid, True)
         return user.has_any_role(roles)
 
-    def user_has_role_matched(self, uid, roles):
+    def user_has_role_matched(self, uid, roles) -> bool:
         user = self.get_user(uid, True)
         return user.has_role(roles)
 
-    def check_user_part_store(self, uid, store_code):
+    def check_user_part_store(self, uid, store_code) -> bool:
         store = Store.query.filter_by(store_code=store_code).first()
         user = self.get_user(uid, True)
         if store is None or user is None:
             return False
-        if store.owner_id == uid or user.store_code == store_code:
+        if store.owner_user_uid == uid or user.store_code == store_code:
             return True
         return False
 
@@ -140,6 +144,19 @@ class UserService:
             request.uid = firebase_obj["uid"]
         except:
             return response_error('Invalid token provided', None, 400)
+
+    def check_user_auth_socket(self, token, existed_on_system):
+        token = token.replace('Bearer ', '')
+        firebase_obj = auth.verify_id_token(token)
+        try:
+            if existed_on_system:
+                uid = firebase_obj["uid"]
+                user_exist = self.user_exists(uid)
+                if not user_exist:
+                    return None
+            return firebase_obj["uid"]
+        except:
+            return None
 
     def update_user_info(self, uid, user_data):
         user = self.get_user(uid, True)
@@ -251,3 +268,4 @@ class UserService:
         user.add_user_roles(roles)
         db.session.add(user)
         db.session.commit()
+        self.fileSystemService.create_user_folder(uid)

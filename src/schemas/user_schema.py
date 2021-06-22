@@ -12,8 +12,6 @@ class UserSchema(SQLAlchemySchema):
         model = User
         include_relationships = True
         load_instance = True
-
-    id = auto_field()
     uid = auto_field()
     email = auto_field()
     fullname = auto_field()

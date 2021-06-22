@@ -1,4 +1,4 @@
-# tests/test_basic.py
+# test/test_user.py
 import unittest
 
 from src.schemas.user_schema import UserSchema
@@ -98,7 +98,8 @@ class FlaskTestCase(BaseTestCase):
             users = self.userService.get_users(filters, [], 20, 1, False)
             schema = UserSchema()
             data = schema.dump(users.items, many=True)
-            self.assertListEqual(data, response.json['data']['items'])
+            for idx, item in enumerate(response.json['data']['items']):
+                self.assertDictEqual(item, data[idx])
             self.assertEqual(response_data.data.meta.pages, users.pages)
             self.assertEqual(response_data.data.meta.total_items, users.total)
             self.assertFalse(response_data.data.meta.next)
@@ -687,6 +688,9 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.extend_info.store_code, user.store_code)
             self.assertEqual(response_data.data.extend_info.uid, uid)
             self.assertFalse(user.is_pass_tutorial)
+            path = self.fileSystemService.get_folder_path('users', uid)
+            self.assertIsNotNone(path)
+            self.assertTrue(self.fileSystemService.acutal_folder_existed(path))
 
     def test_service_user_part_of_store_valid(self):
         with self.client:
@@ -695,6 +699,9 @@ class FlaskTestCase(BaseTestCase):
             user_object = self.login_user(new_user)
             uid = user_object['uid']
             self.assertTrue(self.userService.check_user_part_store(uid, store_info.data.info.store_code))
+            path = self.fileSystemService.get_folder_path('users', uid)
+            self.assertIsNotNone(path)
+            self.assertTrue(self.fileSystemService.acutal_folder_existed(path))
 
     def test_service_user_part_of_store_staff_valid(self):
         with self.client:
@@ -775,8 +782,8 @@ class FlaskTestCase(BaseTestCase):
             user_object = self.login_user(store_customer_user)
             uid = user_object['uid']
             # old_user_data = self.userService.get_user(uid, True)
-            country = self.fake.country_code()
-            currency = self.fake.currency_code()
+            country = "USA"
+            currency = 'USD'
             fullname = self.fake.name()
             address1 = self.fake.address()
             address2 = self.fake.address()
@@ -994,10 +1001,9 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.user_meta.display_name, user_object['display_name'])
             self.assertEqual(response_data.data.user_data.uid, user.uid)
             self.assertEqual(response_data.data.user_data.is_pass_tutorial, user.is_pass_tutorial)
-            self.assertEqual(response_data.data.user_data.id, user.id)
             self.assertEqual(response_data.data.user_data.email, user.email)
             self.assertEqual(response_data.data.user_data.fullname, user.fullname)
-            self.assertEqual(response_data.data.user_data.roles[0].id, user.roles[0].id)
+            self.assertEqual(response_data.data.user_data.roles[0].name, user.roles[0].name)
 
 
 if __name__ == '__main__':

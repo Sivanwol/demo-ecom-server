@@ -1,10 +1,9 @@
-from datetime import datetime
-
 from sqlalchemy import Integer, String, Boolean
 
 from config.database import db
-from src.models import User
-from src.models.mixin.TimestampMixin import TimestampMixin
+from src.models.user import User
+from src.models.media_files import MediaFile
+from src.models.mixin import TimestampMixin
 
 
 class Store(TimestampMixin, db.Model):
@@ -15,19 +14,20 @@ class Store(TimestampMixin, db.Model):
 
     id = db.Column(Integer, primary_key=True)
     store_code = db.Column(String(100), nullable=False)
-    owner_id = db.Column(Integer, db.ForeignKey(User.id))
-    logo_id = db.Column(Integer, nullable=True)
+    owner_user_uid = db.Column(String(100), db.ForeignKey('users.uid'))
+    logo_id = db.Column(Integer, db.ForeignKey(MediaFile.id), nullable=True)
     name = db.Column(String(100), nullable=False)
     description = db.Column(String(255), nullable=True)
     default_currency_code = db.Column(String(3), nullable=False)
     # Note only owner able set this on or off
     is_maintenance = db.Column(Boolean, nullable=False, default=False)
 
-    owner = db.relationship(User, uselist=False)
+    logo = db.relationship(MediaFile, uselist=False)
+    owner = db.relationship("User", foreign_keys=[owner_user_uid])
 
-    def __init__(self, store_code, owner_id, name, default_currency_code, logo_id=None, description=None, is_maintenance=False):
+    def __init__(self, store_code, owner_uid, name, default_currency_code, logo_id=None, description=None, is_maintenance=False):
         self.store_code = store_code
-        self.owner_id = owner_id
+        self.owner_user_uid = owner_uid
         self.name = name
         self.default_currency_code = default_currency_code
         self.logo_id = logo_id
@@ -36,7 +36,7 @@ class Store(TimestampMixin, db.Model):
 
     def __repr__(self):
         return "<Store(id='{}', owner_id='{}', name='{}' is_maintenance={} created_at='{}' updated_at='{}'>".format(self.id,
-                                                                                                                    self.owner_id,
+                                                                                                                    self.owner_user_uid,
                                                                                                                     self.name,
                                                                                                                     self.is_maintenance,
                                                                                                                     self.created_at,

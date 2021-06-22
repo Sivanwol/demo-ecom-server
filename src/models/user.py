@@ -1,9 +1,8 @@
-from datetime import datetime
-
 from sqlalchemy import Integer, String, Boolean
 
 from config.database import db
-from src.models.mixin.TimestampMixin import TimestampMixin
+from src.models.media_files import MediaFile
+from src.models.mixin import TimestampMixin
 
 
 class User(TimestampMixin, db.Model):
@@ -14,7 +13,7 @@ class User(TimestampMixin, db.Model):
 
     id = db.Column(Integer, primary_key=True)
     uid = db.Column(String(100), nullable=False)
-    avatar_id = db.Column(Integer, nullable=True)
+    avatar_id = db.Column(Integer, db.ForeignKey(MediaFile.id), nullable=True)
     email = db.Column(String(100), nullable=False, unique=True, index=True)
     phone = db.Column(String(100), nullable=True)
     store_code = db.Column(String(100), nullable=True, index=True)
@@ -26,8 +25,9 @@ class User(TimestampMixin, db.Model):
     country = db.Column(String(3), nullable=True)
     currency = db.Column(String(3), nullable=True)
 
-    # Define the relationship to Role via UserRoles
+    # Define the relationships
     roles = db.relationship('Roles', secondary='user_roles')
+    avatar = db.relationship(MediaFile, uselist=False, foreign_keys=[avatar_id])
 
     def __init__(self, uid, email, fullname, is_active, is_pass_tutorial, country=None, currency=None, store_code=None, avatar_id=0, phone='', address1='',
                  address2=''):

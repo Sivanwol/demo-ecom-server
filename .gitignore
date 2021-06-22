@@ -36,3 +36,10 @@ firebase-config*.json
 *.iws
 .vscode/
 .idea/
+
+# upload folder
+/uploads/*
+!/uploads/.gitkeep
+!/uploads/stores/.gitkeep
+!/uploads/users/.gitkeep
+!/uploads/system/.gitkeep

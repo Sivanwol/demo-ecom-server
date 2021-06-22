@@ -2,9 +2,11 @@ from urllib.parse import urlparse
 from flask import request, url_for
 from validator import validate
 from src.exceptions.unable_create_owner_user import CommandUnableCreateOwnerUser
+from src.services import SettingsService
 from src.utils.enums import RolesTypes
 from src.utils.firebase_utils import check_user, create_firebase_user
 from src.utils.responses import response_error
+from config.containers import container
 
 
 def verify_uid(userService, uid):
@@ -48,6 +50,16 @@ def setup_accounts_user(roleSerivce, email, password):
 def setup_support_user(roleSerivce, email, password):
     roles = roleSerivce.get_roles([RolesTypes.SUPPORT.value])
     setup_user(email, password, roles)
+
+
+def sync_system_settings():
+    settingsService = container[SettingsService]
+    settingsService.forceSync()
+
+
+def init_system_settings():
+    settingsService = container[SettingsService]
+    settingsService.init_system_settings()
 
 
 def scan_routes(app):

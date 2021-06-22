@@ -1,9 +1,9 @@
-# tests/test_basic.py
+# test/test_store.py
 import unittest
 
-from src.utils.enums import RolesTypes
 from src.utils.general import Struct
 from test.common.Basecase import BaseTestCase
+from src.utils.enums import RolesTypes
 
 
 class FlaskTestCase(BaseTestCase):
@@ -19,7 +19,7 @@ class FlaskTestCase(BaseTestCase):
             user = self.userService.get_user(uid, True)
             self.assertIsNone(user.store_code)
             store_name = self.fake.company()
-            currency_code = self.fake.currency_code()
+            currency_code = 'USD'
             post_data = {
                 'name': store_name,
                 'description': 'store description',
@@ -45,6 +45,9 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.info.default_currency_code, store.default_currency_code)
             self.assertEqual(len(response_data.data.locations), 0)
             self.assertEqual(len(response_data.data.hours), 0)
+            path = self.fileSystemService.get_folder_path('stores', store.store_code)
+            self.assertIsNotNone(path)
+            self.assertTrue(self.fileSystemService.acutal_folder_existed(path))
 
     def test_freeze_store(self):
         with self.client:
@@ -198,7 +201,7 @@ class FlaskTestCase(BaseTestCase):
         user = self.userService.get_user(uid, True)
         self.assertIsNone(user.store_code)
         store_name = self.fake.company()
-        currency_code = self.fake.currency_code()
+        currency_code = 'USD'
         post_data = {
             'name': store_name,
             'description': 'store description',

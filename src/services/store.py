@@ -1,14 +1,15 @@
+from logging import Logger
+
 from sqlalchemy import desc
 
 from config.api import cache
 from config.database import db
 import uuid
 
-from src.exceptions.params_not_match_create_store import ParamsNotMatchCreateStore
-from src.models.store_hours import StoreHours
-from src.models.store_locations import StoreLocations
-from src.models.stores import Store
-from src.schemas.store_schema import StoreSchema, StoreLocationSchema, StoreHourSchema
+from src.exceptions import ParamsNotMatchCreateStore
+from src.models import StoreHours, StoreLocations, Store
+from src.schemas import StoreSchema, StoreLocationSchema, StoreHourSchema
+from src.services import FileSystemService
 from src.utils.validations import valid_currency_code
 
 storeSchema = StoreSchema()
@@ -17,6 +18,10 @@ storeHourSchema = StoreHourSchema()
 
 
 class StoreService:
+    def __init__(self, logger: Logger, fileSystemService: FileSystemService):
+        self.logger = logger
+        self.fileSystemService = fileSystemService
+
     @cache.memoize(50)
     def get_stores(self, return_model=False):
         stores = Store.query.order_by(desc(Store.created_at)).all()
@@ -27,7 +32,7 @@ class StoreService:
 
     @cache.memoize(50)
     def get_store(self, owner_uid, store_code, return_model=False):
-        store = Store.query.filter_by(owner_id=owner_uid, store_code=store_code).first()
+        store = Store.query.filter_by(owner_user_uid=owner_uid, store_code=store_code).first()
         store_data = self.get_store_data(store)
         if not return_model:
             return {
@@ -56,7 +61,7 @@ class StoreService:
 
     @cache.memoize(50)
     def store_exists(self, owner_uid, store_code):
-        store = Store.query.filter_by(owner_id=owner_uid, store_code=store_code).first()
+        store = Store.query.filter_by(owner_user_uid=owner_uid, store_code=store_code).first()
         if store is None:
             return True
         return False
@@ -145,6 +150,7 @@ class StoreService:
         store = Store(store_code, owner_id, store_object['name'], store_object['currency_code'], None, store_object['description'])
         db.session.add(store)
         db.session.commit()
+        self.fileSystemService.create_store_folder(store_code)
         return self.get_store_by_status_code(store_code)
 
     def freeze_store(self, uid, store_code):
@@ -165,7 +171,7 @@ class StoreService:
         stores = self.get_stores(True)
         cache.delete_memoized(self.get_stores)
         for store in stores:
-            self.clear_store_cache(store.owner_id, store.store_code)
+            self.clear_store_cache(store.owner_user_uid, store.store_code)
 
     def clear_store_cache(self, owner_uid, store_code):
         cache.delete_memoized(self.get_store, owner_uid, store_code)

@@ -1,20 +1,19 @@
 import json
 import os
 from random import randint
+from tempfile import mkstemp
 
 from faker import Faker
 from firebase_admin import auth
 from flask_testing import TestCase
-
 from config import settings
-from config.api import app
+from config.containers import app, socketio, container
 from config.database import db
-from src.routes import userService, storeService, roleSerivce
-from src.services.firebase import FirebaseService
+from src.services import FileSystemService, FirebaseService, MediaService, RolesService, StoreService, UserService, SettingsService
 from src.utils.enums import RolesTypes
 from src.utils.firebase_utils import create_firebase_user as create_fb_user, setup_firebase_client, login_user
 from src.utils.general import is_json_key_present, Struct
-from test.utils.user import UserTestUtills
+from test.utils import UserTestUtills, MediaTestUtills
 
 
 class BaseTestCase(TestCase):
@@ -31,31 +30,67 @@ class BaseTestCase(TestCase):
     global_password = "password!0101"
     firebase_client_object = None
     firebaseService = FirebaseService()
-    userService = userService
-    roleService = roleSerivce
-    storeService = storeService
+    userService = container[UserService]
+    roleService = container[RolesService]
+    storeService = container[StoreService]
+    fileSystemService = container[FileSystemService]
+    mediaService = container[MediaService]
+    settingsService = container[SettingsService]
 
     def create_app(self):
         # app.config.from_object('config.TestConfig')
         print(os.environ.get("FLASK_ENV", "development"))
         print(settings[os.environ.get("FLASK_ENV", "development")].SQLALCHEMY_DATABASE_URI)
         self.firebase_client_object = setup_firebase_client()
-        app.app_context().push()
-        return app
+        app.flask_app.app_context().push()
+        return app.flask_app
 
     def setUp(self):
+
+        self.fd, temp_path = mkstemp()
         self.app_context = self.app.app_context()
         self.app_context.push()
         self.client = self.app.test_client()
         self.userUtils = UserTestUtills(self)
+        self.mediaUtils = MediaTestUtills(self)
+        self.ws_client = socketio.test_client(self.app)
+        if settings[os.environ.get("FLASK_ENV", "development")].CLEAR_FOLDER_UPLOAD:
+            self.clear_uploads_folders()
         db.create_all()
         db.session.commit()
         self.roleService.insert_roles()
         print(self.roleService.get_all_roles())
         self.init_unit_data()
+        self.settingsService.init_system_settings()
         Faker.seed(randint(0, 100))
 
+    def clear_uploads_folders(self):
+        # let clear system folders
+        upload_system_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+                                          settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER)
+        folders = self.fileSystemService.get_folder_list(upload_system_path)
+        for folder in folders:
+            self.fileSystemService.remove_folders(folder)
+
+        # let clear users folders
+        upload_system_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+                                          settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER)
+        folders = self.fileSystemService.get_folder_list(upload_system_path)
+        for folder in folders:
+            self.fileSystemService.remove_folders(folder)
+
+        # let clear stores folders
+        upload_system_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+                                          settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER)
+        folders = self.fileSystemService.get_folder_list(upload_system_path)
+        for folder in folders:
+            self.fileSystemService.remove_folders(folder)
+
+    def ws_renew_connection(self, namespace=None):
+        self.ws_client.connect(namespace=namespace)
+
     def tearDown(self):
+        os.close(self.fd)
         db.session.remove()
         db.drop_all()
 
@@ -95,7 +130,8 @@ class BaseTestCase(TestCase):
         if self.platform_support_object is not None:
             self.assertNotEqual(self.platform_support_object.uid, '')
         roles = self.roleService.get_roles([RolesTypes.Support.value])
-        self.userService.sync_firebase_user(self.platform_support_object.uid, roles, self.platform_support_user, 'platform support', True)
+        self.userService.sync_firebase_user(self.platform_support_object.uid, roles, self.platform_support_user, 'platform support',
+                                            True)
 
     def setup_account_user(self):
         self.platform_accounts_object = create_fb_user(self.platform_account_user, self.global_password)
@@ -103,7 +139,8 @@ class BaseTestCase(TestCase):
         if self.platform_accounts_object is not None:
             self.assertNotEqual(self.platform_accounts_object.uid, '')
         roles = self.roleService.get_roles([RolesTypes.Accounts.value])
-        self.userService.sync_firebase_user(self.platform_accounts_object.uid, roles, self.platform_account_user, 'platform account', True)
+        self.userService.sync_firebase_user(self.platform_accounts_object.uid, roles, self.platform_account_user, 'platform account',
+                                            True)
 
     def create_user(self, email, name, roles, initial_state=False, store_code=None, user_data=None, is_active=True):
         user = create_fb_user(email, self.global_password)

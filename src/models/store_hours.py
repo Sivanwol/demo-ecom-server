@@ -1,9 +1,5 @@
-from datetime import datetime
-
-from sqlalchemy import Integer, String, Boolean
-
+from sqlalchemy import Integer,  Boolean
 from config.database import db
-from src.models import User
 from src.models.store_locations import StoreLocations
 from src.models.stores import Store
 
