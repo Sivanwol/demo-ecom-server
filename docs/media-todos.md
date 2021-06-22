@@ -48,10 +48,14 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
 - [ ] Upload files with relevant metadata
 - [ ] Check if folder exist (unless it root)
 - [ ] Check if entity_id existed (if type is user or store)
+- [ ] check if files validate (both size and type)
 - [ ] check permission if type=user (it his own user or support allow to upload files directly)
 - [ ] check permission if type=store (you within the group allow uploading) or/and you are the within staff/owner of the store or you support user allow to upload as well
 - [ ] check permission if type=system if you within staff platform
-- [ ] 
+- [ ] upload files to relevant location
+- [ ] register files on db
+- [ ] return db files register to client
+
 #### Delete Folder workflow logic overall
 - [ ] Locate all relevant file both on sub path and the dest folder
 - [ ] Locate all sup folders
