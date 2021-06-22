@@ -687,7 +687,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.extend_info.store_code, user.store_code)
             self.assertEqual(response_data.data.extend_info.uid, uid)
             self.assertFalse(user.is_pass_tutorial)
-            path = self.fileSystemService.getFolderPath('users',uid)
+            path = self.fileSystemService.get_folder_path('users', uid)
             self.assertIsNotNone(path)
             self.assertTrue(self.fileSystemService.folder_existed(path))
 
@@ -698,7 +698,7 @@ class FlaskTestCase(BaseTestCase):
             user_object = self.login_user(new_user)
             uid = user_object['uid']
             self.assertTrue(self.userService.check_user_part_store(uid, store_info.data.info.store_code))
-            path = self.fileSystemService.getFolderPath('users',uid)
+            path = self.fileSystemService.get_folder_path('users', uid)
             self.assertIsNotNone(path)
             self.assertTrue(self.fileSystemService.folder_existed(path))
 

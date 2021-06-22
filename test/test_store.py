@@ -45,7 +45,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(response_data.data.info.default_currency_code, store.default_currency_code)
             self.assertEqual(len(response_data.data.locations), 0)
             self.assertEqual(len(response_data.data.hours), 0)
-            path = self.fileSystemService.getFolderPath('stores',store.store_code)
+            path = self.fileSystemService.get_folder_path('stores', store.store_code)
             self.assertIsNotNone(path)
             self.assertTrue(self.fileSystemService.folder_existed(path))
 

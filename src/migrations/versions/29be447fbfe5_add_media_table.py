@@ -26,7 +26,7 @@ def upgrade():
                     sa.Column('id', sa.Integer(), nullable=False),
                     sa.Column('code', sa.String(length=255), index=True, nullable=False, unique=True),
                     sa.Column('parent_folder_id', sa.Integer(), sa.ForeignKey('media_folders.id'), nullable=True),
-                    sa.Column('alias', sa.String(length=255), index=True, nullable=False),
+                    sa.Column('alias', sa.String(length=255), index=True, nullable=True),
                     sa.Column('name', sa.String(length=255), nullable=False),
                     sa.Column('description', sa.Text(), nullable=True),
                     sa.Column('is_system_folder', sa.Boolean(), nullable=True, default=False),

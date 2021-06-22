@@ -24,16 +24,16 @@ def upload_media():
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<entity_id>/<type>/folder/create"), methods=["POST"])
 @check_token_of_user
 def create_virtual_directory(entity_id, type, fileSystemService: FileSystemService):
-    path = fileSystemService.getFolderPath(entity_id, type)
+    path = fileSystemService.get_folder_path(entity_id, type)
     if path is None:
         return response_error("Error on format of the params", {type, entity_id})
     # uploaded_files = request.files.getlist('files')
     parent_folder = request.json['parent_folder']
     create_folder = request.json['folder']
     if parent_folder is None:
-        path = fileSystemService.getFolderPath(entity_id, type, create_folder)
+        path = fileSystemService.get_folder_path(entity_id, type, create_folder)
     else:
-        path = fileSystemService.getFolderPath(entity_id, type, os.path.join(parent_folder, create_folder))
+        path = fileSystemService.get_folder_path(entity_id, type, os.path.join(parent_folder, create_folder))
     fileSystemService.create_folder(path)
 
 

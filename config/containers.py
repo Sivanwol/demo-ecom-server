@@ -12,7 +12,7 @@ container[RolesService] = RolesService(app.logger)
 container[UserService] = UserService(app.logger, container[FileSystemService])
 container[StoreService] = StoreService(app.logger, container[FileSystemService])
 container[SettingsService] = SettingsService(app.logger)
-container[MediaService] = MediaService(app.logger)
+container[MediaService] = MediaService(app.logger, container[FileSystemService])
 app = FlaskIntegration(app, container)
 APP_DEBUG_MODE = False
 if os.environ.get("FLASK_ENV", "development") == 'development' or os.environ.get("FLASK_ENV", "development") == 'testing':

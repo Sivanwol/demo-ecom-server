@@ -11,32 +11,31 @@ class MediaFolder(TimestampMixin, db.Model):
     __tablename__ = 'media_folders'
 
     id = db.Column(Integer, primary_key=True)
-    code = db.Column(String(100), nullable=False)
-    alias = db.Column(String(255))
+    code = db.Column(String(100))
+    alias = db.Column(String(255), nullable=True)
     name = db.Column(String(255))
     description = db.Column(Text(), nullable=True)
     is_system_folder = db.Column(Boolean, nullable=True, default=False)
-    parent_folder_id = db.Column(Integer, nullable=True)
+    parent_folder_code = db.Column(String(100), nullable=True)
 
-    def __init__(self, code, alias, name, description=None, is_system_folder=None, parent_folder_id=None):
+    def __init__(self, code, name, alias=None, description=None, is_system_folder=None, parent_folder_code=None):
         self.code = code
         self.alias = alias
         self.name = name
         self.description = description
         self.is_system_folder = is_system_folder
-        self.parent_folder_id = parent_folder_id
+        self.parent_folder_code = parent_folder_code
 
     def __repr__(self):
-        return "<MediaFolder(id='{}', code='{}', alias='{}', name='{}' is_system_folder={} parent_folder_id={} created_at='{}' updated_at='{}'>".format(
+        return "<MediaFolder(id='{}', code='{}', alias='{}', name='{}' is_system_folder={} parent_folder_code={} created_at='{}' updated_at='{}'>".format(
             self.id,
             self.code,
             self.alias,
             self.name,
             self.is_system_folder,
-            self.parent_folder_id,
+            self.parent_folder_code,
             self.created_at,
             self.updated_at)
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-

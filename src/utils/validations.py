@@ -119,3 +119,9 @@ def valid_user_list_by_permissions(userService, requester_uid, filters):
         filters['store_users'] = False
         return filters
     return False  # if this from customer or any type or role that not cover will auto reject
+
+def media_type_valid(media_type):
+    options = settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_TYPE_OPTIONS
+    if media_type in options:
+        return True
+    return False

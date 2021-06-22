@@ -65,6 +65,7 @@ class Config:
     UPLOAD_SYSTEM_FOLDER = os.getenv('UPLOAD_SYSTEM_FOLDER')
     UPLOAD_USERS_FOLDER = os.getenv('UPLOAD_USERS_FOLDER')
     UPLOAD_STORES_FOLDER = os.getenv('UPLOAD_STORES_FOLDER')
+    UPLOAD_TYPE_OPTIONS = [UPLOAD_SYSTEM_FOLDER, UPLOAD_USERS_FOLDER, UPLOAD_STORES_FOLDER]
     # SMTP server config
     # --------------------------------------------------------------------
     # SERVER_EMAIL = 'Sivan Wolberg <sivan.wolberg@wolberg.pro>'

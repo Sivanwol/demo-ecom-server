@@ -4,6 +4,7 @@ import shutil
 from logging import Logger
 
 from config import settings
+from src.utils.validations import media_type_valid
 
 
 class FileSystemService:
@@ -16,7 +17,7 @@ class FileSystemService:
             return True
         return False
 
-    def folder_existed(self, src):
+    def acutal_folder_existed(self, src):
         folder = pathlib.Path(src)
         if folder.exists() and folder.is_dir():
             return True
@@ -33,7 +34,7 @@ class FileSystemService:
                 'error': e.strerror
             })
 
-    def getFolderList(self, src):
+    def get_folder_list(self, src):
         folders = []
         for dirname, dirnames, filenames in os.walk(src):
             # print path to all subdirectories first.
@@ -41,23 +42,38 @@ class FileSystemService:
                 folders.append(os.path.join(dirname, subdirname))
         return folders
 
-    def getFolderPath(self, type, entity_id, sub_folder=None):
-        user_path = settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER
-        system_path = settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER
-        store_path = settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER
+    def get_folder_path(self, type, entity_id, sub_folder=None):
         upload_path = None
-        if type == user_path or type == system_path or type == store_path:
+        if media_type_valid(type):
             upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
                                        type,
                                        entity_id)
             if sub_folder is not None:
                 upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
-                                           type,
-                                           entity_id, sub_folder)
+                                           type, sub_folder, entity_id)
         return upload_path
 
-    def create_folder(self, src, force_create=False):
-        if not self.folder_existed(src):
+    def folder_exists(self, type, entity_id=None, sub_folder=None):
+        if not media_type_valid(type) or (sub_folder is not None and entity_id is None):
+            return False
+
+        upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+                                   type)
+        if sub_folder is not None and entity_id is not None:
+            upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+                                       type, entity_id, sub_folder)
+        return self.acutal_folder_existed(upload_path)
+
+    def system_folder_exists(self, sub_folder=None):
+        upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER)
+        if sub_folder is not None:
+            upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER, sub_folder)
+        return self.acutal_folder_existed(upload_path)
+
+    def create_folder(self, src, sub_path=None, force_create=False):
+        if sub_path is not None:
+            src = os.path.join(src, sub_path)
+        if not self.acutal_folder_existed(src):
             if force_create:
                 self.remove_folders(src)
             try:
@@ -69,16 +85,16 @@ class FileSystemService:
                     'error': e.strerror
                 })
 
-    def create_user_folder(self, entity_id):
+    def create_user_folder(self, entity_id, sub_path=None):
         upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
                                    settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER,
                                    entity_id)
         self.logger.info('create user folder %s (entity id: %s)' % (upload_path, entity_id))
-        self.create_folder(upload_path)
+        self.create_folder(upload_path, sub_path)
 
-    def create_store_folder(self, entity_id):
+    def create_store_folder(self, entity_id, sub_path=None):
         upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
                                    settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER,
                                    entity_id)
         self.logger.info('create store folder %s (entity id: %s)' % (upload_path, entity_id))
-        self.create_folder(upload_path)
+        self.create_folder(upload_path, sub_path)
