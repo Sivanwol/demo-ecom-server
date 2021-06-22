@@ -60,7 +60,7 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
 #### Delete Folder workflow logic overall
 - [ ] check if user have the correct permissions to do this action
 - [ ] Locate all relevant file both on sub path and the dest folder
-- [ ] Locate all sup folders
+- [x] Locate all sup folders
 - [ ] Remove all db files records
 - [ ] Remove All Relevant files
 - [ ] Remove folder and sub folder records
