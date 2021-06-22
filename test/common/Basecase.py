@@ -1,6 +1,7 @@
 import json
 import os
 from random import randint
+from tempfile import mkstemp
 
 from faker import Faker
 from firebase_admin import auth
@@ -45,6 +46,8 @@ class BaseTestCase(TestCase):
         return app.flask_app
 
     def setUp(self):
+
+        self.fd, temp_path = mkstemp()
         self.app_context = self.app.app_context()
         self.app_context.push()
         self.client = self.app.test_client()
@@ -87,6 +90,7 @@ class BaseTestCase(TestCase):
         self.ws_client.connect(namespace=namespace)
 
     def tearDown(self):
+        os.close(self.fd)
         db.session.remove()
         db.drop_all()
 

@@ -689,7 +689,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertFalse(user.is_pass_tutorial)
             path = self.fileSystemService.get_folder_path('users', uid)
             self.assertIsNotNone(path)
-            self.assertTrue(self.fileSystemService.folder_existed(path))
+            self.assertTrue(self.fileSystemService.acutal_folder_existed(path))
 
     def test_service_user_part_of_store_valid(self):
         with self.client:
@@ -700,7 +700,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertTrue(self.userService.check_user_part_store(uid, store_info.data.info.store_code))
             path = self.fileSystemService.get_folder_path('users', uid)
             self.assertIsNotNone(path)
-            self.assertTrue(self.fileSystemService.folder_existed(path))
+            self.assertTrue(self.fileSystemService.acutal_folder_existed(path))
 
     def test_service_user_part_of_store_staff_valid(self):
         with self.client:

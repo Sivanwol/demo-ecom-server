@@ -48,7 +48,7 @@ def create_store(uid):
         except ValidationError as e:
             return response_error("Error on format of the params", {'params': request.json, 'errors': e.messages})
 
-        store = storeService.create_store(fileSystemService, uid, data)
+        store = storeService.create_store(uid, data)
         userService.update_user_store_owner(uid, store['info']['store_code'])
         return response_success(store)
     return response_error("Error on format of the params", {'uid': uid})
