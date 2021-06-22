@@ -1,10 +1,10 @@
-from sqlalchemy import Integer, String, Boolean, Text
+from sqlalchemy import Integer, String, Boolean, Text, asc, desc
 
 from config.database import db
-from src.models.mixin import TimestampWithOwnerUserMixin
+from src.models.mixin import TimestampMixin
 
 
-class MediaFolder(TimestampWithOwnerUserMixin, db.Model):
+class MediaFolder(TimestampMixin, db.Model):
     """
     This is a base user Model
     """
@@ -12,13 +12,17 @@ class MediaFolder(TimestampWithOwnerUserMixin, db.Model):
 
     id = db.Column(Integer, primary_key=True)
     code = db.Column(String(100))
+    owner_user_uid = db.Column(String(100), db.ForeignKey('users.uid'))
     alias = db.Column(String(255), nullable=True)
     name = db.Column(String(255))
     description = db.Column(Text(), nullable=True)
     is_system_folder = db.Column(Boolean, nullable=True, default=False)
+    parent_level = db.Column(Integer, default=1)
     parent_folder_code = db.Column(String(100), nullable=True)
 
-    def __init__(self, code, owner_uid, name, alias=None, description=None, is_system_folder=None, parent_folder_code=None):
+    owner = db.relationship("User", foreign_keys=[owner_user_uid])
+
+    def __init__(self, code, owner_uid, name, alias=None, description=None, is_system_folder=None, parent_level=1, parent_folder_code=None):
         self.code = code
         self.owner_user_uid = owner_uid
         self.alias = alias
@@ -26,10 +30,11 @@ class MediaFolder(TimestampWithOwnerUserMixin, db.Model):
         self.description = description
         self.is_system_folder = is_system_folder
         self.parent_folder_code = parent_folder_code
+        self.parent_level = parent_level
 
     def __repr__(self):
         return "<MediaFolder(id='{}', owner_user_uid='{}', code='{}', alias='{}', " \
-               "name='{}' is_system_folder={} parent_folder_code={} created_at='{}' updated_at='{}'>".format(
+               "name='{}' is_system_folder={} parent_folder_code={} parent_level={} created_at='{}' updated_at='{}'>".format(
             self.id,
             self.code,
             self.owner_user_uid,
@@ -37,8 +42,17 @@ class MediaFolder(TimestampWithOwnerUserMixin, db.Model):
             self.name,
             self.is_system_folder,
             self.parent_folder_code,
+            self.parent_level,
             self.created_at,
             self.updated_at)
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    def get_all_child_folders(self):
+        beginning_getter = db.session.query(MediaFolder). \
+            filter(MediaFolder.parent_folder_code == self.code).cte(name='children_for', recursive=True)
+        with_recursive = beginning_getter.union_all(
+            db.session.query(MediaFolder).filter(MediaFolder.parent_folder_code == beginning_getter.c.code)
+        )
+        return db.session.query(with_recursive).all()

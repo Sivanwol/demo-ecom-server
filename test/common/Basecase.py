@@ -12,7 +12,7 @@ from src.services import FileSystemService, FirebaseService, MediaService, Roles
 from src.utils.enums import RolesTypes
 from src.utils.firebase_utils import create_firebase_user as create_fb_user, setup_firebase_client, login_user
 from src.utils.general import is_json_key_present, Struct
-from test.utils.user import UserTestUtills
+from test.utils import UserTestUtills, MediaTestUtills
 
 
 class BaseTestCase(TestCase):
@@ -49,6 +49,7 @@ class BaseTestCase(TestCase):
         self.app_context.push()
         self.client = self.app.test_client()
         self.userUtils = UserTestUtills(self)
+        self.mediaUtils = MediaTestUtills(self)
         self.ws_client = socketio.test_client(self.app)
         if settings[os.environ.get("FLASK_ENV", "development")].CLEAR_FOLDER_UPLOAD:
             self.clear_uploads_folders()

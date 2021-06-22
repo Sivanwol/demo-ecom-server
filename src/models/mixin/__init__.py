@@ -1,2 +1,1 @@
 from src.models.mixin.TimestampMixin import TimestampMixin
-from src.models.mixin.TimestampWithOwnerUserMixin import TimestampWithOwnerUserMixin

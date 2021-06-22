@@ -67,7 +67,7 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
 - [ ] remove the folders itself
 ##### Step I
 - [ ] check if user have the correct permissions to do this action
-- [ ] Locate all sup folders
+- [x] Locate all sup folders
 - [ ] Remove folder and sub folder records
 - [ ] remove the folders itself
 ##### Step II
@@ -76,6 +76,7 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
 - [ ] Remove all db files records
 - [ ] Remove All Relevant files
 ### Tests
+- [x] check on the model media get_all_parent_folders see if it give all relevant items create till lvl 4 items
 - [x] DI Checks overall system check that all still work as intended
 - [x] check task sync from settings
 - [x] check get settings

@@ -27,6 +27,7 @@ def upgrade():
                     sa.Column('code', sa.String(length=255), index=True, nullable=False, unique=True),
                     sa.Column('owner_user_uid', sa.String(length=100), sa.ForeignKey('users.uid')),
                     sa.Column('parent_folder_id', sa.Integer(), sa.ForeignKey('media_folders.id'), nullable=True),
+                    sa.Column('parent_level', sa.Integer(),  nullable=False, default=1),
                     sa.Column('alias', sa.String(length=255), index=True, nullable=True),
                     sa.Column('name', sa.String(length=255), nullable=False),
                     sa.Column('description', sa.Text(), nullable=True),

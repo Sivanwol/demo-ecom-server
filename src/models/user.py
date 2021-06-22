@@ -25,9 +25,9 @@ class User(TimestampMixin, db.Model):
     country = db.Column(String(3), nullable=True)
     currency = db.Column(String(3), nullable=True)
 
-    # Define the relationship to Role via UserRoles
+    # Define the relationships
     roles = db.relationship('Roles', secondary='user_roles')
-    avatar = db.relationship(MediaFile, uselist=False)
+    avatar = db.relationship(MediaFile, uselist=False, foreign_keys=[avatar_id])
 
     def __init__(self, uid, email, fullname, is_active, is_pass_tutorial, country=None, currency=None, store_code=None, avatar_id=0, phone='', address1='',
                  address2=''):

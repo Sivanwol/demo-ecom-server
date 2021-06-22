@@ -76,6 +76,8 @@ class Config:
     # EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
     # Testing settings
     CLEAR_FOLDER_UPLOAD = False
+    # General Settings
+    MAX_PARENT_LEVEL = os.getenv('MAX_PARENT_LEVEL')
 
 
 class DevelopmentConfig(Config):

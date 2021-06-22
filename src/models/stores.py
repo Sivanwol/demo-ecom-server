@@ -3,10 +3,10 @@ from sqlalchemy import Integer, String, Boolean
 from config.database import db
 from src.models.user import User
 from src.models.media_files import MediaFile
-from src.models.mixin import TimestampWithOwnerUserMixin
+from src.models.mixin import TimestampMixin
 
 
-class Store(TimestampWithOwnerUserMixin, db.Model):
+class Store(TimestampMixin, db.Model):
     """
     This is a base user Model
     """
@@ -14,6 +14,7 @@ class Store(TimestampWithOwnerUserMixin, db.Model):
 
     id = db.Column(Integer, primary_key=True)
     store_code = db.Column(String(100), nullable=False)
+    owner_user_uid = db.Column(String(100), db.ForeignKey('users.uid'))
     logo_id = db.Column(Integer, db.ForeignKey(MediaFile.id), nullable=True)
     name = db.Column(String(100), nullable=False)
     description = db.Column(String(255), nullable=True)
@@ -22,6 +23,7 @@ class Store(TimestampWithOwnerUserMixin, db.Model):
     is_maintenance = db.Column(Boolean, nullable=False, default=False)
 
     logo = db.relationship(MediaFile, uselist=False)
+    owner = db.relationship("User", foreign_keys=[owner_user_uid])
 
     def __init__(self, store_code, owner_uid, name, default_currency_code, logo_id=None, description=None, is_maintenance=False):
         self.store_code = store_code

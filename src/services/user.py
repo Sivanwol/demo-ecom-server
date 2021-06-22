@@ -51,7 +51,7 @@ class UserService:
         return auth.get_user(uid)
 
     @cache.memoize(50)
-    def get_user(self, uid, return_model=False) -> User | UserSchema:
+    def get_user(self, uid, return_model=False):
         user = User.query.filter_by(uid=uid).first()
         if not return_model:
             return self.user_schema.dump(user, many=False)
@@ -100,7 +100,7 @@ class UserService:
         return query.paginate(page=page, per_page=per_page, error_out=False)
 
     @cache.memoize(50)
-    def get_active_user(self, uid, return_model=False) -> User | UserSchema:
+    def get_active_user(self, uid, return_model=False):
         user = User.query.filter_by(uid=uid, is_active=True).first()
         if not return_model:
             return self.user_schema.dump(user, many=False)

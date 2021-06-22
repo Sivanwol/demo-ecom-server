@@ -1,11 +1,11 @@
 from sqlalchemy import Integer, String, Boolean, Text, Float
 from config.database import db
 from src.models.media_folder import MediaFolder
-from src.models.mixin import TimestampWithOwnerUserMixin
+from src.models.mixin import TimestampMixin
 from src.utils.enums import MediaAssetsType
 
 
-class MediaFile(TimestampWithOwnerUserMixin, db.Model):
+class MediaFile(TimestampMixin, db.Model):
     """
     This is a base user Model
     """
@@ -13,6 +13,7 @@ class MediaFile(TimestampWithOwnerUserMixin, db.Model):
 
     id = db.Column(Integer, primary_key=True)
     code = db.Column(String(100))
+    owner_user_uid = db.Column(String(100), db.ForeignKey('users.uid'))
     type = db.Column(String(100))
     entity_id = db.Column(Integer, nullable=True)
     folder_id = db.Column(Integer, db.ForeignKey(MediaFolder.id))
@@ -30,6 +31,7 @@ class MediaFile(TimestampWithOwnerUserMixin, db.Model):
     is_system_file = db.Column(Boolean, default=False)
 
     folder = db.relationship(MediaFolder, uselist=False)
+    owner = db.relationship("User", foreign_keys=[owner_user_uid])
 
     def __init__(self, code, owner_uid, type, folder_id, file_location, file_type, file_size, file_name, file_ext, is_published=None, is_system_file=None):
         if is_published is None:

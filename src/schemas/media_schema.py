@@ -13,4 +13,6 @@ class MediaFolderSchema(SQLAlchemySchema):
     name = auto_field()
     description = auto_field()
     is_system_folder = auto_field()
+    owner_user_uid = auto_field()
     parent_folder_code = auto_field()
+    parent_level = auto_field()
