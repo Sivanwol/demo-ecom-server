@@ -44,7 +44,8 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
 - [x] sync process will work as follow: will have general flag in redis that flag params need go to old values the update will happen as follows  
         old value will save same key with the prefix env_[key]_temp  and new will override the env_[key] with new value once done reset flag in case of failure there need add flow for
         rollback that will fetch the  env_[key]_temp and return to the env_[key] as well reset flag
-#### Upload files
+
+#### Upload files workflow logic overall
 - [ ] Upload files with relevant metadata
 - [ ] Check if folder exist (unless it root)
 - [ ] Check if entity_id existed (if type is user or store)
@@ -57,6 +58,7 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
 - [ ] return db files register to client
 
 #### Delete Folder workflow logic overall
+- [ ] check if user have the correct permissions to do this action
 - [ ] Locate all relevant file both on sub path and the dest folder
 - [ ] Locate all sup folders
 - [ ] Remove all db files records
@@ -64,10 +66,12 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
 - [ ] Remove folder and sub folder records
 - [ ] remove the folders itself
 ##### Step I
+- [ ] check if user have the correct permissions to do this action
 - [ ] Locate all sup folders
 - [ ] Remove folder and sub folder records
 - [ ] remove the folders itself
 ##### Step II
+- [ ] this start after upload process will be done
 - [ ] Locate all relevant file both on sub path and the dest folder
 - [ ] Remove all db files records
 - [ ] Remove All Relevant files
@@ -78,10 +82,30 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
 - [x] check none existed settings
 - [x] check force sync settings via service
 #### Create Folder
+- [ ] check system folder create with incorrect permissions
+- [ ] check system folder create (root level)
+- [ ] check system folder create (sub folder level 1)
+- [ ] check system folder create (sub folder level 2)
+- [ ] check system folder create (sub folder level 3)
 - [ ] Check create root user folder
-  - [ ] check sup folder creation
+  - [ ] check folder create with incorrect permissions
+  - [ ] check sup folder creation (level 1)
+  - [ ] check sup folder creation (level 2)
 - [ ] Check create root store folder
-  - [ ] check sup folder creation
-- [ ] Check create root system folder
-  - [ ] check sup folder creation
+  - [ ] check folder create with incorrect permissions
+  - [ ] check sup folder creation ( level 1)
+  - [ ] check sup folder creation ( level 2)
 #### Delete Folders
+- [ ] check folder delete with incorrect permissions
+- [ ] delete folder root level
+  - [ ] check both db records and actual files has been deleted
+
+#### Upload Files
+- [ ] check files upload with incorrect permissions
+- [ ] upload files with correct metadata
+- [ ] check if files existed abd db records existed
+- [ ] upload files to sub path
+
+#### Delete Files
+- [ ] check folder delete with incorrect permissions
+- [ ] delete files and check if files existed abd db records not existed
