@@ -24,7 +24,6 @@ def upload_media():
     return response_success([])
 
 
-# Todo: create folder
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/folder/create"), methods=["POST"])
 @check_token_of_user
 def create_virtual_directory():
@@ -54,13 +53,30 @@ def create_virtual_directory():
         return response_error("Error on create folder it may try create folder under same name or internal issue", {'params': request.json})
 
 
-# Todo: delete folder (will be do any child entity will be mark for deletion (once it set use have N hours to prevent if not will delete if prevent will
-#  remove the mark )
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<uid>/folder/delete"), methods=["DELETE"])
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/entity_id/folder/<folder_code>/delete"),
+                   methods=["DELETE"])
 @check_token_of_user
-def delete_virtual_directory():
-    pass
+def delete_virtual_directory(entity_id, folder_code):
+    mediaService = container[MediaService]
+    userService = container[UserService]
+    roleService = container[RoleService]
 
+    def handle():
+        media = mediaService.get_virtual_folder(folder_code, entity_id, True)
+        if media is None:
+            return response_error("folder not found", {'params': {entity_id, folder_code}})
+
+
+    user = userService.get_user(request.uid, True)
+    if entity_id == user.uid:
+        return handle()
+    else:
+        if entity_id == 'none':
+            entity_id = None
+        supportRole = roleService.get_roles([RolesTypes.Support.value])
+        if userService.user_has_any_role_matched(request.uid, supportRole) or user.store_code == entity_id:
+            return handle()
+    return response_error("No Permission access folder", {'params': {entity_id, folder_code}})
 
 # Todo: delete folder (will be do any child entity will be mark for deletion (once it set use have N hours to prevent if not will delete if prevent will
 #  remove the mark )

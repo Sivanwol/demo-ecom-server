@@ -28,6 +28,18 @@ class MediaService:
             ref_sub_path = self.get_parent_path_folder(media, ref_sub_path)
         return ref_sub_path
 
+    def get_virtual_folder(self, code, entity_id=None, return_model=True):
+        media = MediaFolder.query.filter_by(code=code).first()
+        if media is None:
+            return None
+        type = media.type
+        if not self.virtual_folder_exists(type, code, entity_id):
+            return None
+        if not return_model:
+            schema = MediaFolderSchema()
+            return schema.dumps(media)
+        return media
+
     def virtual_folder_exists(self, type, code, entity_id=None) -> bool:
         media = MediaFolder.query.filter_by(code=code).first()
         sub_path = None
