@@ -86,3 +86,17 @@ class MediaService:
             schema = MediaFolderSchema()
             return schema.dumps(media)
         return media
+
+    def delele_virtual_folder(self, folder_code, type, entity_id=None):
+        if self.virtual_folder_exists(folder_code, type, entity_id):
+            media = MediaFolder.query.filter_by(code=folder_code).first()
+            list_folders = media.get_all_child_folders()
+            list_folder_codes = []
+            for folder in list_folders:
+                list_folder_codes.append(folder.code)
+                path = self.fileSystemService.get_folder_path(type, entity_id)
+                self.fileSystemService.remove_folder(path)
+            delete = MediaFolder.delete().where(MediaFolder.code.in_(list_folders))
+            delete.execute()
+            return True
+        return False

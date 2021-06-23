@@ -61,21 +61,25 @@ def delete_virtual_directory(entity_id, folder_code):
     userService = container[UserService]
     roleService = container[RoleService]
 
-    def handle():
+    def handle(type):
         media = mediaService.get_virtual_folder(folder_code, entity_id, True)
         if media is None:
             return response_error("folder not found", {'params': {entity_id, folder_code}})
-
+        result = mediaService.delele_virtual_folder(media.code, type,entity_id)
+        response_success({"delete_status": result})
 
     user = userService.get_user(request.uid, True)
     if entity_id == user.uid:
-        return handle()
+        return handle(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER)
     else:
         if entity_id == 'none':
             entity_id = None
         supportRole = roleService.get_roles([RolesTypes.Support.value])
         if userService.user_has_any_role_matched(request.uid, supportRole) or user.store_code == entity_id:
-            return handle()
+            type = settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER
+            if entity_id is not None:
+                type = settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER
+            return handle(type)
     return response_error("No Permission access folder", {'params': {entity_id, folder_code}})
 
 # Todo: delete folder (will be do any child entity will be mark for deletion (once it set use have N hours to prevent if not will delete if prevent will

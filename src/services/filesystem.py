@@ -50,7 +50,7 @@ class FileSystemService:
                                        entity_id)
             if sub_folder is not None:
                 upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
-                                           type, sub_folder, entity_id)
+                                           type, entity_id, sub_folder)
         return upload_path
 
     def folder_exists(self, type, entity_id=None, sub_folder=None) -> bool:
