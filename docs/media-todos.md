@@ -57,6 +57,12 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
 - [ ] register files on db
 - [ ] return db files register to client
 
+#### Create Folder workflow logic overall
+- [ ]  check if user have the correct permissions to do this action
+- [ ]  check if sub path existed and register
+- [ ]  create folder & create record
+- [ ]  return record
+
 #### Delete Folder workflow logic overall
 - [ ] check if user have the correct permissions to do this action
 - [ ] Locate all relevant file both on sub path and the dest folder
