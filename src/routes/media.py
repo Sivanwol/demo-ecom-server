@@ -9,7 +9,8 @@ from config.containers import app as current_app, container
 from src.exceptions import UnableCreateFolder
 from src.middlewares import check_token_of_user
 from src.schemas.requests import RequestMediaCreateFolderSchema
-from src.services import MediaService
+from src.services import MediaService, UserService, RoleService
+from src.utils.enums import RolesTypes
 from src.utils.responses import response_success, response_error
 
 
@@ -28,13 +29,24 @@ def upload_media():
 @check_token_of_user
 def create_virtual_directory():
     mediaService = container[MediaService]
+    userService = container[UserService]
+    roleService = container[RoleService]
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     try:
         schema = RequestMediaCreateFolderSchema()
         data = schema.load(request.json)
-        result = mediaService.create_virtual_folder(data, False)
-        return response_success(result)
+        if data.type != settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER:
+            supportRole = roleService.get_roles([RolesTypes.Support.value])
+            user = userService.get_user(request.uid, True)
+            if userService.user_has_any_role_matched(request.uid, supportRole) or \
+                (user.store_code == data.entity_id and type == settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER):
+                result = mediaService.create_virtual_folder(data, False)
+                return response_success(result)
+            if request.uid == data.entity_id:
+                result = mediaService.create_virtual_folder(data, False)
+                return response_success(result)
+        return response_error("No Permission Create folder", {'params': request.json})
     except ValidationError as e:
         return response_error("Error on format of the params", {'params': request.json})
     except UnableCreateFolder as e:

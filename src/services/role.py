@@ -4,7 +4,7 @@ from src.models import Roles
 from sqlalchemy.sql import or_
 
 
-class RolesService:
+class RoleService:
 
     def __init__(self, logger: Logger):
         self.logger = logger

@@ -4,11 +4,11 @@ from flask_socketio import SocketIO
 from lagom import Singleton, Container
 from lagom.integrations.flask import FlaskIntegration
 from .api import app
-from src.services import FileSystemService, MediaService, RolesService, StoreService, UserService, SettingsService
+from src.services import FileSystemService, MediaService, RoleService, StoreService, UserService, SettingsService
 
 container = Container()
 container[FileSystemService] = FileSystemService(app.logger)
-container[RolesService] = RolesService(app.logger)
+container[RoleService] = RoleService(app.logger)
 container[UserService] = UserService(app.logger, container[FileSystemService])
 container[StoreService] = StoreService(app.logger, container[FileSystemService])
 container[SettingsService] = SettingsService(app.logger)

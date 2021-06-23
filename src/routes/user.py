@@ -10,7 +10,7 @@ from config.containers import app as current_app, container
 from src.middlewares import check_role, check_token_register_firebase_user, check_token_of_user
 from src.schemas.requests import UserRolesList, CreateStoreStaffUser, UpdateUserInfo
 from src.schemas import UserSchema
-from src.services import FileSystemService, RolesService, StoreService, UserService
+from src.services import FileSystemService, RoleService, StoreService, UserService
 from src.utils.enums import RolesTypes
 from src.utils.general import Struct
 from src.utils.responses import response_error, response_success, response_success_paging
@@ -226,7 +226,7 @@ def update_user_info_by_support_user(uid):
 @check_role([RolesTypes.Support.value, RolesTypes.StoreSupport.value, RolesTypes.StoreOwner.value])
 def create_store_stuff(store_code):
     userService = container[UserService]
-    roleSerivce = container[RolesService]
+    roleSerivce = container[RoleService]
     fileSystemService = container[FileSystemService]
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
@@ -261,7 +261,7 @@ def create_store_stuff(store_code):
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
 def sync_platform_user_create(uid):
     userService = container[UserService]
-    roleSerivce = container[RolesService]
+    roleSerivce = container[RoleService]
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(userService, uid):
@@ -312,7 +312,7 @@ def sync_store_user_create(uid, store_code):
 
 def sync_user_from_firebase_user(uid, role_names, is_platform_user, store_code=None, new_user=True):
     userService = container[UserService]
-    roleSerivce = container[RolesService]
+    roleSerivce = container[RoleService]
     user_object = userService.get_firebase_user(uid).__dict__['_data']
     response = {'user': json.dumps(user_object, indent=4), 'extend_info': None}
     roles = roleSerivce.get_roles(role_names)

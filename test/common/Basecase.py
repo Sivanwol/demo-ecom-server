@@ -9,7 +9,7 @@ from flask_testing import TestCase
 from config import settings
 from config.containers import app, socketio, container
 from config.database import db
-from src.services import FileSystemService, FirebaseService, MediaService, RolesService, StoreService, UserService, SettingsService
+from src.services import FileSystemService, FirebaseService, MediaService, RoleService, StoreService, UserService, SettingsService
 from src.utils.enums import RolesTypes
 from src.utils.firebase_utils import create_firebase_user as create_fb_user, setup_firebase_client, login_user
 from src.utils.general import is_json_key_present, Struct
@@ -31,7 +31,7 @@ class BaseTestCase(TestCase):
     firebase_client_object = None
     firebaseService = FirebaseService()
     userService = container[UserService]
-    roleService = container[RolesService]
+    roleService = container[RoleService]
     storeService = container[StoreService]
     fileSystemService = container[FileSystemService]
     mediaService = container[MediaService]
