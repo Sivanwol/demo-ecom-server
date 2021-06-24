@@ -49,18 +49,18 @@ def create_virtual_directory():
         if is_system_folder:
             roles = [RolesTypes.Support.value, RolesTypes.Owner.value, RolesTypes.Accounts.value]
             if userService.user_has_any_role_matched(request.uid, roles):
-                result = mediaService.create_virtual_folder(data, is_store_folder, is_store_folder)
+                result = mediaService.create_virtual_folder(data, is_system_folder, is_store_folder)
                 return response_success(result)
         if is_store_folder:
             roles = [RolesTypes.Support.value]
             user = userService.get_user(request.uid, True)
             if userService.user_has_any_role_matched(request.uid, roles) or user.store_code == data['entity_id']:
-                result = mediaService.create_virtual_folder(data, is_store_folder, is_store_folder)
+                result = mediaService.create_virtual_folder(data, is_system_folder, is_store_folder)
                 return response_success(result)
         if not is_system_folder and not is_store_folder:
             supportRole = roleService.get_roles([RolesTypes.Support.value])
             if userService.user_has_any_role_matched(request.uid, supportRole) or request.uid == data['entity_id']:
-                result = mediaService.create_virtual_folder(data, is_store_folder, is_store_folder)
+                result = mediaService.create_virtual_folder(data, is_system_folder, is_store_folder)
                 return response_success(result)
         return response_error("No Permission Create folder", {'params': request.json})
     except ValidationError as e:

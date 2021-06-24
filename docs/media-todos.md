@@ -90,7 +90,7 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
 - [x] check force sync settings via service
 #### Create Folder
 - [ ] check system folder create with incorrect permissions
-- [ ] check system folder create (root level)
+- [x] check system folder create (root level)
 - [ ] check system folder create (sub folder level 1)
 - [ ] check system folder create (sub folder level 2)
 - [ ] Check create root user folder
