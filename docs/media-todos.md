@@ -58,10 +58,10 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
 - [ ] return db files register to client
 
 #### Create Folder workflow logic overall
-- [ ]  check if user have the correct permissions to do this action
-- [ ]  check if sub path existed and register
-- [ ]  create folder & create record
-- [ ]  return record
+- [x] check if user have the correct permissions to do this action
+- [x] check if sub path existed and register
+- [x] create folder & create record
+- [x] return record
 
 #### Delete Folder workflow logic overall
 - [ ] check if user have the correct permissions to do this action
@@ -91,7 +91,7 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
 #### Create Folder
 - [ ] check system folder create with incorrect permissions
 - [x] check system folder create (root level)
-- [ ] check system folder create (sub folder level 1)
+- [x] check system folder create (sub folder level 1)
 - [ ] check system folder create (sub folder level 2)
 - [ ] Check create root user folder
   - [ ] check folder create with incorrect permissions
