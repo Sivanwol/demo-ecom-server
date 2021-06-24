@@ -62,18 +62,18 @@ class FlaskTestCase(BaseTestCase):
             self.assertIsNotNone(response_data)
             self.assertTrue(response_data.status)
             self.assertIsNotNone(response_data.data)
-            folder_code = response_data.data.code
+            folder_code = response_data.data.media.code
             result = MediaFolder.query.filter_by(code=folder_code).first()
             self.assertTrue(self.mediaService.virtual_folder_exists(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, folder_code))
             self.assertIsNotNone(result)
-            self.assertEqual(result.name, response_data.data.name)
-            self.assertEqual(result.alias, response_data.data.alias)
-            self.assertEqual(result.description, response_data.data.description)
-            self.assertEqual(result.is_system_folder, response_data.data.is_system_folder)
-            self.assertEqual(result.is_store_folder, response_data.data.is_store_folder)
+            self.assertEqual(result.name, response_data.data.media.name)
+            self.assertEqual(result.alias, response_data.data.media.alias)
+            self.assertEqual(result.description, response_data.data.media.description)
+            self.assertEqual(result.is_system_folder, response_data.data.media.is_system_folder)
+            self.assertEqual(result.is_store_folder, response_data.data.media.is_store_folder)
             self.assertEqual(result.parent_folder_code, 'None')
             self.assertEqual(result.parent_level, 1)
-            self.assertEqual(result.parent_level, response_data.data.parent_level)
+            self.assertEqual(result.parent_level, response_data.data.media.parent_level)
 
     def test_create_folder_type_system_level_1(self):
         with self.client:
@@ -141,3 +141,36 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(result.code, lvl1_folder_code)
             self.assertEqual(result.parent_folder_code, root_media.code)
             self.assertEqual(root_media.code, response_data.data.root_media.code)
+
+    def test__create_folder_type_user_level_root(self):
+        with self.client:
+            user_object = self.login_user(self.platform_owner_user)
+            uid = user_object['uid']
+            token = user_object['idToken']
+            post_data = {
+                'name': self.fake.domain_word(),
+                'alias': self.fake.domain_word(),
+                'description': self.fake.sentence(nb_words=10),
+                'is_system_folder': False,
+                'is_store_folder': False,
+                'entity_id': uid,
+                'parent_level': 1
+            }
+            response = self.request_post('api/media/folder/create', token, None, None, post_data)
+            self.assertRequestPassed(response, 'failed request create folder')
+            response_data = Struct(response.json)
+            self.assertIsNotNone(response_data)
+            self.assertTrue(response_data.status)
+            self.assertIsNotNone(response_data.data)
+            folder_code = response_data.data.media.code
+            result = MediaFolder.query.filter_by(code=folder_code).first()
+            self.assertTrue(self.mediaService.virtual_folder_exists(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, folder_code))
+            self.assertIsNotNone(result)
+            self.assertEqual(result.name, response_data.data.media.name)
+            self.assertEqual(result.alias, response_data.data.media.alias)
+            self.assertEqual(result.description, response_data.data.media.description)
+            self.assertEqual(result.is_system_folder, response_data.data.media.is_system_folder)
+            self.assertEqual(result.is_store_folder, response_data.data.media.is_store_folder)
+            self.assertEqual(result.parent_folder_code, 'None')
+            self.assertEqual(result.parent_level, 1)
+            self.assertEqual(result.parent_level, response_data.data.media.parent_level)

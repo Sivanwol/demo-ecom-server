@@ -125,9 +125,9 @@ class MediaService:
             self.fileSystemService.create_folder(os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, root_media.code),
                                                  sub_path)
         if is_store_folder:
-            self.fileSystemService.create_store_folder(data.entity_id, root_media.code, sub_path)
+            self.fileSystemService.create_store_folder(data['entity_id'], root_media.code, sub_path)
         if not is_system_folder and not is_store_folder:
-            self.fileSystemService.create_user_folder(data.entity_id, root_media.code, sub_path)
+            self.fileSystemService.create_user_folder(data['entity_id'], root_media.code, sub_path)
         if not return_model:
             schema = MediaFolderSchema()
             return {

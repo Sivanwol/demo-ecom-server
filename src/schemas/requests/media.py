@@ -7,7 +7,7 @@ from config import settings
 
 class RequestMediaCreateFolderSchema(Schema):
     parent_folder_code = fields.UUID(missing=None, allow_none=True)
-    entity_id = fields.UUID(missing=None, allow_none=True)
+    entity_id = fields.Str(missing=None, allow_none=True, validate=validate.Length(min=16, max=255, error='field entity_id not valid'))
     alias = fields.Str(missing=None, allow_none=True, validate=validate.Length(min=3, max=255, error='field alias not valid'))
     name = fields.Str(required=True, validate=validate.Length(min=3, max=255, error='field name not valid'))
     description = fields.Str(missing=None, allow_none=True)
