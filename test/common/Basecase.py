@@ -54,8 +54,6 @@ class BaseTestCase(TestCase):
         self.userUtils = UserTestUtills(self)
         self.mediaUtils = MediaTestUtills(self)
         self.ws_client = socketio.test_client(self.app)
-        if settings[os.environ.get("FLASK_ENV", "development")].CLEAR_FOLDER_UPLOAD:
-            self.clear_uploads_folders()
         db.create_all()
         db.session.commit()
         self.roleService.insert_roles()
@@ -93,6 +91,8 @@ class BaseTestCase(TestCase):
         os.close(self.fd)
         db.session.remove()
         db.drop_all()
+        if settings[os.environ.get("FLASK_ENV", "development")].CLEAR_FOLDER_UPLOAD:
+            self.clear_uploads_folders()
 
     def login_user(self, email):
         user = login_user(email, self.global_password)

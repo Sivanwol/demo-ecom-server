@@ -58,17 +58,15 @@ class MediaService:
                     verify_folder = True
         return verify_folder
 
-    def create_virtual_folder(self, data: RequestMediaCreateFolderSchema, return_model=True):
+    def create_virtual_folder(self, data: RequestMediaCreateFolderSchema, return_model=False):
         code = "%s" % uuid4()
-        result = MediaFolder.query.filter_by(name=data.name).first()
+        result = MediaFolder.query.filter_by(name=data['name']).first()
         sub_path = None
         if result is not None:
             raise UnableCreateFolder(result, sub_path)
-        if result.parent_folder_code is not None and data.parent_level != 1:
-            sub_path = self.get_parent_path_folder(result)
         if data.parent_level == 1:
             result.parent_folder_code = None
-        media = MediaFolder(code, data.name, data.alias, data.description, data.is_system_folder, data.parent_level, data.parent_folder_code)
+        media = MediaFolder(code, data['name'], data['alias'], data['description'], data['is_system_folder'], data['parent_level'], data['parent_folder_code'])
         self.logger.info("register folder (%s) on database" % media.__str__())
         db.session.add(media)
         db.session.commit()

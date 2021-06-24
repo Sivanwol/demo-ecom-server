@@ -35,19 +35,27 @@ def create_virtual_directory():
     try:
         schema = RequestMediaCreateFolderSchema()
         data = schema.load(request.json)
-        if data.type != settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER:
+
+        if data['type'] != settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER:
+            supportRole = roleService.get_roles([RolesTypes.Support.value, RolesTypes.Owner.value, RolesTypes.Accounts.value])
+            if userService.user_has_any_role_matched(request.uid, supportRole):
+                result = mediaService.create_virtual_folder(data)
+                return response_success(result)
+        if data['type'] != settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER_FOLDER:
             supportRole = roleService.get_roles([RolesTypes.Support.value])
             user = userService.get_user(request.uid, True)
             if userService.user_has_any_role_matched(request.uid, supportRole) or \
-                (user.store_code == data.entity_id and type == settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER):
-                result = mediaService.create_virtual_folder(data, False)
+                (user.store_code == data['entity_id'] and type == settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER):
+                result = mediaService.create_virtual_folder(data)
                 return response_success(result)
-            if request.uid == data.entity_id:
-                result = mediaService.create_virtual_folder(data, False)
+        if data['type'] != settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER or request.uid == data['entity_id']:
+            supportRole = roleService.get_roles([RolesTypes.Support.value])
+            if userService.user_has_any_role_matched(request.uid, supportRole):
+                result = mediaService.create_virtual_folder(data)
                 return response_success(result)
         return response_error("No Permission Create folder", {'params': request.json})
     except ValidationError as e:
-        return response_error("Error on format of the params", {'params': request.json})
+        return response_error("Error on format of the params", {'params': request.json, 'error': e.messages})
     except UnableCreateFolder as e:
         current_app.logger.error("User failed create folder", {'params': request.json, 'e': e.message})
         return response_error("Error on create folder it may try create folder under same name or internal issue", {'params': request.json})
