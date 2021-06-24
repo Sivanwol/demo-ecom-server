@@ -104,7 +104,11 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
   - [ ] check sup folder creation ( level 2)
 #### Delete Folders
 - [ ] check folder delete with incorrect permissions
-- [ ] delete folder root level
+- [ ] delete folder root level on type user
+  - [ ] check both db records and actual files has been deleted
+- [ ] delete folder root level on type stores
+  - [ ] check both db records and actual files has been deleted
+- [ ] delete folder root level on type system
   - [ ] check both db records and actual files has been deleted
 
 #### Upload Files

@@ -53,7 +53,7 @@ def create_virtual_directory():
         return response_error("Error on create folder it may try create folder under same name or internal issue", {'params': request.json})
 
 
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/entity_id/folder/<folder_code>/delete"),
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<entity_id>/folder/<folder_code>/delete"),
                    methods=["DELETE"])
 @check_token_of_user
 def delete_virtual_directory(entity_id, folder_code):
