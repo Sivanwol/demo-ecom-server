@@ -17,15 +17,15 @@ class MediaService:
         self.fileSystemService = fileSystemService
 
     '''
-        will get upto parent_folder_id is null the sub folder path
+        will get upto parent_folder_code is null the sub folder path
     '''
 
     def get_parent_path_folder(self, ref_media: MediaFolder, ref_sub_path='') -> str:
-        media = MediaFolder.query.filter_by(code=ref_media.parent_folder_code).first()
-        if ref_sub_path != '':
-            ref_sub_path = os.path.join(ref_sub_path, media.code)
-        if media.parent_folder_id is not None:
-            ref_sub_path = self.get_parent_path_folder(media, ref_sub_path)
+        media = MediaFolder.query.filter_by(code=ref_media.code).first()
+        if media.parent_level != 1:
+            ref_sub_path = os.path.join(ref_sub_path,media.code)
+        if media.parent_folder_code != 'None':
+            ref_sub_path = self.get_parent_path_folder(MediaFolder.query.filter_by(code=media.parent_folder_code).first(), ref_sub_path)
         return ref_sub_path
 
     def get_virtual_folder(self, code, entity_id=None, return_model=True):
@@ -46,7 +46,7 @@ class MediaService:
         verify_folder = False
         if media is not None:
             verify_folder = True
-            if media.parent_folder_code is not None:
+            if media.parent_folder_code != 'None':
                 verify_folder = False
                 sub_path = self.get_parent_path_folder(media)
             if type != settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER:
@@ -58,7 +58,7 @@ class MediaService:
                     verify_folder = True
         return verify_folder
 
-    def create_virtual_folder(self, data,is_system_folder, is_store_folder, return_model=False):
+    def create_virtual_folder(self, uid, data, is_system_folder, is_store_folder, return_model=False):
         code = "%s" % uuid4()
         result = MediaFolder.query.filter_by(name=data['name']).first()
         sub_path = None
@@ -66,17 +66,17 @@ class MediaService:
             raise UnableCreateFolder(result.code, sub_path)
         if data['parent_level'] == 1:
             data['parent_folder_code'] = None
-        media = MediaFolder(code, data['name'], data['alias'], data['description'], is_system_folder, is_store_folder, data['parent_level'],
-                            data['parent_folder_code'])
+        media = MediaFolder(code, uid, data['name'], data['alias'], data['description'], is_system_folder, is_store_folder, data['parent_level'],
+                            str(data['parent_folder_code']))
         self.logger.info("register folder (%s) on database" % media.__str__())
         db.session.add(media)
         db.session.commit()
         sub_path = None
 
-        if media.parent_folder_code is not None:
+        if media.parent_folder_code != 'None':
             sub_path = self.get_parent_path_folder(media)
         if is_system_folder:
-            self.fileSystemService.create_folder(code, sub_path)
+            self.fileSystemService.create_folder(os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, code), sub_path)
         if is_store_folder:
             self.fileSystemService.create_store_folder(data.entity_id, sub_path)
         if not is_system_folder and not is_store_folder:

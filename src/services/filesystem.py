@@ -75,6 +75,7 @@ class FileSystemService:
         return result
 
     def create_folder(self, src, sub_path=None, force_create=False):
+        src = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER, src)
         if sub_path is not None:
             src = os.path.join(src, sub_path)
         if not self.acutal_folder_existed(src):

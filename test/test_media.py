@@ -71,6 +71,83 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(result.description, response_data.data.description)
             self.assertEqual(result.is_system_folder, response_data.data.is_system_folder)
             self.assertEqual(result.is_store_folder, response_data.data.is_store_folder)
-            self.assertIsNone(result.parent_folder_code)
+            self.assertEqual(result.parent_folder_code, 'None')
             self.assertEqual(result.parent_level, 1)
             self.assertEqual(result.parent_level, response_data.data.parent_level)
+
+    def test_create_folder_type_system_level_1(self):
+        with self.client:
+            user_object = self.login_user(self.platform_owner_user)
+            uid = user_object['uid']
+            token = user_object['idToken']
+            post_data = {
+                'name': self.fake.domain_word(),
+                'alias': self.fake.domain_word(),
+                'description': self.fake.sentence(nb_words=10),
+                'is_system_folder': True,
+                'is_store_folder': False,
+                'parent_level': 1
+            }
+            response = self.request_post('api/media/folder/create', token, None, None, post_data)
+            self.assertRequestPassed(response, 'failed request create folder root level')
+            response_data = Struct(response.json)
+            self.assertIsNotNone(response_data)
+            self.assertTrue(response_data.status)
+            self.assertIsNotNone(response_data.data)
+            root_folder_code = response_data.data.code
+            result = MediaFolder.query.filter_by(code=root_folder_code).first()
+            self.assertTrue(self.mediaService.virtual_folder_exists(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, root_folder_code))
+            self.assertIsNotNone(result)
+            self.assertEqual(result.name, response_data.data.name)
+            self.assertEqual(result.alias, response_data.data.alias)
+            self.assertEqual(result.description, response_data.data.description)
+            self.assertEqual(result.is_system_folder, response_data.data.is_system_folder)
+            self.assertEqual(result.is_store_folder, response_data.data.is_store_folder)
+            self.assertEqual(result.parent_folder_code, 'None')
+            self.assertEqual(result.parent_level, 1)
+            self.assertEqual(result.parent_level, response_data.data.parent_level)
+
+            post_data = {
+                'name': self.fake.domain_word(),
+                'alias': self.fake.domain_word(),
+                'description': self.fake.sentence(nb_words=10),
+                'is_system_folder': True,
+                'is_store_folder': False,
+                'parent_level': 2,
+                'parent_folder_code': root_folder_code
+            }
+            response = self.request_post('api/media/folder/create', token, None, None, post_data)
+            self.assertRequestPassed(response, 'failed request create folder level 1')
+            response_data = Struct(response.json)
+            self.assertIsNotNone(response_data)
+            self.assertTrue(response_data.status)
+            self.assertIsNotNone(response_data.data)
+            lvl1_folder_code = response_data.data.code
+            result = MediaFolder.query.filter_by(code=lvl1_folder_code).first()
+            self.assertTrue(
+                self.mediaService.virtual_folder_exists(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, lvl1_folder_code))
+            self.assertIsNotNone(result)
+            self.assertEqual(result.name, response_data.data.name)
+            self.assertEqual(result.alias, response_data.data.alias)
+            self.assertEqual(result.description, response_data.data.description)
+            self.assertEqual(result.is_system_folder, response_data.data.is_system_folder)
+            self.assertEqual(result.is_store_folder, response_data.data.is_store_folder)
+            self.assertIsNotNone(result.parent_folder_code)
+            self.assertEqual(result.parent_level, 2)
+            self.assertEqual(result.parent_level, response_data.data.parent_level)
+
+            result = MediaFolder.query.filter_by(code=lvl1_folder_code).first()
+            self.assertIsNotNone(result)
+            self.assertEqual(result.code, lvl1_folder_code)
+            folders = result.get_all_child_folders()
+            self.assertEqual(len(folders), 1)
+            result_item = folders[0]
+
+            self.assertEqual(result.name, result_item.name)
+            self.assertEqual(result.alias, result_item.alias)
+            self.assertEqual(result.description, result_item.description)
+            self.assertEqual(result.is_system_folder, result_item.is_system_folder)
+            self.assertEqual(result.is_store_folder, result_item.is_store_folder)
+            self.assertIsNone(result_item.parent_folder_code)
+            self.assertEqual(result_item.parent_level, 2)
+            self.assertEqual(result.parent_level, result_item.parent_level)
