@@ -32,6 +32,7 @@ def upgrade():
                     sa.Column('name', sa.String(length=255), nullable=False),
                     sa.Column('description', sa.Text(), nullable=True),
                     sa.Column('is_system_folder', sa.Boolean(), nullable=True, default=False),
+                    sa.Column('is_store_folder', sa.Boolean(), nullable=True, default=False),
                     sa.Column('created_at', sa.DateTime(), default=sa.func.current_timestamp()),
                     sa.Column('updated_at', sa.DateTime(), onupdate=sa.ColumnDefault(sa.func.current_timestamp), default=sa.func.current_timestamp()),
                     sa.PrimaryKeyConstraint('id')
@@ -40,7 +41,6 @@ def upgrade():
                     sa.Column('id', sa.Integer(), nullable=False),
                     sa.Column('code', sa.String(length=255), index=True, nullable=False, unique=True),
                     sa.Column('owner_user_uid', sa.String(length=100), sa.ForeignKey('users.uid')),
-                    sa.Column('type', sa.String(length=15), nullable=False),
                     sa.Column('entity_id', sa.String(length=255), index=True, nullable=True),
                     sa.Column('folder_id', sa.Integer(), sa.ForeignKey('media_folders.id'), index=True, nullable=True),
                     sa.Column('file_location', sa.String(length=255), nullable=False),
@@ -55,6 +55,7 @@ def upgrade():
                     sa.Column('description', sa.Text(), nullable=True),
                     sa.Column('is_published', sa.Boolean(), default=False),
                     sa.Column('is_system_file', sa.Boolean(),  default=False),
+                    sa.Column('is_store_file', sa.Boolean(), nullable=True, default=False),
                     sa.Column('owner_user_id', sa.Integer(), nullable=True, default=False),
                     sa.Column('created_at', sa.DateTime(), default=sa.func.current_timestamp()),
                     sa.Column('updated_at', sa.DateTime(), onupdate=sa.ColumnDefault(sa.func.current_timestamp), default=sa.func.current_timestamp()),

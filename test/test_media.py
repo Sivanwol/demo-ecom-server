@@ -52,8 +52,8 @@ class FlaskTestCase(BaseTestCase):
                 'name': self.fake.domain_word(),
                 'alias': self.fake.domain_word(),
                 'description': self.fake.sentence(nb_words=10),
-                'type': settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER,
                 'is_system_folder': True,
+                'is_store_folder': False,
                 'parent_level': 1
             }
             response = self.request_post('api/media/folder/create', token, None, None, post_data)

@@ -12,6 +12,6 @@ class RequestMediaCreateFolderSchema(Schema):
     name = fields.Str(required=True, validate=validate.Length(min=3, max=255, error='field name not valid'))
     description = fields.Str(missing=None, allow_none=True)
     parent_level = fields.Integer(required=True, validate=validate.Range(min=1, max=int(settings[os.environ.get("FLASK_ENV", "development")].MAX_PARENT_LEVEL)
-                                                                     , error='field parent_level not valid'))
-    type = fields.Str(required=True, validate=validate.OneOf(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_TYPE_OPTIONS))
+                                                                         , error='field parent_level not valid'))
     is_system_folder = fields.Bool(required=True)
+    is_store_folder = fields.Bool(required=True)

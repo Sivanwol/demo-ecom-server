@@ -36,22 +36,31 @@ def create_virtual_directory():
         schema = RequestMediaCreateFolderSchema()
         data = schema.load(request.json)
 
-        if data['type'] != settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER:
-            supportRole = roleService.get_roles([RolesTypes.Support.value, RolesTypes.Owner.value, RolesTypes.Accounts.value])
-            if userService.user_has_any_role_matched(request.uid, supportRole):
-                result = mediaService.create_virtual_folder(data)
+        is_system_folder = False
+        is_store_folder = False
+        if data['is_system_folder'] and not data['is_store_folder']:
+            is_system_folder = True
+
+        if not data['is_system_folder'] and data['is_store_folder']:
+            is_store_folder = True
+
+        if data['is_system_folder'] and data['is_store_folder']:
+            return response_error("No Permission Create folder that both system and store folder type", {'params': request.json})
+        if is_system_folder:
+            roles = [RolesTypes.Support.value, RolesTypes.Owner.value, RolesTypes.Accounts.value]
+            if userService.user_has_any_role_matched(request.uid, roles):
+                result = mediaService.create_virtual_folder(data, is_store_folder, is_store_folder)
                 return response_success(result)
-        if data['type'] != settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER_FOLDER:
-            supportRole = roleService.get_roles([RolesTypes.Support.value])
+        if is_store_folder:
+            roles = [RolesTypes.Support.value]
             user = userService.get_user(request.uid, True)
-            if userService.user_has_any_role_matched(request.uid, supportRole) or \
-                (user.store_code == data['entity_id'] and type == settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER):
-                result = mediaService.create_virtual_folder(data)
+            if userService.user_has_any_role_matched(request.uid, roles) or user.store_code == data['entity_id']:
+                result = mediaService.create_virtual_folder(data, is_store_folder, is_store_folder)
                 return response_success(result)
-        if data['type'] != settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER or request.uid == data['entity_id']:
+        if not is_system_folder and not is_store_folder:
             supportRole = roleService.get_roles([RolesTypes.Support.value])
-            if userService.user_has_any_role_matched(request.uid, supportRole):
-                result = mediaService.create_virtual_folder(data)
+            if userService.user_has_any_role_matched(request.uid, supportRole) or request.uid == data['entity_id']:
+                result = mediaService.create_virtual_folder(data, is_store_folder, is_store_folder)
                 return response_success(result)
         return response_error("No Permission Create folder", {'params': request.json})
     except ValidationError as e:
@@ -73,7 +82,7 @@ def delete_virtual_directory(entity_id, folder_code):
         media = mediaService.get_virtual_folder(folder_code, entity_id, True)
         if media is None:
             return response_error("folder not found", {'params': {entity_id, folder_code}})
-        result = mediaService.delele_virtual_folder(media.code, type,entity_id)
+        result = mediaService.delele_virtual_folder(media.code, type, entity_id)
         response_success({"delete_status": result})
 
     user = userService.get_user(request.uid, True)
@@ -89,6 +98,7 @@ def delete_virtual_directory(entity_id, folder_code):
                 type = settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER
             return handle(type)
     return response_error("No Permission access folder", {'params': {entity_id, folder_code}})
+
 
 # Todo: delete folder (will be do any child entity will be mark for deletion (once it set use have N hours to prevent if not will delete if prevent will
 #  remove the mark )
