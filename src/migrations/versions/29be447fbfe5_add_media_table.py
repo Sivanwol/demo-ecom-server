@@ -24,10 +24,10 @@ def upgrade():
 
     op.create_table('media_folders',
                     sa.Column('id', sa.Integer(), nullable=False),
-                    sa.Column('code', sa.String(length=255), index=True, nullable=False, unique=True),
+                    sa.Column('code', sa.String(length=100), index=True, nullable=False, unique=True),
                     sa.Column('owner_user_uid', sa.String(length=100), sa.ForeignKey('users.uid')),
-                    sa.Column('parent_folder_code', sa.Integer(), sa.ForeignKey('media_folders.code'), nullable=True),
-                    sa.Column('parent_level', sa.Integer(),  nullable=False, default=1),
+                    sa.Column('parent_folder_code', sa.Integer(), sa.ForeignKey('media_folders.code'), index=True, nullable=True),
+                    sa.Column('parent_level', sa.Integer(), nullable=False, default=1),
                     sa.Column('alias', sa.String(length=255), index=True, nullable=True),
                     sa.Column('name', sa.String(length=255), nullable=False),
                     sa.Column('description', sa.Text(), nullable=True),
@@ -42,7 +42,7 @@ def upgrade():
                     sa.Column('code', sa.String(length=255), index=True, nullable=False, unique=True),
                     sa.Column('owner_user_uid', sa.String(length=100), sa.ForeignKey('users.uid')),
                     sa.Column('entity_id', sa.String(length=255), index=True, nullable=True),
-                    sa.Column('folder_id', sa.Integer(), sa.ForeignKey('media_folders.id'), index=True, nullable=True),
+                    sa.Column('folder_code', sa.String(length=100), sa.ForeignKey('media_folders.code'), index=True, nullable=True),
                     sa.Column('file_location', sa.String(length=255), nullable=False),
                     sa.Column('file_type', sa.Integer(), nullable=False, default=3),
                     sa.Column('file_size', sa.Float(), nullable=False),
@@ -54,7 +54,7 @@ def upgrade():
                     sa.Column('title', sa.Text(), nullable=True),
                     sa.Column('description', sa.Text(), nullable=True),
                     sa.Column('is_published', sa.Boolean(), default=False),
-                    sa.Column('is_system_file', sa.Boolean(),  default=False),
+                    sa.Column('is_system_file', sa.Boolean(), default=False),
                     sa.Column('is_store_file', sa.Boolean(), nullable=True, default=False),
                     sa.Column('owner_user_id', sa.Integer(), nullable=True, default=False),
                     sa.Column('created_at', sa.DateTime(), default=sa.func.current_timestamp()),
@@ -62,8 +62,10 @@ def upgrade():
                     sa.PrimaryKeyConstraint('id')
                     )
 
-    op.alter_column("users", "avatar_id", sa.ForeignKey('media_files.id'))
-    op.alter_column("stores", "logo_id", sa.ForeignKey('media_files.id'))
+    op.alter_column("users", "avatar_code", sa.ForeignKey('media_files.code'), modify_type=sa.String(length=100))
+    op.add_column('users', sa.Column('media_folder_code', sa.ForeignKey('media_folders.code'), modify_type=sa.String(length=100), nullable=True, index=True))
+    op.add_column('stores', sa.Column('media_folder_code', sa.String(length=100), sa.ForeignKey('media_folders.code'), nullable=True, index=True))
+    op.alter_column("stores", "logo_code", sa.ForeignKey('media_files.code'), modify_type=sa.String(length=100), nullable=True, index=True)
     # ### end Alembic commands ###
 
 

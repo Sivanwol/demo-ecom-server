@@ -91,16 +91,16 @@ class FileSystemService:
                     'error': e.strerror
                 })
 
-    def create_user_folder(self, entity_id, sub_path=None):
+    def create_user_folder(self, entity_id, code, sub_path=None):
         upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
                                    settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER,
                                    entity_id)
-        self.logger.info('create user folder %s (entity id: %s)' % (upload_path, entity_id))
+        self.logger.info('create user folder %s (entity id: %s ,code: %s )' % (upload_path, entity_id, code))
         self.create_folder(upload_path, sub_path)
 
-    def create_store_folder(self, entity_id, sub_path=None):
+    def create_store_folder(self, entity_id, code, sub_path=None):
         upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
                                    settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER,
-                                   entity_id)
-        self.logger.info('create store folder %s (entity id: %s)' % (upload_path, entity_id))
+                                   entity_id, code)
+        self.logger.info('create store folder %s (entity id: %s ,code: %s )' % (upload_path, entity_id, code))
         self.create_folder(upload_path, sub_path)

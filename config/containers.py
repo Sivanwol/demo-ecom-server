@@ -7,12 +7,14 @@ from .api import app
 from src.services import FileSystemService, MediaService, RoleService, StoreService, UserService, SettingsService
 
 container = Container()
-container[FileSystemService] = FileSystemService(app.logger)
+fileSystemService = FileSystemService(app.logger)
+mediaService = MediaService(app.logger, fileSystemService)
+container[FileSystemService] = fileSystemService
 container[RoleService] = RoleService(app.logger)
-container[UserService] = UserService(app.logger, container[FileSystemService])
-container[StoreService] = StoreService(app.logger, container[FileSystemService])
+container[MediaService] = mediaService
+container[UserService] = UserService(app.logger, fileSystemService, mediaService)
+container[StoreService] = StoreService(app.logger, fileSystemService, mediaService)
 container[SettingsService] = SettingsService(app.logger)
-container[MediaService] = MediaService(app.logger, container[FileSystemService])
 app = FlaskIntegration(app, container)
 APP_DEBUG_MODE = False
 if os.environ.get("FLASK_ENV", "development") == 'development' or os.environ.get("FLASK_ENV", "development") == 'testing':

@@ -94,18 +94,20 @@ class FlaskTestCase(BaseTestCase):
             self.assertIsNotNone(response_data)
             self.assertTrue(response_data.status)
             self.assertIsNotNone(response_data.data)
-            root_folder_code = response_data.data.code
-            result = MediaFolder.query.filter_by(code=root_folder_code).first()
-            self.assertTrue(self.mediaService.virtual_folder_exists(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, root_folder_code))
-            self.assertIsNotNone(result)
-            self.assertEqual(result.name, response_data.data.name)
-            self.assertEqual(result.alias, response_data.data.alias)
-            self.assertEqual(result.description, response_data.data.description)
-            self.assertEqual(result.is_system_folder, response_data.data.is_system_folder)
-            self.assertEqual(result.is_store_folder, response_data.data.is_store_folder)
-            self.assertEqual(result.parent_folder_code, 'None')
-            self.assertEqual(result.parent_level, 1)
-            self.assertEqual(result.parent_level, response_data.data.parent_level)
+            root_folder_code = response_data.data.media.code
+            root_media = MediaFolder.query.filter_by(code=root_folder_code).first()
+            self.assertTrue(
+                self.mediaService.virtual_folder_exists(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, root_folder_code))
+            self.assertIsNotNone(root_media)
+            self.assertEqual(root_media.code, response_data.data.media.code)
+            self.assertEqual(root_media.name, response_data.data.media.name)
+            self.assertEqual(root_media.alias, response_data.data.media.alias)
+            self.assertEqual(root_media.description, response_data.data.media.description)
+            self.assertEqual(root_media.is_system_folder, response_data.data.media.is_system_folder)
+            self.assertEqual(root_media.is_store_folder, response_data.data.media.is_store_folder)
+            self.assertEqual(root_media.parent_folder_code, 'None')
+            self.assertEqual(root_media.parent_level, 1)
+            self.assertEqual(root_media.parent_level, response_data.data.media.parent_level)
 
             post_data = {
                 'name': self.fake.domain_word(),
@@ -122,32 +124,20 @@ class FlaskTestCase(BaseTestCase):
             self.assertIsNotNone(response_data)
             self.assertTrue(response_data.status)
             self.assertIsNotNone(response_data.data)
-            lvl1_folder_code = response_data.data.code
+            lvl1_folder_code = response_data.data.media.code
             result = MediaFolder.query.filter_by(code=lvl1_folder_code).first()
             self.assertTrue(
-                self.mediaService.virtual_folder_exists(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, lvl1_folder_code))
+                self.mediaService.virtual_folder_exists(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, root_folder_code,
+                                                        lvl1_folder_code))
             self.assertIsNotNone(result)
-            self.assertEqual(result.name, response_data.data.name)
-            self.assertEqual(result.alias, response_data.data.alias)
-            self.assertEqual(result.description, response_data.data.description)
-            self.assertEqual(result.is_system_folder, response_data.data.is_system_folder)
-            self.assertEqual(result.is_store_folder, response_data.data.is_store_folder)
+            self.assertEqual(result.name, response_data.data.media.name)
+            self.assertEqual(result.alias, response_data.data.media.alias)
+            self.assertEqual(result.description, response_data.data.media.description)
+            self.assertEqual(result.is_system_folder, response_data.data.media.is_system_folder)
+            self.assertEqual(result.is_store_folder, response_data.data.media.is_store_folder)
             self.assertIsNotNone(result.parent_folder_code)
             self.assertEqual(result.parent_level, 2)
-            self.assertEqual(result.parent_level, response_data.data.parent_level)
-
-            result = MediaFolder.query.filter_by(code=lvl1_folder_code).first()
-            self.assertIsNotNone(result)
+            self.assertEqual(result.parent_level, response_data.data.media.parent_level)
             self.assertEqual(result.code, lvl1_folder_code)
-            folders = result.get_all_child_folders()
-            self.assertEqual(len(folders), 1)
-            result_item = folders[0]
-
-            self.assertEqual(result.name, result_item.name)
-            self.assertEqual(result.alias, result_item.alias)
-            self.assertEqual(result.description, result_item.description)
-            self.assertEqual(result.is_system_folder, result_item.is_system_folder)
-            self.assertEqual(result.is_store_folder, result_item.is_store_folder)
-            self.assertIsNone(result_item.parent_folder_code)
-            self.assertEqual(result_item.parent_level, 2)
-            self.assertEqual(result.parent_level, result_item.parent_level)
+            self.assertEqual(result.parent_folder_code, root_media.code)
+            self.assertEqual(root_media.code, response_data.data.root_media.code)

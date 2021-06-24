@@ -8,16 +8,17 @@ from config.api import cache
 from config.database import db
 from src.models import User, Store
 from src.schemas import UserSchema
-from src.services import FileSystemService
+from src.services import FileSystemService, MediaService
 from src.utils.enums import AllowSortByDirection
 from src.utils.firebase_utils import create_firebase_user
 from src.utils.responses import response_error
 
 
 class UserService:
-    def __init__(self, logger: Logger, fileSystemService: FileSystemService):
+    def __init__(self, logger: Logger, fileSystemService: FileSystemService, mediaService: MediaService):
         self.logger = logger
         self.fileSystemService = fileSystemService
+        self.mediaService = mediaService
 
     user_schema = UserSchema()
     """Verifies the signature and data for the provided JWT.
@@ -258,6 +259,7 @@ class UserService:
         return True
 
     def sync_firebase_user(self, uid, roles, email, fullname, is_platform_user, store_code=None, is_new_user=True):
+        media = self.mediaService.create_user_folder(uid)
         user = User(uid, email, fullname, True, is_new_user)
         if not is_platform_user:
             if store_code is not None:
@@ -268,4 +270,4 @@ class UserService:
         user.add_user_roles(roles)
         db.session.add(user)
         db.session.commit()
-        self.fileSystemService.create_user_folder(uid)
+        self.fileSystemService.create_user_folder(uid, media.code)

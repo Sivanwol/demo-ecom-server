@@ -2,6 +2,8 @@ import os
 from logging import Logger
 from uuid import uuid4
 
+from flask import request
+
 from config import settings
 from config.database import db
 from src.exceptions import UnableCreateFolder
@@ -23,10 +25,29 @@ class MediaService:
     def get_parent_path_folder(self, ref_media: MediaFolder, ref_sub_path='') -> str:
         media = MediaFolder.query.filter_by(code=ref_media.code).first()
         if media.parent_level != 1:
-            ref_sub_path = os.path.join(ref_sub_path,media.code)
+            ref_sub_path = os.path.join(ref_sub_path, media.code)
         if media.parent_folder_code != 'None':
             ref_sub_path = self.get_parent_path_folder(MediaFolder.query.filter_by(code=media.parent_folder_code).first(), ref_sub_path)
         return ref_sub_path
+
+    ''' getting the root media folder the code here stupid and not optimize as well basically bad note to my self refactor this shit'''
+
+    def get_root_virtual_folder(self, code):
+        media = MediaFolder.query.filter_by(code=code).first()
+        if media is None:
+            return None
+
+        if media.parent_level == 1:
+            return media
+
+        if media.parent_level == 2:
+            media = MediaFolder.query.filter_by(code=media.parent_folder_code).first()
+
+        if media.parent_level == 3:
+            media = MediaFolder.query.filter_by(code=media.parent_folder_code).first()
+            media = MediaFolder.query.filter_by(code=media.parent_folder_code).first()
+
+        return media
 
     def get_virtual_folder(self, code, entity_id=None, return_model=True):
         media = MediaFolder.query.filter_by(code=code).first()
@@ -42,6 +63,7 @@ class MediaService:
 
     def virtual_folder_exists(self, type, code, entity_id=None) -> bool:
         media = MediaFolder.query.filter_by(code=code).first()
+        root_media = self.get_root_virtual_folder(code)
         sub_path = None
         verify_folder = False
         if media is not None:
@@ -54,9 +76,32 @@ class MediaService:
                     if self.fileSystemService.folder_exists(type, entity_id, sub_path):
                         verify_folder = True
             else:
-                if self.fileSystemService.system_folder_exists(sub_path):
+                path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, root_media.code)
+                if sub_path != '':
+                    path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, root_media.code,path)
+                if self.fileSystemService.acutal_folder_existed(path):
                     verify_folder = True
         return verify_folder
+
+    def create_user_folder(self, uid):
+        name = 'main user folder %s' % uid
+        code = "%s" % uuid4()
+        media = MediaFolder(code, uid, name, uid, '', False, False, 1, str('None'))
+        db.session.add(media)
+        db.session.commit()
+        self.fileSystemService.create_user_folder(uid, code)
+        self.logger.info(f'create media record user folder: {code}')
+        return media
+
+    def create_store_folder(self, uid, store_code):
+        name = 'main store folder %s' % store_code
+        code = "%s" % uuid4()
+        media = MediaFolder(code, request.uid, name, store_code, '', False, True, 1, str('None'))
+        db.session.add(media)
+        db.session.commit()
+        self.fileSystemService.create_store_folder(store_code, code)
+        self.logger.info(f'create media record store folder: {code}')
+        return media
 
     def create_virtual_folder(self, uid, data, is_system_folder, is_store_folder, return_model=False):
         code = "%s" % uuid4()
@@ -72,19 +117,27 @@ class MediaService:
         db.session.add(media)
         db.session.commit()
         sub_path = None
-
+        root_media = media
         if media.parent_folder_code != 'None':
             sub_path = self.get_parent_path_folder(media)
+            root_media = self.get_root_virtual_folder(code)
         if is_system_folder:
-            self.fileSystemService.create_folder(os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, code), sub_path)
+            self.fileSystemService.create_folder(os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, root_media.code),
+                                                 sub_path)
         if is_store_folder:
-            self.fileSystemService.create_store_folder(data.entity_id, sub_path)
+            self.fileSystemService.create_store_folder(data.entity_id, root_media.code, sub_path)
         if not is_system_folder and not is_store_folder:
-            self.fileSystemService.create_user_folder(data.entity_id, sub_path)
+            self.fileSystemService.create_user_folder(data.entity_id, root_media.code, sub_path)
         if not return_model:
             schema = MediaFolderSchema()
-            return schema.dump(media, many=False)
-        return media
+            return {
+                "root_media": schema.dump(root_media, many=False) if media.parent_folder_code != 'None' else None,
+                "media": schema.dump(media, many=False)
+            }
+        return {
+            "root_media": root_media if media.parent_folder_code != 'None' else None,
+            "media": media
+        }
 
     def delele_virtual_folder(self, folder_code, type, entity_id=None):
         if self.virtual_folder_exists(folder_code, type, entity_id):
