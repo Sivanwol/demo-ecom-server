@@ -94,8 +94,8 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
 - [x] check system folder create (sub folder level 1)
 - [ ] check system folder create (sub folder level 2)
 - [x] Check create root user folder
-  - [ ] check folder create with incorrect permissions
-  - [ ] check sup folder creation (level 1)
+  - [x] check folder create with incorrect permissions
+  - [x] check sup folder creation (level 1)
   - [ ] check sup folder creation (level 2)
 - [ ] Check create root store folder
   - [ ] check folder create with incorrect permissions
