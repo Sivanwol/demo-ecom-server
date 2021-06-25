@@ -44,16 +44,18 @@ def upload_media(entity_id):
         if is_system_folder:
             roles = [RolesTypes.Support.value, RolesTypes.Owner.value, RolesTypes.Accounts.value]
             if not userService.user_has_any_role_matched(request.uid, roles):
-                return response_error("Permission Error",None, 403)
+                return response_error("Permission Error", None, 403)
         if is_store_folder:
             roles = [RolesTypes.Support.value]
             user = userService.get_user(request.uid, True)
             if not userService.user_has_any_role_matched(request.uid, roles) or user.store_code != data['entity_id']:
-                return response_error("Permission Error",None, 403)
-        if not is_system_folder and not is_store_folder:
+                return response_error("Permission Error", None, 403)
+        if is_user_folder:
             supportRole = roleService.get_roles([RolesTypes.Support.value])
             if userService.user_has_any_role_matched(request.uid, supportRole) or request.uid != data['entity_id']:
-                return response_error("Permission Error",None, 403)
+                return response_error("Permission Error", None, 403)
+        if not mediaService.virtual_folder_exists(data['folder_code'], data['folder_code'] if data['folder_code'] != 'None' else None):
+            return response_error("Upload location not existed")
     except ValidationError as e:
         return response_error("Error on format of the params", {'params': request.json, 'error': e.messages})
 
@@ -61,7 +63,7 @@ def upload_media(entity_id):
     files = fileSystemService.save_temporary_upload_files(files)
     if len(files) == 0:
         return response_error("Files that uploaded no meet with server limitations")
-    response = mediaService.register_uploaded_files(files, data)
+    response = mediaService.register_uploaded_files(request.uid, files, data, is_system_folder, is_store_folder, is_user_folder)
     return response_success(response)
 
 

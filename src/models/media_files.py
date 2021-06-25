@@ -31,7 +31,7 @@ class MediaFile(TimestampMixin, db.Model):
     folder = db.relationship(MediaFolder, uselist=False)
     owner = db.relationship("User", foreign_keys=[owner_user_uid])
 
-    def __init__(self, code, owner_uid, type, folder_id, file_location, file_type, file_size, file_name, file_ext, is_published=None, is_system_file=None,
+    def __init__(self, code, owner_uid,  folder_code, file_location, file_type, file_size, file_name, file_ext, is_published=None, is_system_file=None,
                  is_store_file=None):
         if is_published is None:
             is_published = False
@@ -42,8 +42,7 @@ class MediaFile(TimestampMixin, db.Model):
 
         self.code = code
         self.owner_user_uid = owner_uid
-        self.type = type
-        self.folder_id = folder_id
+        self.folder_code = folder_code
         self.file_location = file_location
         self.file_type = file_type
         self.file_size = file_size
@@ -54,13 +53,12 @@ class MediaFile(TimestampMixin, db.Model):
         self.is_store_file = is_store_file
 
     def __repr__(self):
-        return "<MediaFile(id='{}', code='{}', owner_user_uid='{}', type='{}', folder_id='{}' file_name='{}' file_ext='{}' file_location='{}' " \
+        return "<MediaFile(id='{}', code='{}', owner_user_uid='{}', folder_code='{}' file_name='{}' file_ext='{}' file_location='{}' " \
                "is_published={} is_store_file={} is_system_file={} created_at='{}' updated_at='{}'>".format(
             self.id,
             self.code,
             self.owner_user_uid,
-            self.type,
-            self.folder_id,
+            self.folder_code,
             self.file_name,
             self.file_ext,
             self.file_location,

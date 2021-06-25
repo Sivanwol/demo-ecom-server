@@ -4,7 +4,7 @@ from uuid import uuid4
 from config import settings
 from config.database import db
 from src.exceptions import UnableCreateFolder
-from src.models import MediaFolder
+from src.models import MediaFolder, MediaFile
 from src.schemas import MediaFolderSchema
 from src.services import FileSystemService
 
@@ -154,9 +154,35 @@ class MediaService:
             return True
         return False
 
-    def register_uploaded_files(self, files, metadata):
+    def register_uploaded_files(self, uid, files, metadata, is_system_folder, is_store_folder, is_user_folder):
+        system_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+                                   settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER)
+
+        user_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+                                 settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER)
+
+        store_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+                                  settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER)
+
+        root_media = MediaFolder.query.filter_by(code=metadata['folder_code']).first()
+        sub_path = ''
+        if root_media.parent_folder_code != 'None':
+            sub_path = self.get_parent_path_folder(root_media)
+            root_media = self.get_root_virtual_folder(metadata['folder_code'])
 
         for file in files:
             file_location_temp = file['file_location']
+            file_name = file['file_name']
             file_size = file['file_size']
-
+            file_location = ''
+            if is_system_folder:
+                file_location = os.path.join(system_path, root_media.code, sub_path) if sub_path != '' else os.path.join(system_path, root_media.code)
+            if is_store_folder:
+                file_location = os.path.join(store_path, metadata['entity_id'], root_media.code)
+                if sub_path != '':
+                    file_location = os.path.join(store_path, metadata['entity_id'], root_media.code, sub_path)
+            if is_user_folder:
+                file_location = os.path.join(user_path, metadata['entity_id'], root_media.code)
+                if sub_path != '':
+                    file_location = os.path.join(user_path, metadata['entity_id'], root_media.code, sub_path)
+            # file = MediaFile(uuid4(), uid, root_media.code, os.path.join(file_location, file_name),)
