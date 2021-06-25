@@ -15,16 +15,56 @@ from src.utils.responses import response_success, response_error
 
 
 # Todo: upload media files that include the file meta data and every thing else
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/uploads"), methods=["POST"])
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<entity_id>/uploads"), methods=["POST"])
 @check_token_of_user
-def upload_media():
+def upload_media(entity_id):
     mediaService = container[MediaService]
     userService = container[UserService]
     roleService = container[RoleService]
+    if not request.is_json:
+        return response_error("Request Data must be in json format", request.data)
+    try:
+        schema = RequestMediaCreateFolderSchema()
+        data = schema.load(request.json)
+
+    except ValidationError as e:
+        return response_error("Error on format of the params", {'params': request.json, 'error': e.messages})
     files = request.files.getlist("files")
     for file in files:
         pass
     return response_success([])
+
+
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<entity_id>/<file_code>/update"), methods=["PUT"])
+@check_token_of_user
+def upload_media_file_metadata(entity_id, file_code):
+    mediaService = container[MediaService]
+    userService = container[UserService]
+    roleService = container[RoleService]
+
+
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/files/toggle/publish"), methods=["PUT"])
+@check_token_of_user
+def toggle_published_files():
+    mediaService = container[MediaService]
+    userService = container[UserService]
+    roleService = container[RoleService]
+
+
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<entity_id>/file/<file_code>"), methods=["GET"])
+@check_token_of_user
+def download_media_file(entity_id, file_code):
+    mediaService = container[MediaService]
+    userService = container[UserService]
+    roleService = container[RoleService]
+
+
+@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<entity_id>/folder/<folder_code>"), methods=["GET"])
+@check_token_of_user
+def download_media_folder(entity_id, folder_code):
+    mediaService = container[MediaService]
+    userService = container[UserService]
+    roleService = container[RoleService]
 
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/folder/create"), methods=["POST"])
@@ -129,11 +169,4 @@ def get_user_files():
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<uid>/files/<folder_id>"), methods=["GET"])
 @check_token_of_user
 def get_user_files_from_folder():
-    pass
-
-
-# Todo: will download a folder (will zip and send to client) or just send the file depend what the entity_id
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<uid>/download/<entity_id>"), methods=["GET"])
-@check_token_of_user
-def download_files():
     pass
