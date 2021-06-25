@@ -62,10 +62,12 @@ class Config:
     # Upload System Settings
 
     UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER')
+    UPLOAD_TEMP_FOLDER = os.getenv('UPLOAD_TEMP_FOLDER')
     UPLOAD_SYSTEM_FOLDER = os.getenv('UPLOAD_SYSTEM_FOLDER')
     UPLOAD_USERS_FOLDER = os.getenv('UPLOAD_USERS_FOLDER')
     UPLOAD_STORES_FOLDER = os.getenv('UPLOAD_STORES_FOLDER')
     UPLOAD_TYPE_OPTIONS = [UPLOAD_SYSTEM_FOLDER, UPLOAD_USERS_FOLDER, UPLOAD_STORES_FOLDER]
+    MAX_CONTENT_LENGTH = 8 * 1024 * 1024
     # SMTP server config
     # --------------------------------------------------------------------
     # SERVER_EMAIL = 'Sivan Wolberg <sivan.wolberg@wolberg.pro>'

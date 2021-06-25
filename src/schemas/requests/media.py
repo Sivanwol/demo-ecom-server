@@ -19,7 +19,6 @@ class RequestMediaCreateFolderSchema(Schema):
 
 class RequestMediaCreateFile(Schema):
     folder_code = fields.UUID(missing=None, allow_none=True)
-    entity_id = fields.Str(missing=None, allow_none=True, validate=validate.Length(min=16, max=255, error='field entity_id not valid'))
     alias = fields.Str(missing=None, allow_none=True, validate=validate.Length(min=3, max=255, error='field alias not valid'))
     is_system_file = fields.Bool(required=True)
     is_store_file = fields.Bool(required=True)

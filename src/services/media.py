@@ -49,32 +49,37 @@ class MediaService:
         media = MediaFolder.query.filter_by(code=code).first()
         if media is None:
             return None
-        type = media.type
-        if not self.virtual_folder_exists(type, code, entity_id):
+        if not self.virtual_folder_exists(code, entity_id):
             return None
         if not return_model:
             schema = MediaFolderSchema()
             return schema.dumps(media)
         return media
 
-    def virtual_folder_exists(self, type, code, entity_id=None) -> bool:
+    def virtual_folder_exists(self, code, entity_id=None) -> bool:
         media = MediaFolder.query.filter_by(code=code).first()
         root_media = self.get_root_virtual_folder(code)
         sub_path = None
         verify_folder = False
         if media is not None:
-            verify_folder = True
             if media.parent_folder_code != 'None':
                 verify_folder = False
                 sub_path = self.get_parent_path_folder(media)
-            if type != settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER:
+            is_system_folder = root_media.is_system_folder
+            is_store_folder = root_media.is_store_folder
+            is_user_folder = False
+            if not is_system_folder and not is_store_folder:
+                is_user_folder = True
+            if not is_system_folder:
+                store_dir = settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER
+                type = settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER if is_user_folder else store_dir
                 if sub_path is not None and entity_id is not None:
                     if self.fileSystemService.folder_exists(type, entity_id, sub_path):
                         verify_folder = True
             else:
                 path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, root_media.code)
                 if sub_path != '':
-                    path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, root_media.code,path)
+                    path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, root_media.code, path)
                 if self.fileSystemService.acutal_folder_existed(path):
                     verify_folder = True
         return verify_folder
@@ -148,3 +153,10 @@ class MediaService:
             delete.execute()
             return True
         return False
+
+    def register_uploaded_files(self, files, metadata):
+
+        for file in files:
+            file_location_temp = file['file_location']
+            file_size = file['file_size']
+

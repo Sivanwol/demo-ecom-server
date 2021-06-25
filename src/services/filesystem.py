@@ -2,14 +2,17 @@ import os
 import pathlib
 import shutil
 from logging import Logger
+from uuid import uuid4
 
 from config import settings
+from src.services import SettingsService
 from src.utils.validations import media_type_valid
 
 
 class FileSystemService:
-    def __init__(self, logger: Logger):
+    def __init__(self, logger: Logger, settingsService: SettingsService):
         self.logger = logger
+        self.settingsService = settingsService
 
     def file_existed(self, src) -> bool:
         file = pathlib.Path(src)
@@ -120,3 +123,24 @@ class FileSystemService:
                                    entity_id, code)
         self.logger.info('create store folder %s (entity id: %s ,code: %s )' % (upload_path, entity_id, code))
         self.create_folder(upload_path, sub_path)
+
+    def save_temporary_upload_files(self, files):
+        upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+                                   settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_TEMP_FOLDER)
+        response = []
+        allow_ext = self.settingsService.getItem('UPLOAD_ALLOW_FILES_TYPES')
+        for file in files:
+            extension = os.path.splitext(file.filename)[1]
+            file.seek(0, os.SEEK_END)
+            file_length = file.tell()
+            if extension in allow_ext:
+                file_name = f'{uuid4()}.{extension}'
+                file_location = os.path.join(upload_path, file_name)
+                file.save(file_location)
+                response.append({
+                    'file_location': file_location,
+                    'file_name': file_name,
+                    'file_original_name': file.filename,
+                    'file_size': file_length
+                })
+        return response
