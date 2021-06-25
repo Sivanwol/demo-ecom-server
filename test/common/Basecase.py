@@ -46,7 +46,7 @@ class BaseTestCase(TestCase):
         return app.flask_app
 
     def setUp(self):
-
+        self.fd, temp_path = mkstemp()
         self.app_context = self.app.app_context()
         self.app_context.push()
         self.client = self.app.test_client()
@@ -87,9 +87,9 @@ class BaseTestCase(TestCase):
         self.ws_client.connect(namespace=namespace)
 
     def tearDown(self):
+        self.fd, temp_path = mkstemp()
         db.session.remove()
         db.drop_all()
-        self.fd, temp_path = mkstemp()
         if settings[os.environ.get("FLASK_ENV", "development")].CLEAR_FOLDER_UPLOAD:
             self.clear_uploads_folders()
         os.close(self.fd)

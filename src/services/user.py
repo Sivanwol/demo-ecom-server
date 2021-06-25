@@ -259,7 +259,7 @@ class UserService:
         return True
 
     def sync_firebase_user(self, uid, roles, email, fullname, is_platform_user, store_code=None, is_new_user=True):
-        media = self.mediaService.create_user_folder(uid)
+        self.fileSystemService.create_user_folder_initialize(uid)
         user = User(uid, email, fullname, True, is_new_user)
         if not is_platform_user:
             if store_code is not None:
@@ -270,4 +270,3 @@ class UserService:
         user.add_user_roles(roles)
         db.session.add(user)
         db.session.commit()
-        self.fileSystemService.create_user_folder(uid, media.code)

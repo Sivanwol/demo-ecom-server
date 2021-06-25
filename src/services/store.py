@@ -151,7 +151,7 @@ class StoreService:
         store = Store(store_code, owner_id, store_object['name'], store_object['currency_code'], None, store_object['description'])
         db.session.add(store)
         db.session.commit()
-        self.mediaService.create_store_folder(owner_id, store_code)
+        self.fileSystemService.create_store_folder_initialize(store_code)
         return self.get_store_by_status_code(store_code)
 
     def freeze_store(self, uid, store_code):

@@ -63,8 +63,6 @@ def upgrade():
                     )
 
     op.alter_column("users", "avatar_code", sa.ForeignKey('media_files.code'), modify_type=sa.String(length=100))
-    op.add_column('users', sa.Column('media_folder_code', sa.ForeignKey('media_folders.code'), modify_type=sa.String(length=100), nullable=True, index=True))
-    op.add_column('stores', sa.Column('media_folder_code', sa.String(length=100), sa.ForeignKey('media_folders.code'), nullable=True, index=True))
     op.alter_column("stores", "logo_code", sa.ForeignKey('media_files.code'), modify_type=sa.String(length=100), nullable=True, index=True)
     # ### end Alembic commands ###
 

@@ -1,15 +1,11 @@
 import os
 from logging import Logger
 from uuid import uuid4
-
-from flask import request
-
 from config import settings
 from config.database import db
 from src.exceptions import UnableCreateFolder
 from src.models import MediaFolder
 from src.schemas import MediaFolderSchema
-from src.schemas.requests import RequestMediaCreateFolderSchema
 from src.services import FileSystemService
 
 
@@ -96,7 +92,7 @@ class MediaService:
     def create_store_folder(self, uid, store_code):
         name = 'main store folder %s' % store_code
         code = "%s" % uuid4()
-        media = MediaFolder(code, request.uid, name, store_code, '', False, True, 1, str('None'))
+        media = MediaFolder(code, uid, name, store_code, '', False, True, 1, str('None'))
         db.session.add(media)
         db.session.commit()
         self.fileSystemService.create_store_folder(store_code, code)
