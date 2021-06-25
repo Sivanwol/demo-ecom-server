@@ -18,6 +18,9 @@ from src.utils.responses import response_success, response_error
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/uploads"), methods=["POST"])
 @check_token_of_user
 def upload_media():
+    mediaService = container[MediaService]
+    userService = container[UserService]
+    roleService = container[RoleService]
     files = request.files.getlist("files")
     for file in files:
         pass
