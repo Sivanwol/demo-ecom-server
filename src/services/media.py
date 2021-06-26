@@ -160,7 +160,7 @@ class MediaService:
             return True
         return False
 
-    def register_uploaded_files(self, uid, files, metadata, is_system_folder, is_store_folder, is_user_folder):
+    def register_uploaded_files(self, uid, files, metadata, is_system_file, is_store_file, is_user_file):
         system_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
                                    settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER)
 
@@ -170,32 +170,34 @@ class MediaService:
         store_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
                                   settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER)
 
-        root_media = MediaFolder.query.filter_by(code=metadata['folder_code']).first()
+        root_media = MediaFolder.query.filter_by(code=str(metadata['folder_code'])).first()
         sub_path = ''
         if root_media.parent_folder_code != 'None':
             sub_path = self.get_parent_path_folder(root_media)
-            root_media = self.get_root_virtual_folder(metadata['folder_code'])
+            root_media = self.get_root_virtual_folder(str(metadata['folder_code']))
         media_files = []
         for file in files:
+
+            temp_file_location = file['file_location']
             file_name = file['file_name']
             file_size = file['file_size']
             file_type = file['file_type']
             file_ext = file['file_ext']
             file_location = ''
-            if is_system_folder:
+            if is_system_file:
                 file_location = os.path.join(system_path, root_media.code, sub_path) if sub_path != '' else os.path.join(system_path, root_media.code)
-            if is_store_folder:
+            if is_store_file:
                 file_location = os.path.join(store_path, metadata['entity_id'], root_media.code)
                 if sub_path != '':
                     file_location = os.path.join(store_path, metadata['entity_id'], root_media.code, sub_path)
-            if is_user_folder:
+            if is_user_file:
                 file_location = os.path.join(user_path, metadata['entity_id'], root_media.code)
                 if sub_path != '':
                     file_location = os.path.join(user_path, metadata['entity_id'], root_media.code, sub_path)
-            file = MediaFile(str(uuid4()), uid, root_media.code, os.path.join(file_location, file_name), file_type, file_size, file_name,
-                             file_ext, False, is_system_folder, is_store_folder)
+            file = MediaFile(str(uuid4()), uid, root_media.code, os.path.join(file_location, file_name), file_type.value, file_size, file_name,
+                             file_ext, False, is_system_file, is_store_file)
             db.session.add(file)
-            self.fileSystemService.temp_move_file(file, file_location)
+            self.fileSystemService.temp_move_file(temp_file_location, os.path.join(file_location, file_name))
             media_files.append(file)
         db.session.commit()
         return media_files

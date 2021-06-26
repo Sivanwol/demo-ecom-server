@@ -69,9 +69,8 @@ class FileSystemService:
         self.logger.info('checking %s folder existed (%s)' % (type, result))
         return result
 
-    def temp_move_file(self, file, dest_path):
-        dest_file_path = os.path.join(dest_path, file['file_name'])
-        shutil.move(file['file_location'], dest_file_path)
+    def temp_move_file(self, temp_file_location, dest_path):
+        shutil.move(temp_file_location, dest_path)
 
     def system_folder_exists(self, sub_folder=None) -> bool:
         upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER)
