@@ -354,9 +354,8 @@ class FlaskTestCase(BaseTestCase):
                 'is_system_file': True,
                 'files': []
             }
-            entity_id = 'None'
             post_data['files'].append(self.get_file_content('dragon.png')['raw'])
-            response = self.request_files_upload(f'/api/media/{entity_id}/uploads', token, None, None, post_data)
+            response = self.request_files_upload('/api/media/None/uploads', token, None, None, post_data)
             self.assertRequestPassed(response, 'failed request upload media file')
             response_data = Struct(response.json)
             self.assertIsNotNone(response_data)

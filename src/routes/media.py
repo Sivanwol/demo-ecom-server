@@ -22,11 +22,9 @@ def upload_media(entity_id):
     mediaService = container[MediaService]
     userService = container[UserService]
     roleService = container[RoleService]
-    if not request.is_json:
-        return response_error("Request Data must be in json format", request.data)
     try:
         schema = RequestMediaCreateFile()
-        data = schema.load(request.json)
+        data = schema.load(request.form)
         if not mediaService.virtual_folder_exists(data['folder_code'], None if entity_id.lower() == 'none' else entity_id):
             return response_error("Folder not existed", {'params': request.json})
 

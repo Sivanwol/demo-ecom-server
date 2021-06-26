@@ -274,10 +274,9 @@ class BaseTestCase(TestCase):
         print('request post -> %s' % url)
         print('request query string -> %s' % json.dumps(query_string))
         print('request headers -> %s' % json.dumps(headers))
-        print('request post data-> %s' % json.dumps(data))
         return self.client.post(
             url,
-            data=json.dumps(data),
+            data=data,
             query_string=query_string,
             headers=headers
         )
