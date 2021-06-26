@@ -171,9 +171,10 @@ class MediaService:
             root_media = self.get_root_virtual_folder(metadata['folder_code'])
 
         for file in files:
-            file_location_temp = file['file_location']
             file_name = file['file_name']
             file_size = file['file_size']
+            file_type = file['file_type']
+            file_ext = file['file_ext']
             file_location = ''
             if is_system_folder:
                 file_location = os.path.join(system_path, root_media.code, sub_path) if sub_path != '' else os.path.join(system_path, root_media.code)
@@ -185,4 +186,8 @@ class MediaService:
                 file_location = os.path.join(user_path, metadata['entity_id'], root_media.code)
                 if sub_path != '':
                     file_location = os.path.join(user_path, metadata['entity_id'], root_media.code, sub_path)
-            # file = MediaFile(uuid4(), uid, root_media.code, os.path.join(file_location, file_name),)
+            file = MediaFile(uuid4(), uid, root_media.code, os.path.join(file_location, file_name), file_type, file_size, file_name,
+                             file_ext, False, is_system_folder, is_store_folder)
+            db.session.add(file)
+            self.fileSystemService.temp_move_file(file, file_location)
+        db.session.commit()

@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from config import settings
 from src.services import SettingsService
+from src.utils.enums import MediaAssetsType
 from src.utils.validations import media_type_valid
 
 
@@ -69,29 +70,10 @@ class FileSystemService:
         self.logger.info('checking %s folder existed (%s)' % (type, result))
         return result
 
-    def temp_move_system_files(self, files, dest_path):
-        dest_apth = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
-                                 settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER,
-                                 dest_path)
-        for file in files:
-            dest_file_path = os.path.join(dest_path, file['file_name'])
-            shutil.move(file['file_location'], dest_file_path)
+    def temp_move_file(self, file, dest_path):
+        dest_file_path = os.path.join(dest_path, file['file_name'])
+        shutil.move(file['file_location'], dest_file_path)
 
-    def temp_move_user_files(self, files, entity_id, dest_path):
-        dest_apth = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
-                                 settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER,
-                                 entity_id,dest_path)
-        for file in files:
-            dest_file_path = os.path.join(dest_path, file['file_name'])
-            shutil.move(file['file_location'], dest_file_path)
-
-    def temp_move_store_files(self, files, entity_id, dest_path):
-        dest_apth = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
-                                 settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER,
-                                 entity_id, dest_path)
-        for file in files:
-            dest_file_path = os.path.join(dest_path, file['file_name'])
-            shutil.move(file['file_location'], dest_file_path)
 
     def system_folder_exists(self, sub_folder=None) -> bool:
         upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER)
@@ -148,6 +130,17 @@ class FileSystemService:
         self.logger.info('create store folder %s (entity id: %s ,code: %s )' % (upload_path, entity_id, code))
         self.create_folder(upload_path, sub_path)
 
+    def identify_file_type(self, file_ext):
+        docs = ['doc', 'txt', 'xls', 'docx', 'xlsx']
+        video = ['avi', 'mp4']
+        image = ['jpg', 'jpeg', 'gif', 'png']
+        if file_ext in docs:
+            return MediaAssetsType.Document
+        if file_ext in video:
+            return MediaAssetsType.Video
+        if file_ext in image:
+            return MediaAssetsType.Image
+
     def save_temporary_upload_files(self, files):
         upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
                                    settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_TEMP_FOLDER)
@@ -164,6 +157,8 @@ class FileSystemService:
                 response.append({
                     'file_location': file_location,
                     'file_name': file_name,
+                    'file_ext': extension,
+                    'file_type': self.identify_file_type(extension),
                     'file_original_name': file.filename,
                     'file_size': file_length
                 })
