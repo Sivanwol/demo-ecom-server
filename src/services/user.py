@@ -142,7 +142,7 @@ class UserService:
                 user_exist = self.user_exists(uid)
                 if not user_exist:
                     return response_error('user not active', None, 400)
-            request.uid = firebase_obj["uid"]
+            return firebase_obj["uid"]
         except:
             return response_error('Invalid token provided', None, 400)
 

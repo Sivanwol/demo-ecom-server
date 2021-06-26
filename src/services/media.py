@@ -57,10 +57,10 @@ class MediaService:
         return media
 
     def virtual_folder_exists(self, code, entity_id=None) -> bool:
-        media = MediaFolder.query.filter_by(code=code).first()
+        media = MediaFolder.query.filter_by(code=str(code)).first()
         root_media = media
         if media.parent_level != 1:
-            root_media = self.get_root_virtual_folder(code)
+            root_media = self.get_root_virtual_folder(str(code))
         sub_path = None
         verify_folder = False
         if media is not None:

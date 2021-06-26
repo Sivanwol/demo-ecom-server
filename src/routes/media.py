@@ -17,7 +17,7 @@ from src.utils.responses import response_success, response_error
 # Todo: upload media files that include the file meta data and every thing else
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<entity_id>/uploads"), methods=["POST"])
 @check_token_of_user
-def upload_media(entity_id):
+def upload_media(uid, entity_id):
     fileSystemService = container[FileSystemService]
     mediaService = container[MediaService]
     userService = container[UserService]
@@ -31,10 +31,10 @@ def upload_media(entity_id):
         is_system_file = False
         is_store_file = False
         is_user_file = False
-        if data['is_system_folder'] and not data['is_store_folder']:
+        if data['is_system_file'] and not data['is_store_file']:
             is_system_file = True
 
-        if not data['is_system_folder'] and data['is_store_folder']:
+        if not data['is_system_file'] and data['is_store_file']:
             is_store_file = True
 
         if not is_system_file and not is_store_file:
@@ -56,7 +56,7 @@ def upload_media(entity_id):
             return response_error("Upload location not existed")
     except ValidationError as e:
         return response_error("Error on format of the params", {'params': request.json, 'error': e.messages})
-    files = request.files.getlist("files")
+    files = request.files.getlist("file")
     files = fileSystemService.save_temporary_upload_files(files)
     if len(files) == 0:
         return response_error("Files that uploaded no meet with server limitations")
@@ -71,7 +71,7 @@ def upload_media(entity_id):
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<entity_id>/<file_code>/update"), methods=["PUT"])
 @check_token_of_user
-def upload_media_file_metadata(entity_id, file_code):
+def upload_media_file_metadata(uid, entity_id, file_code):
     mediaService = container[MediaService]
     userService = container[UserService]
     roleService = container[RoleService]
@@ -79,7 +79,7 @@ def upload_media_file_metadata(entity_id, file_code):
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/files/toggle/publish"), methods=["PUT"])
 @check_token_of_user
-def toggle_published_files():
+def toggle_published_files(uid):
     mediaService = container[MediaService]
     userService = container[UserService]
     roleService = container[RoleService]
@@ -87,7 +87,7 @@ def toggle_published_files():
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<entity_id>/file/<file_code>"), methods=["GET"])
 @check_token_of_user
-def download_media_file(entity_id, file_code):
+def download_media_file(uid, entity_id, file_code):
     mediaService = container[MediaService]
     userService = container[UserService]
     roleService = container[RoleService]
@@ -95,7 +95,7 @@ def download_media_file(entity_id, file_code):
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<entity_id>/folder/<folder_code>"), methods=["GET"])
 @check_token_of_user
-def download_media_folder(entity_id, folder_code):
+def download_media_folder(uid, entity_id, folder_code):
     mediaService = container[MediaService]
     userService = container[UserService]
     roleService = container[RoleService]
@@ -103,7 +103,7 @@ def download_media_folder(entity_id, folder_code):
 
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/folder/create"), methods=["POST"])
 @check_token_of_user
-def create_virtual_directory():
+def create_virtual_directory(uid):
     mediaService = container[MediaService]
     userService = container[UserService]
     roleService = container[RoleService]
@@ -150,7 +150,7 @@ def create_virtual_directory():
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<entity_id>/folder/<folder_code>/delete"),
                    methods=["DELETE"])
 @check_token_of_user
-def delete_virtual_directory(entity_id, folder_code):
+def delete_virtual_directory(uid, entity_id, folder_code):
     mediaService = container[MediaService]
     userService = container[UserService]
     roleService = container[RoleService]
@@ -181,26 +181,26 @@ def delete_virtual_directory(entity_id, folder_code):
 #  remove the mark )
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<uid>/<file_io>"), methods=["DELETE"])
 @check_token_of_user
-def delete_files():
+def delete_files(uid):
     pass
 
 
 # Todo: move folder to dest folder
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<uid>/folder/move"), methods=["PUT"])
 @check_token_of_user
-def move_virtual_directory():
+def move_virtual_directory(uid):
     pass
 
 
 # Todo: get users files
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<uid>/files"), methods=["GET"])
 @check_token_of_user
-def get_user_files():
+def get_user_files(uid):
     pass
 
 
 # Todo: get users files on a folder
 @current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<uid>/files/<folder_id>"), methods=["GET"])
 @check_token_of_user
-def get_user_files_from_folder():
+def get_user_files_from_folder(uid):
     pass
