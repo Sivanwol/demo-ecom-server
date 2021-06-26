@@ -5,13 +5,12 @@ from logging import Logger
 from uuid import uuid4
 
 from config import settings
-from src.services import SettingsService
 from src.utils.enums import MediaAssetsType
 from src.utils.validations import media_type_valid
 
 
 class FileSystemService:
-    def __init__(self, logger: Logger, settingsService: SettingsService):
+    def __init__(self, logger: Logger, settingsService):
         self.logger = logger
         self.settingsService = settingsService
 

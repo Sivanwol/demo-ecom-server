@@ -29,7 +29,7 @@ class MediaFileSchema(SQLAlchemySchema):
         load_instance = True
 
     code = auto_field()
-    alias = auto_field()
+    # alias = auto_field()
     entity_id = auto_field()
     folder_code = auto_field()
     file_type = auto_field()
@@ -39,7 +39,7 @@ class MediaFileSchema(SQLAlchemySchema):
     alt = auto_field()
     title = auto_field()
     is_published = auto_field()
-    is_system_folder = auto_field()
-    is_store_folder = auto_field()
+    is_system_file = auto_field()
+    is_store_file = auto_field()
     updated_at = auto_field()
     created_at = auto_field()

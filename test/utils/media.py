@@ -61,8 +61,7 @@ class MediaTestUtills:
         self.test_object.assertIsNotNone(response_data.data)
         folder_code = response_data.data.media.code
         result = MediaFolder.query.filter_by(code=folder_code).first()
-        self.test_object.assertTrue(
-            self.test_object.mediaService.virtual_folder_exists(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, folder_code))
+        self.test_object.assertTrue(self.test_object.mediaService.virtual_folder_exists(folder_code))
         self.test_object.assertIsNotNone(result)
         self.test_object.assertEqual(result.name, response_data.data.media.name)
         self.test_object.assertEqual(result.alias, response_data.data.media.alias)

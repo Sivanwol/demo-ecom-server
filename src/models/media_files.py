@@ -22,6 +22,7 @@ class MediaFile(TimestampMixin, db.Model):
     file_name = db.Column(String(255))
     width = db.Column(Integer, nullable=True)
     height = db.Column(Integer, nullable=True)
+    alias = db.Column(String(255), nullable=True)
     alt = db.Column(Text(), nullable=True)
     title = db.Column(Text(), nullable=True)
     is_published = db.Column(Boolean, default=False)

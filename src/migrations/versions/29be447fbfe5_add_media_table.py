@@ -55,7 +55,6 @@ def upgrade():
                     sa.Column('is_published', sa.Boolean(), default=False),
                     sa.Column('is_system_file', sa.Boolean(), default=False),
                     sa.Column('is_store_file', sa.Boolean(), nullable=True, default=False),
-                    sa.Column('owner_user_id', sa.Integer(), nullable=True, default=False),
                     sa.Column('created_at', sa.DateTime(), default=sa.func.current_timestamp()),
                     sa.Column('updated_at', sa.DateTime(), onupdate=sa.ColumnDefault(sa.func.current_timestamp), default=sa.func.current_timestamp()),
                     sa.PrimaryKeyConstraint('id')
