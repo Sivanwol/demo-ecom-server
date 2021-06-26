@@ -343,10 +343,10 @@ class FlaskTestCase(BaseTestCase):
 
     def test_create_media_file(self):
         with self.client:
+            media_folder = self.mediaUtils.create_system_folder()
             user_object = self.login_user(self.platform_owner_user)
             uid = user_object['uid']
             token = user_object['idToken']
-            media_folder = self.mediaUtils.create_system_folder()
             post_data = {
                 'folder_code': media_folder.code,
                 'alias': self.fake.domain_word(),

@@ -56,7 +56,9 @@ def upload_media(uid, entity_id):
             return response_error("Upload location not existed")
     except ValidationError as e:
         return response_error("Error on format of the params", {'params': request.json, 'error': e.messages})
-    files = request.files.getlist("file")
+    files = request.files.getlist("files")
+    if len(files) == 0:
+        return response_error("no upload files found")
     files = fileSystemService.save_temporary_upload_files(files)
     if len(files) == 0:
         return response_error("Files that uploaded no meet with server limitations")

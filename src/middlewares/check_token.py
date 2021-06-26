@@ -2,10 +2,9 @@ from functools import wraps
 
 from flask import request
 
-from config.api import app
 from config.containers import container
 from src.services.user import UserService
-from src.utils.common_methods import verify_response
+from src.utils.responses import response_error
 
 
 def check_token_of_user(f):
@@ -13,11 +12,10 @@ def check_token_of_user(f):
     def decorator(*args, **kwargs):
         userService = container[UserService]
         uid = None
-        response = verify_response()
-        if response is None:
-            result = userService.check_user_auth(request, True)
-            if result is not None:
-                uid = result
+        result = userService.check_user_auth(request, True)
+        if result is None:
+            return response_error('token rejected', None, 403)
+        uid = result
 
         return f(uid, *args, **kwargs)
 
@@ -29,11 +27,10 @@ def check_token_register_firebase_user(f):
     def decorator(*args, **kwargs):
         userService = container[UserService]
         uid = None
-        response = verify_response()
-        if response is None:
-            result = userService.check_user_auth(request, False)
-            if result is not None:
-                uid = result
+        result = userService.check_user_auth(request, False)
+        if result is None:
+            return response_error('token rejected', None, 403)
+        uid = result
         return f(uid, *args, **kwargs)
 
     return decorator
