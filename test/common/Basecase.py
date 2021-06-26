@@ -37,6 +37,8 @@ class BaseTestCase(TestCase):
     mediaService = container[MediaService]
     settingsService = container[SettingsService]
 
+    config = settings[os.environ.get("FLASK_ENV", "development")]
+
     def create_app(self):
         # app.config.from_object('config.TestConfig')
         print(os.environ.get("FLASK_ENV", "development"))
@@ -260,6 +262,32 @@ class BaseTestCase(TestCase):
             query_string=query_string,
             headers=headers
         )
+
+    def request_files_upload(self, url, token, query_string=None, extra_headers=None, data=None):
+        if extra_headers is None:
+            extra_headers = {}
+        if data is None:
+            data = {}
+        if query_string is None:
+            query_string = {}
+        headers = {'Content-Type': 'multipart/form-data', 'Authorization': 'Bearer %s' % token} | extra_headers
+        print('request post -> %s' % url)
+        print('request query string -> %s' % json.dumps(query_string))
+        print('request headers -> %s' % json.dumps(headers))
+        print('request post data-> %s' % json.dumps(data))
+        return self.client.post(
+            url,
+            data=json.dumps(data),
+            query_string=query_string,
+            headers=headers
+        )
+
+    def get_file_content(self, file_name):
+        file = os.path.join(self.config.TESTING_ASSETS_FOLDER, file_name)
+        return {
+            'raw': (open(file, 'rb'), file),
+            'path': os.path.join(self.config.TESTING_ASSETS_FOLDER, file_name)
+        }
 
     def assertRequestPassed(self, response, message):
         print('response data -> %s' % response.data)

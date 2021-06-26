@@ -150,7 +150,7 @@ class FlaskTestCase(BaseTestCase):
                 'name': self.fake.domain_word(),
                 'alias': self.fake.domain_word(),
                 'description': self.fake.sentence(nb_words=10),
-                'is_system_folder': False,
+                'is_system_folder': True,
                 'is_store_folder': False,
                 'entity_id': uid,
                 'parent_level': 1
@@ -183,7 +183,7 @@ class FlaskTestCase(BaseTestCase):
                 'name': self.fake.domain_word(),
                 'alias': self.fake.domain_word(),
                 'description': self.fake.sentence(nb_words=10),
-                'is_system_folder': False,
+                'is_system_folder': True,
                 'is_store_folder': False,
                 'entity_id': uid,
                 'parent_level': 1
@@ -213,7 +213,7 @@ class FlaskTestCase(BaseTestCase):
                 'name': self.fake.domain_word(),
                 'alias': self.fake.domain_word(),
                 'description': self.fake.sentence(nb_words=10),
-                'is_system_folder': False,
+                'is_system_folder': True,
                 'is_store_folder': False,
                 'entity_id': uid,
                 'parent_level': 2,
@@ -343,3 +343,25 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(result.code, lvl1_folder_code)
             self.assertEqual(result.parent_folder_code, root_media.code)
             self.assertEqual(root_media.code, response_data.data.root_media.code)
+
+    def test_create_media_file(self):
+        with self.client:
+            user_object = self.login_user(self.platform_owner_user)
+            uid = user_object['uid']
+            token = user_object['idToken']
+            media_folder = self.mediaUtils.create_system_folder()
+            post_data = {
+                'folder_code': media_folder.code,
+                'alias': self.fake.domain_word(),
+                'is_store_file': False,
+                'is_system_file': True,
+                'files': []
+            }
+            entity_id = 'None'
+            post_data['files'].append(self.get_file_content('dragon.png')['raw'])
+            response = self.request_files_upload(f'/api/media/{entity_id}/uploads', token , None , None, post_data)
+            self.assertRequestPassed(response, 'failed request upload media file')
+            response_data = Struct(response.json)
+            self.assertIsNotNone(response_data)
+            self.assertTrue(response_data.status)
+            self.assertIsNotNone(response_data.data)

@@ -78,6 +78,7 @@ class Config:
     # EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
     # Testing settings
     CLEAR_FOLDER_UPLOAD = False
+    TESTING_ASSETS_FOLDER = ''
     # General Settings
     MAX_PARENT_LEVEL = os.getenv('MAX_PARENT_LEVEL')
 
@@ -92,6 +93,7 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     ENV = os.environ.get("FLASK_ENV", "testing")
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    TESTING_ASSETS_FOLDER = os.getenv('TESTING_ASSETS_FOLDER') if os.getenv('TESTING_ASSETS_FOLDER') is not None else os.path.join('test', 'assets')
     DEBUG = True
     SENTRY_ENABLE = False
     TESTING = True

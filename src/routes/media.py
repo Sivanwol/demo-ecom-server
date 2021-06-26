@@ -30,27 +30,27 @@ def upload_media(entity_id):
         if not mediaService.virtual_folder_exists(data['folder_code'], None if entity_id.lower() == 'none' else entity_id):
             return response_error("Folder not existed", {'params': request.json})
 
-        is_system_folder = False
-        is_store_folder = False
-        is_user_folder = False
+        is_system_file = False
+        is_store_file = False
+        is_user_file = False
         if data['is_system_folder'] and not data['is_store_folder']:
-            is_system_folder = True
+            is_system_file = True
 
         if not data['is_system_folder'] and data['is_store_folder']:
-            is_store_folder = True
+            is_store_file = True
 
-        if not is_system_folder and not is_store_folder:
-            is_user_folder = True
-        if is_system_folder:
+        if not is_system_file and not is_store_file:
+            is_user_file = True
+        if is_system_file:
             roles = [RolesTypes.Support.value, RolesTypes.Owner.value, RolesTypes.Accounts.value]
             if not userService.user_has_any_role_matched(request.uid, roles):
                 return response_error("Permission Error", None, 403)
-        if is_store_folder:
+        if is_store_file:
             roles = [RolesTypes.Support.value]
             user = userService.get_user(request.uid, True)
             if not userService.user_has_any_role_matched(request.uid, roles) or user.store_code != data['entity_id']:
                 return response_error("Permission Error", None, 403)
-        if is_user_folder:
+        if is_user_file:
             supportRole = roleService.get_roles([RolesTypes.Support.value])
             if userService.user_has_any_role_matched(request.uid, supportRole) or request.uid != data['entity_id']:
                 return response_error("Permission Error", None, 403)
@@ -62,7 +62,7 @@ def upload_media(entity_id):
     files = fileSystemService.save_temporary_upload_files(files)
     if len(files) == 0:
         return response_error("Files that uploaded no meet with server limitations")
-    files = mediaService.register_uploaded_files(request.uid, files, data, is_system_folder, is_store_folder, is_user_folder)
+    files = mediaService.register_uploaded_files(request.uid, files, data, is_system_file, is_store_file, is_user_file)
     # any task need do after need assign here to the task que
     mediaService.post_process_files_uploads(files)
     # end assign code
