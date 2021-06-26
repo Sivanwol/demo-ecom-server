@@ -1,6 +1,6 @@
 from marshmallow_sqlalchemy import SQLAlchemySchema, auto_field
 
-from src.models import MediaFolder
+from src.models import MediaFolder, MediaFile
 
 
 class MediaFolderSchema(SQLAlchemySchema):
@@ -8,6 +8,7 @@ class MediaFolderSchema(SQLAlchemySchema):
         model = MediaFolder
         include_fk = True
         load_instance = True
+
     code = auto_field()
     alias = auto_field()
     name = auto_field()
@@ -17,3 +18,28 @@ class MediaFolderSchema(SQLAlchemySchema):
     owner_user_uid = auto_field()
     parent_folder_code = auto_field()
     parent_level = auto_field()
+    created_at = auto_field()
+    updated_at = auto_field()
+
+
+class MediaFileSchema(SQLAlchemySchema):
+    class Meta:
+        model = MediaFile
+        include_fk = True
+        load_instance = True
+
+    code = auto_field()
+    alias = auto_field()
+    entity_id = auto_field()
+    folder_code = auto_field()
+    file_type = auto_field()
+    file_size = auto_field()
+    width = auto_field()
+    height = auto_field()
+    alt = auto_field()
+    title = auto_field()
+    is_published = auto_field()
+    is_system_folder = auto_field()
+    is_store_folder = auto_field()
+    updated_at = auto_field()
+    created_at = auto_field()

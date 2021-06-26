@@ -23,8 +23,6 @@ class RequestMediaCreateFile(Schema):
     is_system_file = fields.Bool(required=True)
     is_store_file = fields.Bool(required=True)
     file_name = fields.Str(required=True, validate=validate.Length(min=3, max=255, error='field name not valid'))
-    file_type = fields.Integer(required=True, validate=validate.Range(min=1, max=3), error='field file_type not valid')
-    file_size = fields.Float(required=True)
     width = fields.Integer(missing=None, allow_none=True)
     height = fields.Integer(missing=None, allow_none=True)
     alt = fields.Str(missing=None, allow_none=True)

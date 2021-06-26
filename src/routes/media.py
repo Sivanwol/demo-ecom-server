@@ -1,6 +1,5 @@
 import os
 
-import pycountry
 from flask import request
 from marshmallow import ValidationError
 
@@ -8,7 +7,7 @@ from config import settings
 from config.containers import app as current_app, container
 from src.exceptions import UnableCreateFolder
 from src.middlewares import check_token_of_user
-from src.schemas.requests import RequestMediaCreateFolderSchema
+from src.schemas.requests import RequestMediaCreateFolderSchema, RequestMediaCreateFile
 from src.services import MediaService, UserService, RoleService, FileSystemService
 from src.utils.enums import RolesTypes
 from src.utils.responses import response_success, response_error
@@ -25,7 +24,7 @@ def upload_media(entity_id):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     try:
-        schema = RequestMediaCreateFolderSchema()
+        schema = RequestMediaCreateFile()
         data = schema.load(request.json)
         if not mediaService.virtual_folder_exists(data['folder_code'], None if entity_id.lower() == 'none' else entity_id):
             return response_error("Folder not existed", {'params': request.json})
@@ -58,7 +57,6 @@ def upload_media(entity_id):
             return response_error("Upload location not existed")
     except ValidationError as e:
         return response_error("Error on format of the params", {'params': request.json, 'error': e.messages})
-
     files = request.files.getlist("files")
     files = fileSystemService.save_temporary_upload_files(files)
     if len(files) == 0:
