@@ -7,6 +7,7 @@ from config import settings
 from config.containers import app as current_app, container
 from src.exceptions import UnableCreateFolder
 from src.middlewares import check_token_of_user
+from src.schemas import MediaFileSchema
 from src.schemas.requests import RequestMediaCreateFolderSchema, RequestMediaCreateFile
 from src.services import MediaService, UserService, RoleService, FileSystemService
 from src.utils.enums import RolesTypes
@@ -61,7 +62,12 @@ def upload_media(entity_id):
     files = fileSystemService.save_temporary_upload_files(files)
     if len(files) == 0:
         return response_error("Files that uploaded no meet with server limitations")
-    response = mediaService.register_uploaded_files(request.uid, files, data, is_system_folder, is_store_folder, is_user_folder)
+    files = mediaService.register_uploaded_files(request.uid, files, data, is_system_folder, is_store_folder, is_user_folder)
+    # any task need do after need assign here to the task que
+    mediaService.post_process_files_uploads(files)
+    # end assign code
+    schema = MediaFileSchema()
+    response = schema.dump(files, many=True)
     return response_success(response)
 
 

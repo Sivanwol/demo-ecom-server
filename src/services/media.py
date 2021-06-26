@@ -5,7 +5,7 @@ from config import settings
 from config.database import db
 from src.exceptions import UnableCreateFolder
 from src.models import MediaFolder, MediaFile
-from src.schemas import MediaFolderSchema, MediaFileSchema
+from src.schemas import MediaFolderSchema
 from src.services import FileSystemService
 
 
@@ -154,7 +154,8 @@ class MediaService:
             return True
         return False
 
-    def register_uploaded_files(self, uid, files, metadata, is_system_folder, is_store_folder, is_user_folder, return_model=False):
+
+    def register_uploaded_files(self, uid, files, metadata, is_system_folder, is_store_folder, is_user_folder):
         system_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
                                    settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER)
 
@@ -190,10 +191,9 @@ class MediaService:
                              file_ext, False, is_system_folder, is_store_folder)
             db.session.add(file)
             self.fileSystemService.temp_move_file(file, file_location)
-            model = file
-            if not return_model:
-                schema = MediaFileSchema()
-                model = schema.dump(model)
-            media_files.append(model)
+            media_files.append(file)
         db.session.commit()
         return media_files
+
+    def post_process_files_uploads(self,files):
+        pass
