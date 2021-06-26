@@ -58,7 +58,9 @@ class MediaService:
 
     def virtual_folder_exists(self, code, entity_id=None) -> bool:
         media = MediaFolder.query.filter_by(code=code).first()
-        root_media = self.get_root_virtual_folder(code)
+        root_media = media
+        if media.parent_level != 1:
+            root_media = self.get_root_virtual_folder(code)
         sub_path = None
         verify_folder = False
         if media is not None:
@@ -77,9 +79,13 @@ class MediaService:
                     if self.fileSystemService.folder_exists(type, entity_id, sub_path):
                         verify_folder = True
             else:
-                path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, root_media.code)
-                if sub_path != '':
-                    path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, root_media.code, path)
+                path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+                                    settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER,
+                                    root_media.code)
+                if sub_path != '' and sub_path is not None:
+                    path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+                                        settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER,
+                                        root_media.code, path)
                 if self.fileSystemService.acutal_folder_existed(path):
                     verify_folder = True
         return verify_folder
@@ -154,7 +160,6 @@ class MediaService:
             return True
         return False
 
-
     def register_uploaded_files(self, uid, files, metadata, is_system_folder, is_store_folder, is_user_folder):
         system_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
                                    settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER)
@@ -195,5 +200,5 @@ class MediaService:
         db.session.commit()
         return media_files
 
-    def post_process_files_uploads(self,files):
+    def post_process_files_uploads(self, files):
         pass
