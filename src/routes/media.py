@@ -62,7 +62,7 @@ def upload_media(uid, entity_id):
     files = fileSystemService.save_temporary_upload_files(files)
     if len(files) == 0:
         return response_error("Files that uploaded no meet with server limitations")
-    files = mediaService.register_uploaded_files(request.uid, files, data, is_system_file, is_store_file, is_user_file)
+    files = mediaService.register_uploaded_files(uid, files, data, is_system_file, is_store_file, is_user_file)
     # any task need do after need assign here to the task que
     mediaService.post_process_files_uploads(files)
     # end assign code

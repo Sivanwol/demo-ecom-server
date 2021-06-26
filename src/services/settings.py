@@ -17,7 +17,7 @@ class SettingsService:
         value = None
         if not redis_connection.exists('sync_in_progress'):
             raise SettingsNotSync()
-
+        key = f'{os.environ.get("FLASK_ENV", "development")}_{key}'
         if not bool(int(redis_connection.get('sync_in_progress'))):
             key_is_json = "%s_is_json" % key
             if not redis_connection.exists(key):

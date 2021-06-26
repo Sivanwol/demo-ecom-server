@@ -343,6 +343,7 @@ class FlaskTestCase(BaseTestCase):
 
     def test_create_media_file(self):
         with self.client:
+            self.settingsService.syncSettings()
             media_folder = self.mediaUtils.create_system_folder()
             user_object = self.login_user(self.platform_owner_user)
             uid = user_object['uid']

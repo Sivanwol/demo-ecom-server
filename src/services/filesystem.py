@@ -143,9 +143,10 @@ class FileSystemService:
         upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
                                    settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_TEMP_FOLDER)
         response = []
-        allow_ext = self.settingsService.getItem('UPLOAD_ALLOW_FILES_TYPES')
+        allow_ext = self.settingsService.getItem('UPLOAD_ALLOW_FILES_TYPES').decode("utf-8")
+        allow_ext = allow_ext.split(',')
         for file in files:
-            extension = os.path.splitext(file.filename)[1]
+            extension = os.path.splitext(file.filename)[1].replace(".", "")
             file.seek(0, os.SEEK_END)
             file_length = file.tell()
             if extension in allow_ext:
