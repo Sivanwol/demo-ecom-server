@@ -228,15 +228,8 @@ def delete_files(uid):
     pass
 
 
-# Todo: move folder to dest folder
-@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<uid>/folder/move"), methods=["PUT"])
-@check_token_of_user
-def move_virtual_directory(uid):
-    pass
-
-
-# Todo: get users files
-@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<uid>/files"), methods=["GET"])
+# Todo: get users files and folders
+@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<uid>/list"), methods=["GET"])
 @check_token_of_user
 def get_user_files(uid):
     pass
