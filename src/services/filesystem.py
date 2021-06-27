@@ -33,7 +33,11 @@ class FileSystemService:
             return True
         return False
 
-    def remove_folders(self, src):
+    def remove_file(self, src):
+        if self.file_existed(src):
+            os.unlink(src)
+
+    def remove_folder(self, src):
         try:
             self.logger.info('delete folder %s' % src)
             shutil.rmtree(src)

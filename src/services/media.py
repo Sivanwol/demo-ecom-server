@@ -176,6 +176,12 @@ class MediaService:
             "media": media
         }
 
+    def delete_file(self, file_code):
+        media = self.get_file(file_code, True)
+        self.fileSystemService.remove_file(media.file_location)
+        delete = MediaFolder.delete().where(MediaFolder.code.in_(media.code))
+        delete.execute()
+
     def delele_virtual_folder(self, folder_code, type, entity_id=None):
         if self.virtual_folder_exists(folder_code, type, entity_id):
             media = MediaFolder.query.filter_by(code=folder_code).first()
