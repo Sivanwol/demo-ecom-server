@@ -1,3 +1,5 @@
+from flask import send_file
+import magic
 from sqlalchemy import Integer, String, Boolean, Text, Float
 from config.database import db
 from src.models.media_folder import MediaFolder
@@ -76,3 +78,12 @@ class MediaFile(TimestampMixin, db.Model):
 
     def get_download_uri(self):
         return f'/media/{self.entity_id}/file/{self.code}'
+
+    def download_file(self):
+        mime = magic.Magic(mime=True)
+        mimetype = mime.from_file(self.file_location)
+        result = send_file(self.file_location,
+                           mimetype=mimetype,
+                           as_attachment=True,
+                           conditional=False)
+        return result

@@ -1,13 +1,13 @@
 import os
 from uuid import uuid4
 
-from flask import Flask
+from flask import Flask, send_file
 
 from config.database import db
 from config.setup import app
 from src.exceptions import UnableCreateFolder
 from src.models import MediaFolder, MediaFile
-from src.schemas import MediaFolderSchema
+from src.schemas import MediaFolderSchema, MediaFileSchema
 from src.services import FileSystemService
 
 
@@ -56,6 +56,27 @@ class MediaService:
         if not return_model:
             schema = MediaFolderSchema()
             return schema.dumps(media)
+        return media
+
+    def get_file(self, code, return_model=True):
+        media = MediaFile.query.filter_by(code=str(code)).first()
+        if media is None:
+            return False
+        if not return_model:
+            schema = MediaFileSchema()
+            return schema.dump(media, many=False)
+        return media
+
+    def toggle_file_publish(self, code, return_model=True):
+        media = MediaFile.query.filter_by(code=str(code)).first()
+        if media is None:
+            return False
+        media.is_publish = not media.is_publish
+        db.session.merge(media)
+        db.session.commit()
+        if not return_model:
+            schema = MediaFileSchema()
+            return schema.dump(media, many=False)
         return media
 
     def virtual_file_exists(self, code) -> bool:
