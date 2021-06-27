@@ -63,24 +63,26 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
 - [x] create folder & create record
 - [x] return record
 
+#### List of Files/Folder
+this will fetch list of files/ folder sort by name, size with paging support
 #### Delete Folder workflow logic overall
-- [ ] check if user have the correct permissions to do this action
-- [ ] Locate all relevant file both on sub path and the dest folder
+- [x] check if user have the correct permissions to do this action
+- [x] Locate all relevant file both on sub path and the dest folder
 - [x] Locate all sup folders
-- [ ] Remove all db files records
-- [ ] Remove All Relevant files
-- [ ] Remove folder and sub folder records
-- [ ] remove the folders itself
+- [x] Remove all db files records
+- [x] Remove All Relevant files
+- [x] Remove folder and sub folder records
+- [x] remove the folders itself
 ##### Step I
-- [ ] check if user have the correct permissions to do this action
+- [x] check if user have the correct permissions to do this action
 - [x] Locate all sup folders
-- [ ] Remove folder and sub folder records
-- [ ] remove the folders itself
+- [x] Remove folder and sub folder records
+- [x] remove the folders itself
 ##### Step II
-- [ ] this start after upload process will be done
-- [ ] Locate all relevant file both on sub path and the dest folder
-- [ ] Remove all db files records
-- [ ] Remove All Relevant files
+- [x] this start after upload process will be done
+- [x] Locate all relevant file both on sub path and the dest folder
+- [x] Remove all db files records
+- [x] Remove All Relevant files
 ### Tests
 - [x] check on the model media get_all_parent_folders see if it give all relevant items create till lvl 4 items
 - [x] DI Checks overall system check that all still work as intended
