@@ -144,39 +144,6 @@ def download_media_file(uid, entity_id, file_code):
     return response_success(media)
 
 
-@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<entity_id>/folder/<folder_code>"), methods=["GET"])
-@check_token_of_user
-def download_media_folder(uid, entity_id, folder_code):
-    mediaService = containers[MediaService]
-    userService = containers[UserService]
-    roleService = containers[RoleService]
-    media = mediaService.get_file(file_code,True)
-    if not media:
-        return response_error("no file found")
-    if not media.is_publish:
-        return response_error("no file found")
-
-    is_system_file = media['is_system_file']
-    is_store_file = media['is_store_file']
-    is_user_file = False
-    if not media.is_system_file and not media.is_store_file:
-        is_user_file = True
-
-    if is_system_file:
-        roles = [RolesTypes.Support.value, RolesTypes.Owner.value, RolesTypes.Accounts.value]
-        if not userService.user_has_any_role_matched(uid, roles):
-            return response_error("Permission Error", None, 403)
-    if is_store_file:
-        roles = [RolesTypes.Support.value]
-        if not userService.user_has_any_role_matched(uid, roles) or entity_id != media.entity_id:
-            return response_error("Permission Error", None, 403)
-    if is_user_file:
-        supportRole = roleService.get_roles([RolesTypes.Support.value])
-        if userService.user_has_any_role_matched(uid, supportRole) or entity_id != media.entity_id:
-            return response_error("Permission Error", None, 403)
-    return media.download_file()
-
-
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/folder/create"), methods=["POST"])
 @check_token_of_user
 def create_virtual_directory(uid):
