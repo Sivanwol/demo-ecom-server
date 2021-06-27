@@ -111,10 +111,10 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
   - [ ] check both db records and actual files has been deleted
 
 #### Upload Files
-- [ ] check files upload with incorrect permissions
-- [ ] upload files with correct metadata
-- [ ] check if files existed abd db records existed
-- [ ] upload files to sub path
+- [x] check files upload with incorrect permissions
+- [x] upload files with correct metadata
+- [x] check if files existed abd db records existed
+- [x] upload files to sub path
 
 #### Delete Files
 - [ ] check folder delete with incorrect permissions
