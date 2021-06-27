@@ -238,5 +238,35 @@ class MediaService:
         db.session.commit()
         return media_files
 
+    def get_list(self, entity_id, is_system, is_store, from_folder_code=None, parent_level=1, only_folder=False, return_model=False):
+        items = []
+        result_folders = []
+        folderSchema = MediaFolderSchema
+        fileSchema = MediaFileSchema
+        if parent_level == 1:
+            result_folders = MediaFolder.query.filter_by(owner_user_uid=entity_id, is_system_folder=is_system, is_store_folder=is_store, parent_level=1).all()
+        else:
+            folder = self.get_root_virtual_folder(from_folder_code)
+            result_folders = folder.get_all_child_folders(True)
+
+        for folder in result_folders:
+            if not only_folder:
+                files = MediaFile.query.filter_by(owner_user_uid=entity_id, folder_code=folder.code, is_system_folder=is_system, is_store_folder=is_store)
+                item = {folder, files}
+                if not return_model:
+                    item = {
+                        'folder': folderSchema.dump(folder, many=False),
+                        'files': fileSchema.dump(files, many=True)
+                    }
+                items.append(item)
+            else:
+                item = {folder}
+                if not return_model:
+                    item = {
+                        'folder': folderSchema.dump(folder, many=False)
+                    }
+                items.append(item)
+        return items
+
     def post_process_files_uploads(self, files):
         pass

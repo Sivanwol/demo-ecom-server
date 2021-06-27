@@ -7,9 +7,10 @@ from src.exceptions import UnableCreateFolder
 from src.middlewares import check_token_of_user
 from src.schemas import MediaFileSchema
 from src.schemas.requests import RequestMediaCreateFolderSchema, RequestMediaCreateFile
-from src.services import MediaService, UserService, RoleService, FileSystemService
+from src.services import MediaService, UserService, RoleService, FileSystemService, StoreService
 from src.utils.enums import RolesTypes
 from src.utils.responses import response_success, response_error
+from src.utils.validations import vaild_per_page
 
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<entity_id>/uploads"), methods=["POST"])
@@ -264,4 +265,57 @@ def delete_files(uid, entity_id, file_code):
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<uid>/list"), methods=["GET"])
 @check_token_of_user
 def get_user_files(uid):
-    pass
+    mediaService = containers[MediaService]
+    userService = containers[UserService]
+    storeService = containers[StoreService]
+    roleService = containers[RoleService]
+    is_system = False
+    is_store = False
+    from_folder_code = None
+    entity_id = None
+    parent_level = 1
+    only_folder = None
+    is_valid = False
+    if request.args.get('from_folder_code') is not None and request.args.get('from_folder_code') != '':
+        from_folder_code = request.args.get('from_folder_code')
+        parent_level = request.args.get('parent_level', type=int)
+        if not mediaService.virtual_folder_exists(from_folder_code):
+            return response_error("folder not found", {'params': request.json})
+
+    if request.args.get('is_system', type=bool) is not None:
+        is_system = request.args.get('is_system', type=bool)
+    if request.args.get('is_store', type=bool) is not None:
+        is_store = request.args.get('is_store', type=bool)
+    if request.args.get('only_folder', type=bool) is not None:
+        only_folder = request.args.get('only_folder', type=bool)
+
+    if request.args.get('entity_id') is not None and request.args.get('entity_id') != '':
+        entity_id = request.args.get('entity_id')
+        if is_store and not is_system:
+            if not storeService.store_exists(entity_id):
+                return response_error("store not found", {'params': request.json})
+
+        if not is_store and not is_system:
+            if not userService.user_exists(entity_id):
+                return response_error("user not found", {'params': request.json})
+    else:
+        return response_error("missing params", {'params': request.json})
+
+    if is_system:
+        roles = [RolesTypes.Support.value, RolesTypes.Owner.value, RolesTypes.Accounts.value]
+        if userService.user_has_any_role_matched(uid, roles):
+            is_valid = True
+    if is_store:
+        roles = [RolesTypes.Support.value]
+        user = userService.get_user(uid, True)
+        if userService.user_has_any_role_matched(uid, roles) or user.store_code == entity_id:
+            is_valid = True
+    if not is_system and not is_store:
+        supportRole = roleService.get_roles([RolesTypes.Support.value])
+        if userService.user_has_any_role_matched(uid, supportRole) or request.uid == entity_id:
+            is_valid = True
+
+    if is_valid:
+        result = mediaService.get_list(entity_id, is_system, is_store, from_folder_code, parent_level, only_folder)
+        return response_success(result)
+    return response_error("No Permission access folder", {'params': request.json}, 403)
