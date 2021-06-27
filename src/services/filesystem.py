@@ -26,6 +26,12 @@ class FileSystemService:
             return True
         return False
 
+    def acutal_file_existed(self, src) -> bool:
+        file = pathlib.Path(src)
+        if file.exists() and file.is_file():
+            return True
+        return False
+
     def remove_folders(self, src):
         try:
             self.logger.info('delete folder %s' % src)

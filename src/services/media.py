@@ -56,6 +56,13 @@ class MediaService:
             return schema.dumps(media)
         return media
 
+    def virtual_file_exists(self, code) -> bool:
+        media = MediaFile.query.filter_by(code=str(code)).first()
+        if media is not None:
+            if self.fileSystemService.acutal_file_existed(media.file_location):
+                return True
+        return False
+
     def virtual_folder_exists(self, code, entity_id=None) -> bool:
         media = MediaFolder.query.filter_by(code=str(code)).first()
         root_media = media

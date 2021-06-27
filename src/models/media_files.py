@@ -20,6 +20,7 @@ class MediaFile(TimestampMixin, db.Model):
     file_type = db.Column(Integer, default=MediaAssetsType.Document.value)
     file_size = db.Column(Float)
     file_name = db.Column(String(255))
+    download_uri = db.Column(String(255))
     width = db.Column(Integer, nullable=True)
     height = db.Column(Integer, nullable=True)
     alias = db.Column(String(255), nullable=True)
@@ -52,6 +53,7 @@ class MediaFile(TimestampMixin, db.Model):
         self.is_published = is_published
         self.is_system_file = is_system_file
         self.is_store_file = is_store_file
+        self.download_uri = self.get_download_uri()
 
     def __repr__(self):
         return "<MediaFile(id='{}', code='{}', owner_user_uid='{}', folder_code='{}' file_name='{}' file_ext='{}' file_location='{}' " \
@@ -71,3 +73,6 @@ class MediaFile(TimestampMixin, db.Model):
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    def get_download_uri(self):
+        return f'/media/{self.entity_id}/file/{self.code}'

@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 from random import randint
 from tempfile import mkstemp
 
@@ -84,6 +85,20 @@ class BaseTestCase(TestCase):
         folders = self.fileSystemService.get_folder_list(upload_system_path)
         for folder in folders:
             self.fileSystemService.remove_folders(folder)
+
+        # let clear temp folder
+        upload_temp_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+                                        settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_TEMP_FOLDER)
+        for filename in os.listdir(upload_temp_path):
+            file_path = os.path.join(upload_temp_path, filename)
+            if file_path != os.path.join(upload_temp_path, '.gitkeep'):
+                try:
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.unlink(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                except Exception as e:
+                    print('Failed to delete %s. Reason: %s' % (file_path, e))
 
     def ws_renew_connection(self, namespace=None):
         self.ws_client.connect(namespace=namespace)

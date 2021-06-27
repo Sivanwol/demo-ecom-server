@@ -30,10 +30,12 @@ class MediaFileSchema(SQLAlchemySchema):
 
     code = auto_field()
     # alias = auto_field()
+    owner_user_uid = auto_field()
     entity_id = auto_field()
     folder_code = auto_field()
     file_type = auto_field()
     file_size = auto_field()
+    download_uri = auto_field()
     width = auto_field()
     height = auto_field()
     alt = auto_field()
@@ -43,3 +45,4 @@ class MediaFileSchema(SQLAlchemySchema):
     is_store_file = auto_field()
     updated_at = auto_field()
     created_at = auto_field()
+

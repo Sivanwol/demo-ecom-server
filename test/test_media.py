@@ -3,7 +3,7 @@ import os
 import unittest
 
 from config import settings
-from src.models import MediaFolder
+from src.models import MediaFolder, MediaFile
 from src.utils.general import Struct
 from test.common.Basecase import BaseTestCase
 
@@ -362,3 +362,16 @@ class FlaskTestCase(BaseTestCase):
             self.assertIsNotNone(response_data)
             self.assertTrue(response_data.status)
             self.assertIsNotNone(response_data.data)
+            self.assertEqual(len(response_data.data) , 1)
+            data = response_data.data[0]
+            file_code = data.code
+            result = MediaFile.query.filter_by(code=file_code).first()
+            self.assertTrue(self.mediaService.virtual_file_exists(file_code))
+            self.assertIsNotNone(result)
+            self.assertEqual(result.file_type, data.file_type)
+            self.assertEqual(result.code, data.code)
+            self.assertEqual(result.file_size, data.file_size)
+            self.assertEqual(result.is_published, data.is_published)
+            self.assertEqual(result.is_system_file, data.is_system_file)
+            self.assertEqual(result.is_store_file, data.is_store_file)
+
