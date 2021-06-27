@@ -1,8 +1,10 @@
 import os
-from logging import Logger
 from uuid import uuid4
-from config import settings
+
+from flask import Flask
+
 from config.database import db
+from config.setup import app
 from src.exceptions import UnableCreateFolder
 from src.models import MediaFolder, MediaFile
 from src.schemas import MediaFolderSchema
@@ -10,8 +12,8 @@ from src.services import FileSystemService
 
 
 class MediaService:
-    def __init__(self, logger: Logger, fileSystemService: FileSystemService):
-        self.logger = logger
+    def __init__(self, app: Flask, fileSystemService: FileSystemService):
+        self.logger = app.logger
         self.fileSystemService = fileSystemService
 
     '''
@@ -80,18 +82,18 @@ class MediaService:
             if not is_system_folder and not is_store_folder:
                 is_user_folder = True
             if not is_system_folder:
-                store_dir = settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER
-                type = settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER if is_user_folder else store_dir
+                store_dir = app.config['UPLOAD_STORES_FOLDER']
+                type = app.config['UPLOAD_USERS_FOLDER'] if is_user_folder else store_dir
                 if sub_path is not None and entity_id is not None:
                     if self.fileSystemService.folder_exists(type, entity_id, sub_path):
                         verify_folder = True
             else:
-                path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
-                                    settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER,
+                path = os.path.join(app.config['UPLOAD_FOLDER'],
+                                    app.config['UPLOAD_SYSTEM_FOLDER'],
                                     root_media.code)
                 if sub_path != '' and sub_path is not None:
-                    path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
-                                        settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER,
+                    path = os.path.join(app.config['UPLOAD_FOLDER'],
+                                        app.config['UPLOAD_SYSTEM_FOLDER'],
                                         root_media.code, path)
                 if self.fileSystemService.acutal_folder_existed(path):
                     verify_folder = True
@@ -136,7 +138,7 @@ class MediaService:
             sub_path = self.get_parent_path_folder(media)
             root_media = self.get_root_virtual_folder(code)
         if is_system_folder:
-            self.fileSystemService.create_folder(os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER, root_media.code),
+            self.fileSystemService.create_folder(os.path.join(app.config['UPLOAD_SYSTEM_FOLDER'], root_media.code),
                                                  sub_path)
         if is_store_folder:
             self.fileSystemService.create_store_folder(data['entity_id'], root_media.code, sub_path)
@@ -168,14 +170,14 @@ class MediaService:
         return False
 
     def register_uploaded_files(self, uid, files, metadata, is_system_file, is_store_file, is_user_file):
-        system_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
-                                   settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER)
+        system_path = os.path.join(app.config['UPLOAD_FOLDER'],
+                                   app.config['UPLOAD_SYSTEM_FOLDER'])
 
-        user_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
-                                 settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER)
+        user_path = os.path.join(app.config['UPLOAD_FOLDER'],
+                                 app.config['UPLOAD_USERS_FOLDER'])
 
-        store_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
-                                  settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER)
+        store_path = os.path.join(app.config['UPLOAD_FOLDER'],
+                                  app.config['UPLOAD_STORES_FOLDER'])
 
         root_media = MediaFolder.query.filter_by(code=str(metadata['folder_code'])).first()
         sub_path = ''

@@ -1,10 +1,9 @@
 from functools import wraps
 from flask import request
 
-from config.containers import app, container
+from config.app import containers,app
 from src.services.user import UserService
 from src.exceptions.unknown_roles import UnknownRolesOrNotMatched
-from src.utils.common_methods import verify_response
 from src.utils.responses import response_error
 
 
@@ -12,7 +11,7 @@ def check_role(*role_names):
     def wrapper(f):
         @wraps(f)
         def decorator(*args, **kwargs):
-            userService = container[UserService]
+            userService = containers[UserService]
             uid = None
             try:
                 result = userService.check_user_auth(request, True)

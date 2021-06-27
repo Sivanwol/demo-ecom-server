@@ -1,8 +1,7 @@
-from logging import Logger
-
+from flask import Flask
 from sqlalchemy import desc
 
-from config.api import cache
+from config.setup import cache
 from config.database import db
 import uuid
 
@@ -18,8 +17,8 @@ storeHourSchema = StoreHourSchema()
 
 
 class StoreService:
-    def __init__(self, logger: Logger, fileSystemService: FileSystemService, mediaService: MediaService):
-        self.logger = logger
+    def __init__(self, app: Flask, fileSystemService: FileSystemService, mediaService: MediaService):
+        self.logger = app.logger
         self.fileSystemService = fileSystemService
         self.mediaService = mediaService
 

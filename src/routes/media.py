@@ -2,9 +2,7 @@ import os
 
 from flask import request
 from marshmallow import ValidationError
-
-from config import settings
-from config.containers import app as current_app, container
+from config.app import app as current_app, containers
 from src.exceptions import UnableCreateFolder
 from src.middlewares import check_token_of_user
 from src.schemas import MediaFileSchema
@@ -15,13 +13,13 @@ from src.utils.responses import response_success, response_error
 
 
 # Todo: upload media files that include the file meta data and every thing else
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<entity_id>/uploads"), methods=["POST"])
+@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<entity_id>/uploads"), methods=["POST"])
 @check_token_of_user
 def upload_media(uid, entity_id):
-    fileSystemService = container[FileSystemService]
-    mediaService = container[MediaService]
-    userService = container[UserService]
-    roleService = container[RoleService]
+    fileSystemService = containers[FileSystemService]
+    mediaService = containers[MediaService]
+    userService = containers[UserService]
+    roleService = containers[RoleService]
     try:
         schema = RequestMediaCreateFile()
         data = schema.load(request.form)
@@ -71,44 +69,44 @@ def upload_media(uid, entity_id):
     return response_success(response)
 
 
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<entity_id>/<file_code>/update"), methods=["PUT"])
+@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<entity_id>/<file_code>/update"), methods=["PUT"])
 @check_token_of_user
 def upload_media_file_metadata(uid, entity_id, file_code):
-    mediaService = container[MediaService]
-    userService = container[UserService]
-    roleService = container[RoleService]
+    mediaService = containers[MediaService]
+    userService = containers[UserService]
+    roleService = containers[RoleService]
 
 
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/files/toggle/publish"), methods=["PUT"])
+@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/files/toggle/publish"), methods=["PUT"])
 @check_token_of_user
 def toggle_published_files(uid):
-    mediaService = container[MediaService]
-    userService = container[UserService]
-    roleService = container[RoleService]
+    mediaService = containers[MediaService]
+    userService = containers[UserService]
+    roleService = containers[RoleService]
 
 
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<entity_id>/file/<file_code>"), methods=["GET"])
+@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<entity_id>/file/<file_code>"), methods=["GET"])
 @check_token_of_user
 def download_media_file(uid, entity_id, file_code):
-    mediaService = container[MediaService]
-    userService = container[UserService]
-    roleService = container[RoleService]
+    mediaService = containers[MediaService]
+    userService = containers[UserService]
+    roleService = containers[RoleService]
 
 
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<entity_id>/folder/<folder_code>"), methods=["GET"])
+@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<entity_id>/folder/<folder_code>"), methods=["GET"])
 @check_token_of_user
 def download_media_folder(uid, entity_id, folder_code):
-    mediaService = container[MediaService]
-    userService = container[UserService]
-    roleService = container[RoleService]
+    mediaService = containers[MediaService]
+    userService = containers[UserService]
+    roleService = containers[RoleService]
 
 
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/folder/create"), methods=["POST"])
+@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/folder/create"), methods=["POST"])
 @check_token_of_user
 def create_virtual_directory(uid):
-    mediaService = container[MediaService]
-    userService = container[UserService]
-    roleService = container[RoleService]
+    mediaService = containers[MediaService]
+    userService = containers[UserService]
+    roleService = containers[RoleService]
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     try:
@@ -149,13 +147,13 @@ def create_virtual_directory(uid):
         return response_error("Error on create folder it may try create folder under same name or internal issue", {'params': request.json})
 
 
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<entity_id>/folder/<folder_code>/delete"),
+@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<entity_id>/folder/<folder_code>/delete"),
                    methods=["DELETE"])
 @check_token_of_user
 def delete_virtual_directory(uid, entity_id, folder_code):
-    mediaService = container[MediaService]
-    userService = container[UserService]
-    roleService = container[RoleService]
+    mediaService = containers[MediaService]
+    userService = containers[UserService]
+    roleService = containers[RoleService]
 
     def handle(type):
         media = mediaService.get_virtual_folder(folder_code, entity_id, True)
@@ -166,43 +164,43 @@ def delete_virtual_directory(uid, entity_id, folder_code):
 
     user = userService.get_user(request.uid, True)
     if entity_id == user.uid:
-        return handle(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER)
+        return handle(current_app.flask_app.config['UPLOAD_USERS_FOLDER'])
     else:
         if entity_id == 'none':
             entity_id = None
         supportRole = roleService.get_roles([RolesTypes.Support.value])
         if userService.user_has_any_role_matched(request.uid, supportRole) or user.store_code == entity_id:
-            type = settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER
+            type = current_app.flask_app.config['UPLOAD_SYSTEM_FOLDER']
             if entity_id is not None:
-                type = settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER
+                type = current_app.flask_app.config['UPLOAD_STORES_FOLDER']
             return handle(type)
     return response_error("No Permission access folder", {'params': {entity_id, folder_code}})
 
 
 # Todo: delete folder (will be do any child entity will be mark for deletion (once it set use have N hours to prevent if not will delete if prevent will
 #  remove the mark )
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<uid>/<file_io>"), methods=["DELETE"])
+@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<uid>/<file_io>"), methods=["DELETE"])
 @check_token_of_user
 def delete_files(uid):
     pass
 
 
 # Todo: move folder to dest folder
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<uid>/folder/move"), methods=["PUT"])
+@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<uid>/folder/move"), methods=["PUT"])
 @check_token_of_user
 def move_virtual_directory(uid):
     pass
 
 
 # Todo: get users files
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<uid>/files"), methods=["GET"])
+@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<uid>/files"), methods=["GET"])
 @check_token_of_user
 def get_user_files(uid):
     pass
 
 
 # Todo: get users files on a folder
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/media/<uid>/files/<folder_id>"), methods=["GET"])
+@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<uid>/files/<folder_id>"), methods=["GET"])
 @check_token_of_user
 def get_user_files_from_folder(uid):
     pass

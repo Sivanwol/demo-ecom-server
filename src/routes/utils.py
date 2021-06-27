@@ -1,12 +1,9 @@
-import os
-
 import pycountry
-from config import settings
-from config.containers import app as current_app
+from config.app import app as current_app
 from src.utils.responses import response_success
 
 
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/utils/countries"))
+@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/utils/countries"))
 def get_countries():
     countries = {}
     for country in list(pycountry.countries):
@@ -15,7 +12,7 @@ def get_countries():
     return response_success(countries)
 
 
-@current_app.route(settings[os.environ.get("FLASK_ENV", "development")].API_ROUTE.format(route="/utils/currencies"))
+@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/utils/currencies"))
 def get_currencies():
     currencies = {}
     for currency in list(pycountry.currencies):

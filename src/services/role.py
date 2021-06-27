@@ -1,4 +1,4 @@
-from logging import Logger
+from flask import Flask
 
 from src.models import Roles
 from sqlalchemy.sql import or_
@@ -6,8 +6,8 @@ from sqlalchemy.sql import or_
 
 class RoleService:
 
-    def __init__(self, logger: Logger):
-        self.logger = logger
+    def __init__(self, app: Flask):
+        self.logger = app.logger
 
 
     def get_all_roles(self):

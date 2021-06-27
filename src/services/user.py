@@ -1,10 +1,9 @@
-from logging import Logger
-
 import firebase_admin
 from firebase_admin import auth
+from flask import Flask
 from sqlalchemy import or_, desc, asc
 
-from config.api import cache
+from config.setup import cache
 from config.database import db
 from src.models import User, Store
 from src.schemas import UserSchema
@@ -15,8 +14,8 @@ from src.utils.responses import response_error
 
 
 class UserService:
-    def __init__(self, logger: Logger, fileSystemService: FileSystemService, mediaService: MediaService):
-        self.logger = logger
+    def __init__(self,app: Flask, fileSystemService: FileSystemService, mediaService: MediaService):
+        self.logger = app.logger
         self.fileSystemService = fileSystemService
         self.mediaService = mediaService
 

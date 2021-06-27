@@ -1,17 +1,18 @@
 import os
 import pathlib
 import shutil
-from logging import Logger
 from uuid import uuid4
 
-from config import settings
+from flask import Flask
+
+from config.setup import app
 from src.utils.enums import MediaAssetsType
 from src.utils.validations import media_type_valid
 
 
 class FileSystemService:
-    def __init__(self, logger: Logger, settingsService):
-        self.logger = logger
+    def __init__(self, app: Flask, settingsService):
+        self.logger = app.logger
         self.settingsService = settingsService
 
     def file_existed(self, src) -> bool:
@@ -54,11 +55,11 @@ class FileSystemService:
     def get_folder_path(self, type, entity_id, sub_folder=None):
         upload_path = None
         if media_type_valid(type):
-            upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+            upload_path = os.path.join(app.config['UPLOAD_FOLDER'],
                                        type,
                                        entity_id)
             if sub_folder is not None:
-                upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+                upload_path = os.path.join(app.config['UPLOAD_FOLDER'],
                                            type, entity_id, sub_folder)
         return upload_path
 
@@ -66,10 +67,10 @@ class FileSystemService:
         if not media_type_valid(type) or (sub_folder is not None and entity_id is None):
             return False
 
-        upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+        upload_path = os.path.join(app.config['UPLOAD_FOLDER'],
                                    type)
         if sub_folder is not None and entity_id is not None:
-            upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+            upload_path = os.path.join(app.config['UPLOAD_FOLDER'],
                                        type, entity_id, sub_folder)
         result = self.acutal_folder_existed(upload_path)
         self.logger.info('checking %s folder existed (%s)' % (type, result))
@@ -79,15 +80,15 @@ class FileSystemService:
         shutil.move(temp_file_location, dest_path)
 
     def system_folder_exists(self, sub_folder=None) -> bool:
-        upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER)
+        upload_path = os.path.join(app.config['UPLOAD_FOLDER'])
         if sub_folder is not None:
-            upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER, sub_folder)
+            upload_path = os.path.join(app.config['UPLOAD_FOLDER'], sub_folder)
         result = self.acutal_folder_existed(upload_path)
         self.logger.info('checking system folder existed (%s)' % result)
         return result
 
     def create_folder(self, src, sub_path=None, force_create=False):
-        src = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER, src)
+        src = os.path.join(app.config['UPLOAD_FOLDER'], src)
         if sub_path is not None:
             src = os.path.join(src, sub_path)
         if not self.acutal_folder_existed(src):
@@ -104,31 +105,31 @@ class FileSystemService:
                 })
 
     def create_user_folder_initialize(self, entity_id):
-        upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
-                                   settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER,
+        upload_path = os.path.join(app.config['UPLOAD_FOLDER'],
+                                   app.config['UPLOAD_USERS_FOLDER'],
                                    entity_id)
         if not self.acutal_folder_existed(upload_path):
             self.logger.info('initialize user folder %s (entity id: %s )' % (upload_path, entity_id))
             self.create_folder(upload_path, None)
 
     def create_user_folder(self, entity_id, code, sub_path=None):
-        upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
-                                   settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER,
+        upload_path = os.path.join(app.config['UPLOAD_FOLDER'],
+                                   app.config['UPLOAD_USERS_FOLDER'],
                                    entity_id, code)
         self.logger.info('create user folder %s (entity id: %s ,code: %s )' % (upload_path, entity_id, code))
         self.create_folder(upload_path, sub_path)
 
     def create_store_folder_initialize(self, entity_id):
-        upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
-                                   settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER,
+        upload_path = os.path.join(app.config['UPLOAD_FOLDER'],
+                                   app.config['UPLOAD_STORES_FOLDER'],
                                    entity_id)
         if not self.acutal_folder_existed(upload_path):
             self.logger.info('initialize store folder %s (entity id: %s )' % (upload_path, entity_id))
             self.create_folder(upload_path, None)
 
     def create_store_folder(self, entity_id, code, sub_path=None):
-        upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
-                                   settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER,
+        upload_path = os.path.join(app.config['UPLOAD_FOLDER'],
+                                   app.config['UPLOAD_STORES_FOLDER'],
                                    entity_id, code)
         self.logger.info('create store folder %s (entity id: %s ,code: %s )' % (upload_path, entity_id, code))
         self.create_folder(upload_path, sub_path)
@@ -145,8 +146,8 @@ class FileSystemService:
             return MediaAssetsType.Image
 
     def save_temporary_upload_files(self, files):
-        upload_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
-                                   settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_TEMP_FOLDER)
+        upload_path = os.path.join(app.config['UPLOAD_FOLDER'],
+                                   app.config['UPLOAD_TEMP_FOLDER'])
         response = []
         allow_ext = self.settingsService.getItem('UPLOAD_ALLOW_FILES_TYPES').decode("utf-8")
         allow_ext = allow_ext.split(',')

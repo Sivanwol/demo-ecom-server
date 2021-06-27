@@ -8,7 +8,7 @@ from faker import Faker
 from firebase_admin import auth
 from flask_testing import TestCase
 from config import settings
-from config.containers import app, socketio, container
+from config.app import app, socketio, containers
 from config.database import db
 from src.services import FileSystemService, FirebaseService, MediaService, RoleService, StoreService, UserService, SettingsService
 from src.utils.enums import RolesTypes
@@ -31,12 +31,12 @@ class BaseTestCase(TestCase):
     global_password = "password!0101"
     firebase_client_object = None
     firebaseService = FirebaseService()
-    userService = container[UserService]
-    roleService = container[RoleService]
-    storeService = container[StoreService]
-    fileSystemService = container[FileSystemService]
-    mediaService = container[MediaService]
-    settingsService = container[SettingsService]
+    userService = containers[UserService]
+    roleService = containers[RoleService]
+    storeService = containers[StoreService]
+    fileSystemService = containers[FileSystemService]
+    mediaService = containers[MediaService]
+    settingsService = containers[SettingsService]
 
     config = settings[os.environ.get("FLASK_ENV", "development")]
 

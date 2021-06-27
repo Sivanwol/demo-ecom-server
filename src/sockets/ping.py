@@ -1,5 +1,5 @@
 from flask_socketio import emit
-from config.containers import socketio
+from config.app import socketio
 from src.sockets.common import CommonSocketConnection
 from src.utils.responses import response_success
 
