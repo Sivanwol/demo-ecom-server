@@ -341,7 +341,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(result.parent_folder_code, root_media.code)
             self.assertEqual(root_media.code, response_data.data.root_media.code)
 
-    def test_create_media_file(self):
+    def test_upload_media_system_file(self):
         with self.client:
             self.settingsService.syncSettings()
             media_folder = self.mediaUtils.create_system_folder()
@@ -374,4 +374,39 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(result.is_published, data.is_published)
             self.assertEqual(result.is_system_file, data.is_system_file)
             self.assertEqual(result.is_store_file, data.is_store_file)
+
+    def test_upload_media_system_files(self):
+        with self.client:
+            self.settingsService.syncSettings()
+            media_folder = self.mediaUtils.create_system_folder()
+            user_object = self.login_user(self.platform_owner_user)
+            uid = user_object['uid']
+            token = user_object['idToken']
+            post_data = {
+                'folder_code': media_folder.code,
+                'alias': self.fake.domain_word(),
+                'is_store_file': False,
+                'is_system_file': True,
+                'files': []
+            }
+            post_data['files'].append(self.get_file_content('dragon.png')['raw'])
+            post_data['files'].append(self.get_file_content('dragon.jpg')['raw'])
+            response = self.request_files_upload('/api/media/None/uploads', token, None, None, post_data)
+            self.assertRequestPassed(response, 'failed request upload media file')
+            response_data = Struct(response.json)
+            self.assertIsNotNone(response_data)
+            self.assertTrue(response_data.status)
+            self.assertIsNotNone(response_data.data)
+            self.assertEqual(len(response_data.data) , 2)
+            for data in response_data.data:
+                file_code = data.code
+                result = MediaFile.query.filter_by(code=file_code).first()
+                self.assertTrue(self.mediaService.virtual_file_exists(file_code))
+                self.assertIsNotNone(result)
+                self.assertEqual(result.file_type, data.file_type)
+                self.assertEqual(result.code, data.code)
+                self.assertEqual(result.file_size, data.file_size)
+                self.assertEqual(result.is_published, data.is_published)
+                self.assertEqual(result.is_system_file, data.is_system_file)
+                self.assertEqual(result.is_store_file, data.is_store_file)
 
