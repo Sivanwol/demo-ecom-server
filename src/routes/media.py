@@ -13,9 +13,9 @@ from src.utils.responses import response_success, response_error
 from src.utils.validations import vaild_per_page
 
 
-@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<entity_id>/uploads"), methods=["POST"])
+@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<entity_code>/uploads"), methods=["POST"])
 @check_token_of_user
-def upload_media(uid, entity_id):
+def upload_media(uid, entity_code):
     fileSystemService = containers[FileSystemService]
     mediaService = containers[MediaService]
     userService = containers[UserService]
@@ -23,7 +23,7 @@ def upload_media(uid, entity_id):
     try:
         schema = RequestMediaCreateFile()
         data = schema.load(request.form)
-        if not mediaService.virtual_folder_exists(data['folder_code'], None if entity_id.lower() == 'none' else entity_id):
+        if not mediaService.virtual_folder_exists(data['folder_code'], None if entity_code.lower() == 'none' else entity_code):
             return response_error("Folder not existed", {'params': request.json})
 
         is_system_file = False
@@ -60,6 +60,7 @@ def upload_media(uid, entity_id):
     files = fileSystemService.save_temporary_upload_files(files)
     if len(files) == 0:
         return response_error("Files that uploaded no meet with server limitations")
+    data['entity_code'] = entity_code
     files = mediaService.register_uploaded_files(uid, files, data, is_system_file, is_store_file, is_user_file)
     # any task need do after need assign here to the task que
     mediaService.post_process_files_uploads(files)
@@ -101,11 +102,11 @@ def toggle_published_files(uid, file_code):
     if is_store_file:
         roles = [RolesTypes.Support.value]
         user = userService.get_user(uid, True)
-        if not userService.user_has_any_role_matched(uid, roles) or user.store_code != media['entity_id']:
+        if not userService.user_has_any_role_matched(uid, roles) or user.store_code != media['entity_code']:
             return response_error("Permission Error", None, 403)
     if is_user_file:
         supportRole = roleService.get_roles([RolesTypes.Support.value])
-        if userService.user_has_any_role_matched(uid, supportRole) or uid != media['entity_id']:
+        if userService.user_has_any_role_matched(uid, supportRole) or uid != media['entity_code']:
             return response_error("Permission Error", None, 403)
     media = mediaService.toggle_file_publish(file_code)
     if not media:
@@ -113,9 +114,9 @@ def toggle_published_files(uid, file_code):
     return response_success(media)
 
 
-@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<entity_id>/file/<file_code>"), methods=["GET"])
+@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<entity_code>/file/<file_code>"), methods=["GET"])
 @check_token_of_user
-def download_media_file(uid, entity_id, file_code):
+def download_media_file(uid, entity_code, file_code):
     mediaService = containers[MediaService]
     userService = containers[UserService]
     roleService = containers[RoleService]
@@ -136,11 +137,11 @@ def download_media_file(uid, entity_id, file_code):
     if is_store_file:
         roles = [RolesTypes.Support.value]
         user = userService.get_user(uid, True)
-        if not userService.user_has_any_role_matched(uid, roles) or user.store_code != media['entity_id']:
+        if not userService.user_has_any_role_matched(uid, roles) or user.store_code != media['entity_code']:
             return response_error("Permission Error", None, 403)
     if is_user_file:
         supportRole = roleService.get_roles([RolesTypes.Support.value])
-        if userService.user_has_any_role_matched(uid, supportRole) or uid != media['entity_id']:
+        if userService.user_has_any_role_matched(uid, supportRole) or uid != media['entity_code']:
             return response_error("Permission Error", None, 403)
     return response_success(media)
 
@@ -262,9 +263,9 @@ def delete_files(uid, entity_id, file_code):
 
 
 # Todo: get users files and folders
-@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<uid>/list"), methods=["GET"])
+@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/list"), methods=["GET"])
 @check_token_of_user
-def get_user_files(uid):
+def get_media_list(uid):
     mediaService = containers[MediaService]
     userService = containers[UserService]
     storeService = containers[StoreService]
@@ -316,6 +317,6 @@ def get_user_files(uid):
             is_valid = True
 
     if is_valid:
-        result = mediaService.get_list(entity_id, is_system, is_store, from_folder_code, parent_level, only_folder)
+        result = mediaService.get_list(uid, entity_id, is_system, is_store, from_folder_code, parent_level, only_folder)
         return response_success(result)
     return response_error("No Permission access folder", {'params': request.json}, 403)

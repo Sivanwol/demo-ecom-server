@@ -24,7 +24,7 @@ class MediaService:
         media = MediaFolder.query.filter_by(code=ref_media.code).first()
         if media.parent_level != 1:
             ref_sub_path = os.path.join(ref_sub_path, media.code)
-        if media.parent_folder_code != 'None':
+        if media.parent_folder_code is not None and media.parent_folder_code != 'None':
             ref_sub_path = self.get_parent_path_folder(MediaFolder.query.filter_by(code=media.parent_folder_code).first(), ref_sub_path)
         return ref_sub_path
 
@@ -86,7 +86,7 @@ class MediaService:
                 return True
         return False
 
-    def virtual_folder_exists(self, code, entity_id=None) -> bool:
+    def virtual_folder_exists(self, code, entity_code=None) -> bool:
         media = MediaFolder.query.filter_by(code=str(code)).first()
         root_media = media
         if media.parent_level != 1:
@@ -105,8 +105,8 @@ class MediaService:
             if not is_system_folder:
                 store_dir = app.config['UPLOAD_STORES_FOLDER']
                 type = app.config['UPLOAD_USERS_FOLDER'] if is_user_folder else store_dir
-                if sub_path is not None and entity_id is not None:
-                    if self.fileSystemService.folder_exists(type, entity_id, sub_path):
+                if sub_path is not None and entity_code is not None:
+                    if self.fileSystemService.folder_exists(type, entity_code, sub_path):
                         verify_folder = True
             else:
                 path = os.path.join(app.config['UPLOAD_FOLDER'],
@@ -123,7 +123,7 @@ class MediaService:
     def create_user_folder(self, uid):
         name = 'main user folder %s' % uid
         code = "%s" % uuid4()
-        media = MediaFolder(code, uid, name, uid, '', False, False, 1, str('None'))
+        media = MediaFolder(code, uid, uid, name, uid, '', False, False, 1, str('None'))
         db.session.add(media)
         db.session.commit()
         self.fileSystemService.create_user_folder(uid, code)
@@ -133,7 +133,7 @@ class MediaService:
     def create_store_folder(self, uid, store_code):
         name = 'main store folder %s' % store_code
         code = "%s" % uuid4()
-        media = MediaFolder(code, uid, name, store_code, '', False, True, 1, str('None'))
+        media = MediaFolder(code, store_code, uid, name, '', '', False, True, 1, str('None'))
         db.session.add(media)
         db.session.commit()
         self.fileSystemService.create_store_folder(store_code, code)
@@ -148,8 +148,8 @@ class MediaService:
             raise UnableCreateFolder(result.code, sub_path)
         if data['parent_level'] == 1:
             data['parent_folder_code'] = None
-        media = MediaFolder(code, uid, data['name'], data['alias'], data['description'], is_system_folder, is_store_folder, data['parent_level'],
-                            str(data['parent_folder_code']))
+        media = MediaFolder(code, data['entity_code'], uid, data['name'], data['alias'], data['description'], is_system_folder, is_store_folder,
+                            data['parent_level'], str(data['parent_folder_code']))
         self.logger.info("register folder (%s) on database" % media.__str__())
         db.session.add(media)
         db.session.commit()
@@ -162,9 +162,9 @@ class MediaService:
             self.fileSystemService.create_folder(os.path.join(app.config['UPLOAD_SYSTEM_FOLDER'], root_media.code),
                                                  sub_path)
         if is_store_folder:
-            self.fileSystemService.create_store_folder(data['entity_id'], root_media.code, sub_path)
+            self.fileSystemService.create_store_folder(data['entity_code'], root_media.code, sub_path)
         if not is_system_folder and not is_store_folder:
-            self.fileSystemService.create_user_folder(data['entity_id'], root_media.code, sub_path)
+            self.fileSystemService.create_user_folder(data['entity_code'], root_media.code, sub_path)
         if not return_model:
             schema = MediaFolderSchema()
             return {
@@ -182,14 +182,14 @@ class MediaService:
         delete = MediaFolder.delete().where(MediaFolder.code.in_(media.code))
         delete.execute()
 
-    def delele_virtual_folder(self, folder_code, type, entity_id=None):
-        if self.virtual_folder_exists(folder_code, type, entity_id):
+    def delele_virtual_folder(self, folder_code, type, entity_code=None):
+        if self.virtual_folder_exists(folder_code, type, entity_code):
             media = MediaFolder.query.filter_by(code=folder_code).first()
             list_folders = media.get_all_child_folders()
             list_folder_codes = []
             for folder in list_folders:
                 list_folder_codes.append(folder.code)
-                path = self.fileSystemService.get_folder_path(type, entity_id)
+                path = self.fileSystemService.get_folder_path(type, entity_code)
                 self.fileSystemService.remove_folder(path)
             delete = MediaFolder.delete().where(MediaFolder.code.in_(list_folders))
             delete.execute()
@@ -223,13 +223,13 @@ class MediaService:
             if is_system_file:
                 file_location = os.path.join(system_path, root_media.code, sub_path) if sub_path != '' else os.path.join(system_path, root_media.code)
             if is_store_file:
-                file_location = os.path.join(store_path, metadata['entity_id'], root_media.code)
+                file_location = os.path.join(store_path, metadata['entity_code'], root_media.code)
                 if sub_path != '':
-                    file_location = os.path.join(store_path, metadata['entity_id'], root_media.code, sub_path)
+                    file_location = os.path.join(store_path, metadata['entity_code'], root_media.code, sub_path)
             if is_user_file:
-                file_location = os.path.join(user_path, metadata['entity_id'], root_media.code)
+                file_location = os.path.join(user_path, metadata['entity_code'], root_media.code)
                 if sub_path != '':
-                    file_location = os.path.join(user_path, metadata['entity_id'], root_media.code, sub_path)
+                    file_location = os.path.join(user_path, metadata['entity_code'], root_media.code, sub_path)
             file = MediaFile(str(uuid4()), uid, root_media.code, os.path.join(file_location, file_name), file_type.value, file_size, file_name,
                              file_ext, False, is_system_file, is_store_file)
             db.session.add(file)
@@ -238,20 +238,20 @@ class MediaService:
         db.session.commit()
         return media_files
 
-    def get_list(self, entity_id, is_system, is_store, from_folder_code=None, parent_level=1, only_folder=False, return_model=False):
+    def get_list(self, owner_user_uid, entity_code, is_system, is_store, from_folder_code=None, parent_level=1, only_folder=False, return_model=False):
         items = []
-        result_folders = []
         folderSchema = MediaFolderSchema
         fileSchema = MediaFileSchema
         if parent_level == 1:
-            result_folders = MediaFolder.query.filter_by(owner_user_uid=entity_id, is_system_folder=is_system, is_store_folder=is_store, parent_level=1).all()
+            result_folders = MediaFolder.query.filter_by(owner_user_uid=owner_user_uid, entity_code=entity_code, is_system_folder=is_system,
+                                                         is_store_folder=is_store, parent_level=1).all()
         else:
             folder = self.get_root_virtual_folder(from_folder_code)
             result_folders = folder.get_all_child_folders(True)
 
         for folder in result_folders:
             if not only_folder:
-                files = MediaFile.query.filter_by(owner_user_uid=entity_id, folder_code=folder.code, is_system_folder=is_system, is_store_folder=is_store)
+                files = MediaFile.query.filter_by(owner_user_uid, entity_id, folder_code=folder.code, is_system_file=is_system, is_store_file=is_store)
                 item = {folder, files}
                 if not return_model:
                     item = {

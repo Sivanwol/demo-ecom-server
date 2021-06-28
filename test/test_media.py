@@ -415,11 +415,37 @@ class FlaskTestCase(BaseTestCase):
         uid = user_object['uid']
         token = user_object['idToken']
         list_folders = self.mediaUtils.create_media_folder_parents(uid, 2)
-        root_code = list_folders[0]
-        list_folders.pop(0)
-        result = MediaFolder.query.filter_by(code=root_code).first()
+
         post_data = {
-            'folder_code': result.code,
+            'name': self.fake.domain_word(),
+            'alias': self.fake.domain_word(),
+            'description': self.fake.sentence(nb_words=10),
+            'is_system_folder': True,
+            'is_store_folder': False,
+            'parent_level': 1
+        }
+        response = self.request_post('api/media/folder/create', token, None, None, post_data)
+        self.assertRequestPassed(response, 'failed request create folder root level')
+        response_data = Struct(response.json)
+        self.assertIsNotNone(response_data)
+        self.assertTrue(response_data.status)
+        self.assertIsNotNone(response_data.data)
+        root_folder_code = response_data.data.media.code
+        root_media = MediaFolder.query.filter_by(code=root_folder_code).first()
+        self.assertTrue(self.mediaService.virtual_folder_exists(root_folder_code))
+        self.assertIsNotNone(root_media)
+        self.assertEqual(root_media.code, response_data.data.media.code)
+        self.assertEqual(root_media.name, response_data.data.media.name)
+        self.assertEqual(root_media.alias, response_data.data.media.alias)
+        self.assertEqual(root_media.description, response_data.data.media.description)
+        self.assertEqual(root_media.is_system_folder, response_data.data.media.is_system_folder)
+        self.assertEqual(root_media.is_store_folder, response_data.data.media.is_store_folder)
+        self.assertEqual(root_media.parent_folder_code, 'None')
+        self.assertEqual(root_media.parent_level, 1)
+        self.assertEqual(root_media.parent_level, response_data.data.media.parent_level)
+        root_code = root_media.code
+        post_data = {
+            'folder_code': root_code,
             'alias': self.fake.domain_word(),
             'is_store_file': False,
             'is_system_file': True,
@@ -450,7 +476,7 @@ class FlaskTestCase(BaseTestCase):
             'is_store': False,
             'entity_id': 'none'
         }
-        response = self.request_get('/api/media/None/list', token, query_string)
+        response = self.request_get('/api/media/list', token, query_string)
         self.assertRequestPassed(response, 'failed request list media items')
         response_data = Struct(response.json)
         self.assertIsNotNone(response_data)

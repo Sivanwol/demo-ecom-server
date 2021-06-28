@@ -16,7 +16,7 @@ class MediaFile(TimestampMixin, db.Model):
     id = db.Column(Integer, primary_key=True)
     code = db.Column(String(100))
     owner_user_uid = db.Column(String(100), db.ForeignKey('users.uid'))
-    entity_id = db.Column(Integer, nullable=True)
+    entity_code = db.Column(String(100), nullable=True)
     folder_code = db.Column(String(100), db.ForeignKey(MediaFolder.code))
     file_location = db.Column(String(255))
     file_type = db.Column(Integer, default=MediaAssetsType.Document.value)
@@ -35,7 +35,8 @@ class MediaFile(TimestampMixin, db.Model):
     folder = db.relationship(MediaFolder, uselist=False)
     owner = db.relationship("User", foreign_keys=[owner_user_uid])
 
-    def __init__(self, code, owner_uid,  folder_code, file_location, file_type, file_size, file_name, file_ext, is_published=None, is_system_file=None,
+    def __init__(self, code, owner_uid, entity_code, folder_code, file_location, file_type, file_size, file_name, file_ext, is_published=None,
+                 is_system_file=None,
                  is_store_file=None):
         if is_published is None:
             is_published = False
@@ -45,6 +46,7 @@ class MediaFile(TimestampMixin, db.Model):
             is_store_file = False
 
         self.code = code
+        self.entity_code = entity_code
         self.owner_user_uid = owner_uid
         self.folder_code = folder_code
         self.file_location = file_location
@@ -58,10 +60,11 @@ class MediaFile(TimestampMixin, db.Model):
         self.download_uri = self.get_download_uri()
 
     def __repr__(self):
-        return "<MediaFile(id='{}', code='{}', owner_user_uid='{}', folder_code='{}' file_name='{}' file_ext='{}' file_location='{}' " \
+        return "<MediaFile(id='{}', code='{}',entity_code='{} owner_user_uid='{}', folder_code='{}' file_name='{}' file_ext='{}' file_location='{}' " \
                "is_published={} is_store_file={} is_system_file={} created_at='{}' updated_at='{}'>".format(
             self.id,
             self.code,
+            self.entity_code,
             self.owner_user_uid,
             self.folder_code,
             self.file_name,
