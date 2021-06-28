@@ -70,21 +70,21 @@ class BaseTestCase(TestCase):
                                           settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER)
         folders = self.fileSystemService.get_folder_list(upload_system_path)
         for folder in folders:
-            self.fileSystemService.remove_folders(folder)
+            self.fileSystemService.remove_folder(folder)
 
         # let clear users folders
         upload_system_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
                                           settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER)
         folders = self.fileSystemService.get_folder_list(upload_system_path)
         for folder in folders:
-            self.fileSystemService.remove_folders(folder)
+            self.fileSystemService.remove_folder(folder)
 
         # let clear stores folders
         upload_system_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
                                           settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER)
         folders = self.fileSystemService.get_folder_list(upload_system_path)
         for folder in folders:
-            self.fileSystemService.remove_folders(folder)
+            self.fileSystemService.remove_folder(folder)
 
         # let clear temp folder
         upload_temp_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
