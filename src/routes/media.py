@@ -290,7 +290,7 @@ def get_user_files(uid):
         only_folder = request.args.get('only_folder', type=bool)
 
     if request.args.get('entity_id') is not None and request.args.get('entity_id') != '':
-        entity_id = request.args.get('entity_id')
+        entity_id = request.args.get('entity_id').lower()
         if is_store and not is_system:
             if not storeService.store_exists(entity_id):
                 return response_error("store not found", {'params': request.json})
