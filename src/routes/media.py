@@ -273,7 +273,7 @@ def get_media_list(uid):
     is_system = False
     is_store = False
     from_folder_code = None
-    entity_id = None
+    entity_code = str(None)
     parent_level = 1
     only_folder = None
     is_valid = False
@@ -289,16 +289,16 @@ def get_media_list(uid):
         is_store = request.args.get('is_store', type=bool)
     if request.args.get('only_folder', type=bool) is not None:
         only_folder = request.args.get('only_folder', type=bool)
+    if not is_system:
+        if request.args.get('entity_code') is not None and request.args.get('entity_code') != '':
+            entity_code = request.args.get('entity_code').lower()
+            if is_store:
+                if not storeService.store_exists(entity_code):
+                    return response_error("store not found", {'params': request.json})
 
-    if request.args.get('entity_id') is not None and request.args.get('entity_id') != '':
-        entity_id = request.args.get('entity_id').lower()
-        if is_store and not is_system:
-            if not storeService.store_exists(entity_id):
-                return response_error("store not found", {'params': request.json})
-
-        if not is_store and not is_system:
-            if not userService.user_exists(entity_id):
-                return response_error("user not found", {'params': request.json})
+            if not is_store:
+                if not userService.user_exists(entity_code):
+                    return response_error("user not found", {'params': request.json})
     else:
         return response_error("missing params", {'params': request.json})
 

@@ -422,6 +422,7 @@ class FlaskTestCase(BaseTestCase):
             'description': self.fake.sentence(nb_words=10),
             'is_system_folder': True,
             'is_store_folder': False,
+            'entity_code': str(None),
             'parent_level': 1
         }
         response = self.request_post('api/media/folder/create', token, None, None, post_data)
@@ -474,7 +475,7 @@ class FlaskTestCase(BaseTestCase):
         query_string ={
             'is_system': True,
             'is_store': False,
-            'entity_id': 'none'
+            'entity_code': str(None),
         }
         response = self.request_get('/api/media/list', token, query_string)
         self.assertRequestPassed(response, 'failed request list media items')
