@@ -1,15 +1,14 @@
-from logging import Logger
-
+from flask import Flask
 from sqlalchemy import desc
 
-from config.api import cache
+from config.setup import cache
 from config.database import db
 import uuid
 
 from src.exceptions import ParamsNotMatchCreateStore
 from src.models import StoreHours, StoreLocations, Store
 from src.schemas import StoreSchema, StoreLocationSchema, StoreHourSchema
-from src.services import FileSystemService
+from src.services import FileSystemService, MediaService
 from src.utils.validations import valid_currency_code
 
 storeSchema = StoreSchema()
@@ -18,9 +17,10 @@ storeHourSchema = StoreHourSchema()
 
 
 class StoreService:
-    def __init__(self, logger: Logger, fileSystemService: FileSystemService):
-        self.logger = logger
+    def __init__(self, app: Flask, fileSystemService: FileSystemService, mediaService: MediaService):
+        self.logger = app.logger
         self.fileSystemService = fileSystemService
+        self.mediaService = mediaService
 
     @cache.memoize(50)
     def get_stores(self, return_model=False):
@@ -150,7 +150,7 @@ class StoreService:
         store = Store(store_code, owner_id, store_object['name'], store_object['currency_code'], None, store_object['description'])
         db.session.add(store)
         db.session.commit()
-        self.fileSystemService.create_store_folder(store_code)
+        self.fileSystemService.create_store_folder_initialize(store_code)
         return self.get_store_by_status_code(store_code)
 
     def freeze_store(self, uid, store_code):

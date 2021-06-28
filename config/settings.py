@@ -62,10 +62,12 @@ class Config:
     # Upload System Settings
 
     UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER')
+    UPLOAD_TEMP_FOLDER = os.getenv('UPLOAD_TEMP_FOLDER')
     UPLOAD_SYSTEM_FOLDER = os.getenv('UPLOAD_SYSTEM_FOLDER')
     UPLOAD_USERS_FOLDER = os.getenv('UPLOAD_USERS_FOLDER')
     UPLOAD_STORES_FOLDER = os.getenv('UPLOAD_STORES_FOLDER')
     UPLOAD_TYPE_OPTIONS = [UPLOAD_SYSTEM_FOLDER, UPLOAD_USERS_FOLDER, UPLOAD_STORES_FOLDER]
+    MAX_CONTENT_LENGTH = 8 * 1024 * 1024
     # SMTP server config
     # --------------------------------------------------------------------
     # SERVER_EMAIL = 'Sivan Wolberg <sivan.wolberg@wolberg.pro>'
@@ -76,6 +78,7 @@ class Config:
     # EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
     # Testing settings
     CLEAR_FOLDER_UPLOAD = False
+    TESTING_ASSETS_FOLDER = ''
     # General Settings
     MAX_PARENT_LEVEL = os.getenv('MAX_PARENT_LEVEL')
 
@@ -90,6 +93,7 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     ENV = os.environ.get("FLASK_ENV", "testing")
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    TESTING_ASSETS_FOLDER = os.getenv('TESTING_ASSETS_FOLDER') if os.getenv('TESTING_ASSETS_FOLDER') is not None else os.path.join('test', 'assets')
     DEBUG = True
     SENTRY_ENABLE = False
     TESTING = True

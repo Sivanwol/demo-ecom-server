@@ -6,7 +6,7 @@ from src.services import SettingsService
 from src.utils.enums import RolesTypes
 from src.utils.firebase_utils import check_user, create_firebase_user
 from src.utils.responses import response_error
-from config.containers import container
+from config.app import containers
 
 
 def verify_uid(userService, uid):
@@ -53,12 +53,12 @@ def setup_support_user(roleSerivce, email, password):
 
 
 def sync_system_settings():
-    settingsService = container[SettingsService]
+    settingsService = containers[SettingsService]
     settingsService.forceSync()
 
 
 def init_system_settings():
-    settingsService = container[SettingsService]
+    settingsService = containers[SettingsService]
     settingsService.init_system_settings()
 
 

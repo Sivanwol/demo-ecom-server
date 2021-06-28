@@ -1,8 +1,9 @@
 import json
 import os
-from logging import Logger
 
-from config.api import redis_connection
+from flask import Flask
+
+from config.setup import redis_connection
 from config.database import db
 from src.exceptions import SettingsNotSync
 from src.models import Settings
@@ -10,14 +11,14 @@ from src.utils.general import Struct
 
 
 class SettingsService:
-    def __init__(self, logger: Logger):
-        self.logger = logger
+    def __init__(self, app: Flask):
+        self.logger = app.logger
 
     def getItem(self, key):
         value = None
         if not redis_connection.exists('sync_in_progress'):
             raise SettingsNotSync()
-
+        key = f'{os.environ.get("FLASK_ENV", "development")}_{key}'
         if not bool(int(redis_connection.get('sync_in_progress'))):
             key_is_json = "%s_is_json" % key
             if not redis_connection.exists(key):

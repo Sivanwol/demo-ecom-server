@@ -1,5 +1,6 @@
 import json
 import os
+import shutil
 from random import randint
 from tempfile import mkstemp
 
@@ -7,9 +8,9 @@ from faker import Faker
 from firebase_admin import auth
 from flask_testing import TestCase
 from config import settings
-from config.containers import app, socketio, container
+from config.app import app, socketio, containers
 from config.database import db
-from src.services import FileSystemService, FirebaseService, MediaService, RolesService, StoreService, UserService, SettingsService
+from src.services import FileSystemService, FirebaseService, MediaService, RoleService, StoreService, UserService, SettingsService
 from src.utils.enums import RolesTypes
 from src.utils.firebase_utils import create_firebase_user as create_fb_user, setup_firebase_client, login_user
 from src.utils.general import is_json_key_present, Struct
@@ -30,12 +31,14 @@ class BaseTestCase(TestCase):
     global_password = "password!0101"
     firebase_client_object = None
     firebaseService = FirebaseService()
-    userService = container[UserService]
-    roleService = container[RolesService]
-    storeService = container[StoreService]
-    fileSystemService = container[FileSystemService]
-    mediaService = container[MediaService]
-    settingsService = container[SettingsService]
+    userService = containers[UserService]
+    roleService = containers[RoleService]
+    storeService = containers[StoreService]
+    fileSystemService = containers[FileSystemService]
+    mediaService = containers[MediaService]
+    settingsService = containers[SettingsService]
+
+    config = settings[os.environ.get("FLASK_ENV", "development")]
 
     def create_app(self):
         # app.config.from_object('config.TestConfig')
@@ -46,7 +49,6 @@ class BaseTestCase(TestCase):
         return app.flask_app
 
     def setUp(self):
-
         self.fd, temp_path = mkstemp()
         self.app_context = self.app.app_context()
         self.app_context.push()
@@ -54,8 +56,6 @@ class BaseTestCase(TestCase):
         self.userUtils = UserTestUtills(self)
         self.mediaUtils = MediaTestUtills(self)
         self.ws_client = socketio.test_client(self.app)
-        if settings[os.environ.get("FLASK_ENV", "development")].CLEAR_FOLDER_UPLOAD:
-            self.clear_uploads_folders()
         db.create_all()
         db.session.commit()
         self.roleService.insert_roles()
@@ -70,29 +70,46 @@ class BaseTestCase(TestCase):
                                           settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_SYSTEM_FOLDER)
         folders = self.fileSystemService.get_folder_list(upload_system_path)
         for folder in folders:
-            self.fileSystemService.remove_folders(folder)
+            self.fileSystemService.remove_folder(folder)
 
         # let clear users folders
         upload_system_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
                                           settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_USERS_FOLDER)
         folders = self.fileSystemService.get_folder_list(upload_system_path)
         for folder in folders:
-            self.fileSystemService.remove_folders(folder)
+            self.fileSystemService.remove_folder(folder)
 
         # let clear stores folders
         upload_system_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
                                           settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_STORES_FOLDER)
         folders = self.fileSystemService.get_folder_list(upload_system_path)
         for folder in folders:
-            self.fileSystemService.remove_folders(folder)
+            self.fileSystemService.remove_folder(folder)
+
+        # let clear temp folder
+        upload_temp_path = os.path.join(settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_FOLDER,
+                                        settings[os.environ.get("FLASK_ENV", "development")].UPLOAD_TEMP_FOLDER)
+        for filename in os.listdir(upload_temp_path):
+            file_path = os.path.join(upload_temp_path, filename)
+            if file_path != os.path.join(upload_temp_path, '.gitkeep'):
+                try:
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.unlink(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                except Exception as e:
+                    print('Failed to delete %s. Reason: %s' % (file_path, e))
 
     def ws_renew_connection(self, namespace=None):
         self.ws_client.connect(namespace=namespace)
 
     def tearDown(self):
-        os.close(self.fd)
+        self.fd, temp_path = mkstemp()
         db.session.remove()
         db.drop_all()
+        if settings[os.environ.get("FLASK_ENV", "development")].CLEAR_FOLDER_UPLOAD:
+            self.clear_uploads_folders()
+        os.close(self.fd)
 
     def login_user(self, email):
         user = login_user(email, self.global_password)
@@ -260,6 +277,31 @@ class BaseTestCase(TestCase):
             query_string=query_string,
             headers=headers
         )
+
+    def request_files_upload(self, url, token, query_string=None, extra_headers=None, data=None):
+        if extra_headers is None:
+            extra_headers = {}
+        if data is None:
+            data = {}
+        if query_string is None:
+            query_string = {}
+        headers = {'Content-Type': 'multipart/form-data', 'Authorization': 'Bearer %s' % token} | extra_headers
+        print('request post -> %s' % url)
+        print('request query string -> %s' % json.dumps(query_string))
+        print('request headers -> %s' % json.dumps(headers))
+        return self.client.post(
+            url,
+            data=data,
+            query_string=query_string,
+            headers=headers
+        )
+
+    def get_file_content(self, file_name, allow_open=True):
+        file = os.path.join(self.config.TESTING_ASSETS_FOLDER, file_name)
+        return {
+            'raw': (open(file, 'rb'), file) if allow_open else None,
+            'path': os.path.join(self.config.TESTING_ASSETS_FOLDER, file_name)
+        }
 
     def assertRequestPassed(self, response, message):
         print('response data -> %s' % response.data)

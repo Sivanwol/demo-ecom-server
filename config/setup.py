@@ -45,11 +45,11 @@ def load_application():
 
 app = load_application()
 
-redis_url = "redis://{password}@{hostname}:{port}/{db}".format(
-    password=settings[os.environ.get("FLASK_ENV", "development")].REDIS_PASSWORD,
-    hostname=settings[os.environ.get("FLASK_ENV", "development")].REDIS_HOST,
-    port=settings[os.environ.get("FLASK_ENV", "development")].REDIS_PORT,
-    db=settings[os.environ.get("FLASK_ENV", "development")].REDIS_DB,
+redis_url = "redis://{password}@{host}:{port}/{db}".format(
+    password=app.config['REDIS_PASSWORD'],
+    host=app.config['REDIS_HOST'],
+    port=app.config['REDIS_PORT'],
+    db=app.config['REDIS_DB']
 )
 # on level of testing we dont need redis also need disable the caching system
 if os.environ.get("FLASK_ENV", "development") == 'testing':
@@ -60,18 +60,18 @@ if os.environ.get("FLASK_ENV", "development") == 'testing':
     redis_connection = FakeStrictRedis()
 else:
     redis_connection = Redis(
-        password=settings[os.environ.get("FLASK_ENV", "development")].REDIS_PASSWORD,
-        host=settings[os.environ.get("FLASK_ENV", "development")].REDIS_HOST,
-        port=settings[os.environ.get("FLASK_ENV", "development")].REDIS_PORT,
-        db=settings[os.environ.get("FLASK_ENV", "development")].REDIS_DB
+        password=app.config['REDIS_PASSWORD'],
+        host=app.config['REDIS_HOST'],
+        port=app.config['REDIS_PORT'],
+        db=app.config['REDIS_DB']
     )
     cache = Cache(app, config={
         'CACHE_TYPE': 'RedisCache',
-        'CACHE_KEY_PREFIX': settings[os.environ.get("FLASK_ENV", "development")].CACHE_KEY_PREFIX,
-        'CACHE_REDIS_HOST': settings[os.environ.get("FLASK_ENV", "development")].REDIS_HOST,
-        'CACHE_REDIS_PORT': settings[os.environ.get("FLASK_ENV", "development")].REDIS_PORT,
-        'CACHE_REDIS_DB': settings[os.environ.get("FLASK_ENV", "development")].REDIS_CACHE_DB,
-        'CACHE_REDIS_PASSWORD': settings[os.environ.get("FLASK_ENV", "development")].REDIS_PASSWORD
+        'CACHE_KEY_PREFIX': app.config['CACHE_KEY_PREFIX'],
+        'CACHE_REDIS_HOST': app.config['REDIS_HOST'],
+        'CACHE_REDIS_PORT': app.config['REDIS_PORT'],
+        'CACHE_REDIS_DB': app.config['REDIS_CACHE_DB'],
+        'CACHE_REDIS_PASSWORD': app.config['REDIS_PASSWORD']
     })
     celery = Celery(__name__, backend=redis_url, broker=redis_url)
 cache.init_app(app)

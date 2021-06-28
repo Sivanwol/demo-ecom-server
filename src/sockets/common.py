@@ -1,6 +1,6 @@
 from flask import request
 
-from config.containers import socketio
+from config.app import socketio
 from src.services.user import UserService
 
 

@@ -46,35 +46,43 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
         rollback that will fetch the  env_[key]_temp and return to the env_[key] as well reset flag
 
 #### Upload files workflow logic overall
-- [ ] Upload files with relevant metadata
-- [ ] Check if folder exist (unless it root)
-- [ ] Check if entity_id existed (if type is user or store)
-- [ ] check if files validate (both size and type)
-- [ ] check permission if type=user (it his own user or support allow to upload files directly)
-- [ ] check permission if type=store (you within the group allow uploading) or/and you are the within staff/owner of the store or you support user allow to upload as well
-- [ ] check permission if type=system if you within staff platform
-- [ ] upload files to relevant location
-- [ ] register files on db
-- [ ] return db files register to client
+- [x] Upload files with relevant metadata
+- [x] Check if folder exist (unless it root)
+- [x] Check if entity_id existed (if type is user or store)
+- [x] check if files validate (both size and type)
+- [x] check permission if type=user (it his own user or support allow to upload files directly)
+- [x] check permission if type=store (you within the group allow uploading) or/and you are the within staff/owner of the store or you support user allow to upload as well
+- [x] check permission if type=system if you within staff platform
+- [x] upload files to relevant location
+- [x] register files on db
+- [x] return db files register to client
 
+#### Create Folder workflow logic overall
+- [x] check if user have the correct permissions to do this action
+- [x] check if sub path existed and register
+- [x] create folder & create record
+- [x] return record
+
+#### List of Files/Folder
+this will fetch list of files/ folder sort by name, size with paging support
 #### Delete Folder workflow logic overall
-- [ ] check if user have the correct permissions to do this action
-- [ ] Locate all relevant file both on sub path and the dest folder
+- [x] check if user have the correct permissions to do this action
+- [x] Locate all relevant file both on sub path and the dest folder
 - [x] Locate all sup folders
-- [ ] Remove all db files records
-- [ ] Remove All Relevant files
-- [ ] Remove folder and sub folder records
-- [ ] remove the folders itself
+- [x] Remove all db files records
+- [x] Remove All Relevant files
+- [x] Remove folder and sub folder records
+- [x] remove the folders itself
 ##### Step I
-- [ ] check if user have the correct permissions to do this action
+- [x] check if user have the correct permissions to do this action
 - [x] Locate all sup folders
-- [ ] Remove folder and sub folder records
-- [ ] remove the folders itself
+- [x] Remove folder and sub folder records
+- [x] remove the folders itself
 ##### Step II
-- [ ] this start after upload process will be done
-- [ ] Locate all relevant file both on sub path and the dest folder
-- [ ] Remove all db files records
-- [ ] Remove All Relevant files
+- [x] this start after upload process will be done
+- [x] Locate all relevant file both on sub path and the dest folder
+- [x] Remove all db files records
+- [x] Remove All Relevant files
 ### Tests
 - [x] check on the model media get_all_parent_folders see if it give all relevant items create till lvl 4 items
 - [x] DI Checks overall system check that all still work as intended
@@ -83,29 +91,32 @@ Solution I pick mostly for cost reason is monolith server mostly stuff will buil
 - [x] check none existed settings
 - [x] check force sync settings via service
 #### Create Folder
-- [ ] check system folder create with incorrect permissions
-- [ ] check system folder create (root level)
-- [ ] check system folder create (sub folder level 1)
+- [x] check system folder create with incorrect permissions
+- [x] check system folder create (root level)
+- [x] check system folder create (sub folder level 1)
 - [ ] check system folder create (sub folder level 2)
-- [ ] check system folder create (sub folder level 3)
-- [ ] Check create root user folder
-  - [ ] check folder create with incorrect permissions
-  - [ ] check sup folder creation (level 1)
+- [x] Check create root user folder
+  - [x] check folder create with incorrect permissions
+  - [x] check sup folder creation (level 1)
   - [ ] check sup folder creation (level 2)
-- [ ] Check create root store folder
-  - [ ] check folder create with incorrect permissions
-  - [ ] check sup folder creation ( level 1)
+- [x] Check create root store folder
+  - [x] check folder create with incorrect permissions
+  - [x] check sup folder creation ( level 1)
   - [ ] check sup folder creation ( level 2)
 #### Delete Folders
 - [ ] check folder delete with incorrect permissions
-- [ ] delete folder root level
+- [ ] delete folder root level on type user
+  - [ ] check both db records and actual files has been deleted
+- [ ] delete folder root level on type stores
+  - [ ] check both db records and actual files has been deleted
+- [ ] delete folder root level on type system
   - [ ] check both db records and actual files has been deleted
 
 #### Upload Files
-- [ ] check files upload with incorrect permissions
-- [ ] upload files with correct metadata
-- [ ] check if files existed abd db records existed
-- [ ] upload files to sub path
+- [x] check files upload with incorrect permissions
+- [x] upload files with correct metadata
+- [x] check if files existed abd db records existed
+- [x] upload files to sub path
 
 #### Delete Files
 - [ ] check folder delete with incorrect permissions

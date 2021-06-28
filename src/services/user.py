@@ -1,23 +1,23 @@
-from logging import Logger
-
 import firebase_admin
 from firebase_admin import auth
+from flask import Flask
 from sqlalchemy import or_, desc, asc
 
-from config.api import cache
+from config.setup import cache
 from config.database import db
 from src.models import User, Store
 from src.schemas import UserSchema
-from src.services import FileSystemService
+from src.services import FileSystemService, MediaService
 from src.utils.enums import AllowSortByDirection
 from src.utils.firebase_utils import create_firebase_user
 from src.utils.responses import response_error
 
 
 class UserService:
-    def __init__(self, logger: Logger, fileSystemService: FileSystemService):
-        self.logger = logger
+    def __init__(self,app: Flask, fileSystemService: FileSystemService, mediaService: MediaService):
+        self.logger = app.logger
         self.fileSystemService = fileSystemService
+        self.mediaService = mediaService
 
     user_schema = UserSchema()
     """Verifies the signature and data for the provided JWT.
@@ -141,7 +141,7 @@ class UserService:
                 user_exist = self.user_exists(uid)
                 if not user_exist:
                     return response_error('user not active', None, 400)
-            request.uid = firebase_obj["uid"]
+            return firebase_obj["uid"]
         except:
             return response_error('Invalid token provided', None, 400)
 
@@ -258,6 +258,7 @@ class UserService:
         return True
 
     def sync_firebase_user(self, uid, roles, email, fullname, is_platform_user, store_code=None, is_new_user=True):
+        self.fileSystemService.create_user_folder_initialize(uid)
         user = User(uid, email, fullname, True, is_new_user)
         if not is_platform_user:
             if store_code is not None:
@@ -268,4 +269,3 @@ class UserService:
         user.add_user_roles(roles)
         db.session.add(user)
         db.session.commit()
-        self.fileSystemService.create_user_folder(uid)

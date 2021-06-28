@@ -12,4 +12,4 @@ class UnableCreateFolder(Error):
     def __init__(self, folder_name, sub_path=None):
         if sub_path is None:
             sub_path = ''
-        self.message = 'unable create folder %s on sub_path (%s)' % (folder_name, sub_path)
+        self.message = 'unable create folder code %s on sub_path (%s)' % (folder_name, sub_path)
