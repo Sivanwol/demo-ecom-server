@@ -1,10 +1,14 @@
-from flask import send_file
-import magic
+import os
+from io import BytesIO
+
+from flask import send_file, abort, send_from_directory
+import mimetypes
 from sqlalchemy import Integer, String, Boolean, Text, Float
 from config.database import db
 from src.models.media_folder import MediaFolder
 from src.models.mixin import TimestampMixin
 from src.utils.enums import MediaAssetsType
+from flask import safe_join as _safe_join
 
 
 class MediaFile(TimestampMixin, db.Model):
@@ -83,10 +87,16 @@ class MediaFile(TimestampMixin, db.Model):
         return f'/media/{self.entity_code}/file/{self.code}'
 
     def download_file(self):
-        mime = magic.Magic(mime=True)
-        mimetype = mime.from_file(self.file_location)
-        result = send_file(self.file_location,
-                           mimetype=mimetype,
-                           as_attachment=True,
-                           conditional=False)
+        safe_join = lambda r, *paths: os.path.normpath(_safe_join(r, *[p.replace(os.path.sep, "/") for p in paths]))
+        mimetype = mimetypes.guess_type(self.file_location)
+        file = self.file_location
+        result = b''
+        if os.path.exists(file):
+            result = send_from_directory(os.path.dirname(file), os.path.basename(file),
+                                         mimetype=mimetype[0],
+                                         attachment_filename=self.file_name,
+                                         as_attachment=True,
+                                         conditional=True, cache_timeout=0)
+        else:
+            abort(404)
         return result

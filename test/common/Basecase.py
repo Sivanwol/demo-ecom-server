@@ -296,10 +296,10 @@ class BaseTestCase(TestCase):
             headers=headers
         )
 
-    def get_file_content(self, file_name):
+    def get_file_content(self, file_name, allow_open=True):
         file = os.path.join(self.config.TESTING_ASSETS_FOLDER, file_name)
         return {
-            'raw': (open(file, 'rb'), file),
+            'raw': (open(file, 'rb'), file) if allow_open else None,
             'path': os.path.join(self.config.TESTING_ASSETS_FOLDER, file_name)
         }
 

@@ -165,7 +165,7 @@ class FileSystemService:
                 file.save(file_location)
                 response.append({
                     'file_location': file_location,
-                    'file_name': file_name,
+                    'file_name': file.filename,
                     'file_ext': extension,
                     'file_type': self.identify_file_type(extension),
                     'file_original_name': file.filename,

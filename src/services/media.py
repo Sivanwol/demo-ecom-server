@@ -58,7 +58,7 @@ class MediaService:
             return schema.dumps(media)
         return media
 
-    def get_file(self, code, return_model=True):
+    def get_file(self, code, return_model=False):
         media = MediaFile.query.filter_by(code=str(code)).first()
         if media is None:
             return False

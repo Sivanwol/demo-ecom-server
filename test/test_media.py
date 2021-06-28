@@ -1,5 +1,6 @@
 # test/test_media.py
 import unittest
+from io import BytesIO
 
 from src.models import MediaFolder, MediaFile
 from src.utils.general import Struct
@@ -498,3 +499,31 @@ class FlaskTestCase(BaseTestCase):
         self.assertEqual(len(response_data.data), 2)
         self.assertEqual(response_data.data[0].folder.code, root_code)
         self.assertEqual(len(response_data.data[0].files), 2)
+
+    def test_download_file(self):
+        with self.client:
+            self.settingsService.syncSettings()
+            media_folder = self.mediaUtils.create_system_folder()
+            user_object = self.login_user(self.platform_owner_user)
+            uid = user_object['uid']
+            token = user_object['idToken']
+            post_data = {
+                'folder_code': media_folder.code,
+                'alias': self.fake.domain_word(),
+                'is_store_file': False,
+                'is_system_file': True,
+                'files': []
+            }
+            post_data['files'].append(self.get_file_content('dragon.png')['raw'])
+            response = self.request_files_upload('/api/media/None/uploads', token, None, None, post_data)
+            self.assertRequestPassed(response, 'failed request upload media file')
+            response_data = Struct(response.json)
+            self.assertIsNotNone(response_data)
+            self.assertTrue(response_data.status)
+            self.assertIsNotNone(response_data.data)
+            self.assertEqual(len(response_data.data), 1)
+            data = response_data.data[0]
+            file_code = data.code
+            self.assertTrue(self.mediaService.virtual_file_exists(file_code))
+            response = self.request_get(f'/api/media/file/{file_code}', token)
+            self.assertRequestPassed(response, 'failed request download media file')

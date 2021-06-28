@@ -114,20 +114,20 @@ def toggle_published_files(uid, file_code):
     return response_success(media)
 
 
-@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<entity_code>/file/<file_code>"), methods=["GET"])
+@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/file/<file_code>"), methods=["GET"])
 @check_token_of_user
-def download_media_file(uid, entity_code, file_code):
+def download_media_file(uid, file_code):
     mediaService = containers[MediaService]
     userService = containers[UserService]
     roleService = containers[RoleService]
-    media = mediaService.get_file(file_code)
+    media = mediaService.get_file(file_code,True)
     if not media:
         return response_error("no file found")
 
-    is_system_file = media['is_system_file']
-    is_store_file = media['is_store_file']
+    is_system_file = media.is_system_file
+    is_store_file = media.is_store_file
     is_user_file = False
-    if not media['is_system_file'] and not media['is_store_file']:
+    if not is_system_file and not is_store_file:
         is_user_file = True
 
     if is_system_file:
@@ -137,13 +137,13 @@ def download_media_file(uid, entity_code, file_code):
     if is_store_file:
         roles = [RolesTypes.Support.value]
         user = userService.get_user(uid, True)
-        if not userService.user_has_any_role_matched(uid, roles) or user.store_code != media['entity_code']:
+        if not userService.user_has_any_role_matched(uid, roles) or user.store_code != media.entity_code:
             return response_error("Permission Error", None, 403)
     if is_user_file:
         supportRole = roleService.get_roles([RolesTypes.Support.value])
-        if userService.user_has_any_role_matched(uid, supportRole) or uid != media['entity_code']:
+        if userService.user_has_any_role_matched(uid, supportRole) or uid != media.entity_code:
             return response_error("Permission Error", None, 403)
-    return response_success(media)
+    return media.download_file()
 
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/folder/create"), methods=["POST"])
