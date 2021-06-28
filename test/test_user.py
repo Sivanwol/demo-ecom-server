@@ -735,7 +735,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertRequestPassed(response, 'bind user to store request failed')
             user = self.userService.get_user(uid, True)
             self.assertFalse(user.is_pass_tutorial)
-            response = self.request_put('/api/user/{}/passed_tutorial'.format(uid), token)
+            response = self.request_put('/api/user/passed_tutorial', token)
             self.assertRequestPassed(response, 'mark user pass tutrial as passed request failed')
             user = self.userService.get_user(uid, True)
             self.assertTrue(user.is_pass_tutorial)

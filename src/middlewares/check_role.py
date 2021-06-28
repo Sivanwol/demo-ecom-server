@@ -12,7 +12,6 @@ def check_role(*role_names):
         @wraps(f)
         def decorator(*args, **kwargs):
             userService = containers[UserService]
-            uid = None
             try:
                 result = userService.check_user_auth(request, True)
 

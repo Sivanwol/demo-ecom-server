@@ -17,7 +17,7 @@ from src.utils.validations import vaild_per_page, valid_user_list_by_permissions
 
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/user/<request_uid>"))
-def get(uid, request_uid):
+def get(request_uid):
     userService = containers[UserService]
     if verify_uid(userService, request_uid):
         try:
@@ -174,22 +174,24 @@ def mark_user_passed_tutorial(uid):
     return response_error("Error on format of the params", {'uid': uid})
 
 
-@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/user/update"), methods=["PUT"])
+@current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/user/<request_uid>/update"), methods=["PUT"])
 @check_token_of_user
-def update_user_info(uid):
+def update_user_info(uid,request_uid):
     userService = containers[UserService]
-    if not request.is_json:
-        return response_error("Request Data must be in json format", request.data)
-    try:
-        schema = UpdateUserInfo()
-        data = schema.load(request.json)
-    except ValidationError as e:
-        return response_error("Error on format of the params", {'params': request.json})
-    data = Struct(data)
-    if not valid_currency_code(data.currency) or not valid_country_code(data.country):
-        return response_error("Error on format of the params", {'params': request.json})
-    userService.update_user_info(uid, data)
-    return response_success({})
+    if verify_uid(userService, request_uid):
+        if not request.is_json:
+            return response_error("Request Data must be in json format", request.data)
+        try:
+            schema = UpdateUserInfo()
+            data = schema.load(request.json)
+        except ValidationError as e:
+            return response_error("Error on format of the params", {'params': request.json})
+        data = Struct(data)
+        if not valid_currency_code(data.currency) or not valid_country_code(data.country):
+            return response_error("Error on format of the params", {'params': request.json})
+        userService.update_user_info(request_uid, data)
+        return response_success({})
+    return response_error("Error on format of the params", {'uid': request_uid})
 
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/user/<uid>/update"), methods=["PUT"])
