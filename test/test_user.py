@@ -617,11 +617,10 @@ class FlaskTestCase(BaseTestCase):
             user = self.userService.get_user(owner_uid, True)
             self.assertIsNone(user.store_code)
             store_name = self.fake.company()
-            currency_code = self.fake.currency_code()
             post_data = {
                 'name': store_name,
                 'description': 'store description',
-                'currency_code': currency_code
+                'currency_code': 'USD'
             }
             response = self.request_post('/api/store/%s/create' % owner_uid, owner_token, None, None, post_data)
             self.assertRequestPassed(response, 'create store request failed')
