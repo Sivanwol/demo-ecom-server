@@ -230,7 +230,7 @@ class MediaService:
                 file_location = os.path.join(user_path, metadata['entity_code'], root_media.code)
                 if sub_path != '':
                     file_location = os.path.join(user_path, metadata['entity_code'], root_media.code, sub_path)
-            file = MediaFile(str(uuid4()), uid, root_media.code, os.path.join(file_location, file_name), file_type.value, file_size, file_name,
+            file = MediaFile(str(uuid4()), uid, metadata['entity_code'], root_media.code, os.path.join(file_location, file_name), file_type.value, file_size, file_name,
                              file_ext, False, is_system_file, is_store_file)
             db.session.add(file)
             self.fileSystemService.temp_move_file(temp_file_location, os.path.join(file_location, file_name))
