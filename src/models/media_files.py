@@ -80,7 +80,7 @@ class MediaFile(TimestampMixin, db.Model):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
     def get_download_uri(self):
-        return f'/media/{self.entity_id}/file/{self.code}'
+        return f'/media/{self.entity_code}/file/{self.code}'
 
     def download_file(self):
         mime = magic.Magic(mime=True)
