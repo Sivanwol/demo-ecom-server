@@ -53,7 +53,7 @@ class MediaTestUtills:
             'description': self.test_object.fake.sentence(nb_words=10),
             'is_system_folder': True,
             'is_store_folder': False,
-            'entity_id': uid,
+            'entity_code': str(None),
             'parent_level': 1
         }
         response = self.test_object.request_post('api/media/folder/create', token, None, None, post_data)

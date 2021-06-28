@@ -102,13 +102,13 @@ class MediaService:
             is_user_folder = False
             if not is_system_folder and not is_store_folder:
                 is_user_folder = True
-            if not is_system_folder:
+            if is_store_folder or is_user_folder:
                 store_dir = app.config['UPLOAD_STORES_FOLDER']
                 type = app.config['UPLOAD_USERS_FOLDER'] if is_user_folder else store_dir
-                if sub_path is not None and entity_code is not None:
-                    if self.fileSystemService.folder_exists(type, entity_code, sub_path):
-                        verify_folder = True
-            else:
+                if self.fileSystemService.folder_exists(type, entity_code, sub_path):
+                    verify_folder = True
+
+            if is_system_folder:
                 path = os.path.join(app.config['UPLOAD_FOLDER'],
                                     app.config['UPLOAD_SYSTEM_FOLDER'],
                                     root_media.code)

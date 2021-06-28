@@ -52,6 +52,7 @@ class FlaskTestCase(BaseTestCase):
                 'name': self.fake.domain_word(),
                 'alias': self.fake.domain_word(),
                 'description': self.fake.sentence(nb_words=10),
+                'entity_code': str(None),
                 'is_system_folder': True,
                 'is_store_folder': False,
                 'parent_level': 1
@@ -84,6 +85,7 @@ class FlaskTestCase(BaseTestCase):
                 'name': self.fake.domain_word(),
                 'alias': self.fake.domain_word(),
                 'description': self.fake.sentence(nb_words=10),
+                'entity_code': str(None),
                 'is_system_folder': True,
                 'is_store_folder': False,
                 'parent_level': 1
@@ -112,6 +114,7 @@ class FlaskTestCase(BaseTestCase):
                 'name': self.fake.domain_word(),
                 'alias': self.fake.domain_word(),
                 'description': self.fake.sentence(nb_words=10),
+                'entity_code': str(None),
                 'is_system_folder': True,
                 'is_store_folder': False,
                 'parent_level': 2,
@@ -150,7 +153,7 @@ class FlaskTestCase(BaseTestCase):
                 'description': self.fake.sentence(nb_words=10),
                 'is_system_folder': True,
                 'is_store_folder': False,
-                'entity_id': uid,
+                'entity_code': uid,
                 'parent_level': 1
             }
             response = self.request_post('api/media/folder/create', token, None, None, post_data)
@@ -183,7 +186,7 @@ class FlaskTestCase(BaseTestCase):
                 'description': self.fake.sentence(nb_words=10),
                 'is_system_folder': True,
                 'is_store_folder': False,
-                'entity_id': uid,
+                'entity_code': uid,
                 'parent_level': 1
             }
             response = self.request_post('api/media/folder/create', token, None, None, post_data)
@@ -212,7 +215,7 @@ class FlaskTestCase(BaseTestCase):
                 'description': self.fake.sentence(nb_words=10),
                 'is_system_folder': True,
                 'is_store_folder': False,
-                'entity_id': uid,
+                'entity_code': uid,
                 'parent_level': 2,
                 'parent_folder_code': root_folder_code
             }
@@ -250,7 +253,7 @@ class FlaskTestCase(BaseTestCase):
                 'description': self.fake.sentence(nb_words=10),
                 'is_system_folder': False,
                 'is_store_folder': True,
-                'entity_id': store_code,
+                'entity_code': store_code,
                 'parent_level': 1
             }
             response = self.request_post('api/media/folder/create', token, None, None, post_data)
@@ -284,7 +287,7 @@ class FlaskTestCase(BaseTestCase):
                 'description': self.fake.sentence(nb_words=10),
                 'is_system_folder': False,
                 'is_store_folder': True,
-                'entity_id': store_code,
+                'entity_code': store_code,
                 'parent_level': 1
             }
             response = self.request_post('api/media/folder/create', token, None, None, post_data)
@@ -313,7 +316,7 @@ class FlaskTestCase(BaseTestCase):
                 'description': self.fake.sentence(nb_words=10),
                 'is_system_folder': False,
                 'is_store_folder': True,
-                'entity_id': store_code,
+                'entity_code': store_code,
                 'parent_level': 2,
                 'parent_folder_code': root_folder_code
             }
