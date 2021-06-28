@@ -261,7 +261,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertIsNotNone(response_data.data)
             folder_code = response_data.data.media.code
             result = MediaFolder.query.filter_by(code=folder_code).first()
-            self.assertTrue(self.mediaService.virtual_folder_exists(folder_code,store_code))
+            self.assertTrue(self.mediaService.virtual_folder_exists(folder_code, store_code))
             self.assertIsNotNone(result)
             self.assertEqual(result.name, response_data.data.media.name)
             self.assertEqual(result.alias, response_data.data.media.alias)
@@ -295,7 +295,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertIsNotNone(response_data.data)
             root_folder_code = response_data.data.media.code
             root_media = MediaFolder.query.filter_by(code=root_folder_code).first()
-            self.assertTrue(self.mediaService.virtual_folder_exists(root_folder_code,store_code))
+            self.assertTrue(self.mediaService.virtual_folder_exists(root_folder_code, store_code))
             self.assertIsNotNone(root_media)
             self.assertEqual(root_media.code, response_data.data.media.code)
             self.assertEqual(root_media.name, response_data.data.media.name)
@@ -360,7 +360,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertIsNotNone(response_data)
             self.assertTrue(response_data.status)
             self.assertIsNotNone(response_data.data)
-            self.assertEqual(len(response_data.data) , 1)
+            self.assertEqual(len(response_data.data), 1)
             data = response_data.data[0]
             file_code = data.code
             result = MediaFile.query.filter_by(code=file_code).first()
@@ -395,7 +395,7 @@ class FlaskTestCase(BaseTestCase):
             self.assertIsNotNone(response_data)
             self.assertTrue(response_data.status)
             self.assertIsNotNone(response_data.data)
-            self.assertEqual(len(response_data.data) , 2)
+            self.assertEqual(len(response_data.data), 2)
             for data in response_data.data:
                 file_code = data.code
                 result = MediaFile.query.filter_by(code=file_code).first()
@@ -414,8 +414,6 @@ class FlaskTestCase(BaseTestCase):
         user_object = self.login_user(self.platform_owner_user)
         uid = user_object['uid']
         token = user_object['idToken']
-        list_folders = self.mediaUtils.create_media_folder_parents(uid, 2)
-
         post_data = {
             'name': self.fake.domain_word(),
             'alias': self.fake.domain_word(),
@@ -444,6 +442,17 @@ class FlaskTestCase(BaseTestCase):
         self.assertEqual(root_media.parent_folder_code, 'None')
         self.assertEqual(root_media.parent_level, 1)
         self.assertEqual(root_media.parent_level, response_data.data.media.parent_level)
+        post_data = {
+            'name': self.fake.domain_word(),
+            'alias': self.fake.domain_word(),
+            'description': self.fake.sentence(nb_words=10),
+            'is_system_folder': True,
+            'is_store_folder': False,
+            'entity_code': str(None),
+            'parent_level': 1
+        }
+        response = self.request_post('api/media/folder/create', token, None, None, post_data)
+        self.assertRequestPassed(response, 'failed request create folder root level')
         root_code = root_media.code
         post_data = {
             'folder_code': root_code,
@@ -460,7 +469,7 @@ class FlaskTestCase(BaseTestCase):
         self.assertIsNotNone(response_data)
         self.assertTrue(response_data.status)
         self.assertIsNotNone(response_data.data)
-        self.assertEqual(len(response_data.data) , 2)
+        self.assertEqual(len(response_data.data), 2)
         for data in response_data.data:
             file_code = data.code
             result = MediaFile.query.filter_by(code=file_code).first()
@@ -472,9 +481,9 @@ class FlaskTestCase(BaseTestCase):
             self.assertEqual(result.is_published, data.is_published)
             self.assertEqual(result.is_system_file, data.is_system_file)
             self.assertEqual(result.is_store_file, data.is_store_file)
-        query_string ={
-            'is_system': True,
-            'is_store': False,
+        query_string = {
+            'is_system': 1,
+            'is_store': 0,
             'entity_code': str(None),
         }
         response = self.request_get('/api/media/list', token, query_string)
@@ -483,3 +492,6 @@ class FlaskTestCase(BaseTestCase):
         self.assertIsNotNone(response_data)
         self.assertTrue(response_data.status)
         self.assertIsNotNone(response_data.data)
+        self.assertEqual(len(response_data.data), 2)
+        self.assertEqual(response_data.data[0].folder.code, root_code)
+        self.assertEqual(len(response_data.data[0].files), 2)

@@ -283,40 +283,41 @@ def get_media_list(uid):
         if not mediaService.virtual_folder_exists(from_folder_code):
             return response_error("folder not found", {'params': request.json})
 
-    if request.args.get('is_system', type=bool) is not None:
-        is_system = request.args.get('is_system', type=bool)
-    if request.args.get('is_store', type=bool) is not None:
-        is_store = request.args.get('is_store', type=bool)
-    if request.args.get('only_folder', type=bool) is not None:
-        only_folder = request.args.get('only_folder', type=bool)
+    if request.args.get('is_system', type=int) is not None:
+        is_system = True if request.args.get('is_system', type=int) ==1 else False
+    if request.args.get('is_store', type=int) is not None:
+        is_store = True if request.args.get('is_store', type=int) ==1 else False
+    if request.args.get('only_folder', type=int) is not None:
+        only_folder = True if request.args.get('only_folder', type=int) ==1 else False
+    if is_system and is_store:
+        return response_error("Cant get both system folder and store please pick", {'params': request.args})
     if not is_system:
         if request.args.get('entity_code') is not None and request.args.get('entity_code') != '':
             entity_code = request.args.get('entity_code').lower()
             if is_store:
                 if not storeService.store_exists(entity_code):
-                    return response_error("store not found", {'params': request.json})
+                    return response_error("store not found", {'params': request.args})
 
             if not is_store:
                 if not userService.user_exists(entity_code):
-                    return response_error("user not found", {'params': request.json})
+                    return response_error("user not found", {'params': request.args})
+        else:
+            return response_error("missing params", {'params': request.args})
     else:
-        return response_error("missing params", {'params': request.json})
-
-    if is_system:
         roles = [RolesTypes.Support.value, RolesTypes.Owner.value, RolesTypes.Accounts.value]
         if userService.user_has_any_role_matched(uid, roles):
             is_valid = True
     if is_store:
         roles = [RolesTypes.Support.value]
         user = userService.get_user(uid, True)
-        if userService.user_has_any_role_matched(uid, roles) or user.store_code == entity_id:
+        if userService.user_has_any_role_matched(uid, roles) or user.store_code == entity_code:
             is_valid = True
     if not is_system and not is_store:
         supportRole = roleService.get_roles([RolesTypes.Support.value])
-        if userService.user_has_any_role_matched(uid, supportRole) or request.uid == entity_id:
+        if userService.user_has_any_role_matched(uid, supportRole) or request.uid == entity_code:
             is_valid = True
 
     if is_valid:
-        result = mediaService.get_list(uid, entity_id, is_system, is_store, from_folder_code, parent_level, only_folder)
+        result = mediaService.get_list(uid, entity_code, is_system, is_store, from_folder_code, parent_level, only_folder)
         return response_success(result)
     return response_error("No Permission access folder", {'params': request.json}, 403)

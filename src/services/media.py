@@ -240,8 +240,8 @@ class MediaService:
 
     def get_list(self, owner_user_uid, entity_code, is_system, is_store, from_folder_code=None, parent_level=1, only_folder=False, return_model=False):
         items = []
-        folderSchema = MediaFolderSchema
-        fileSchema = MediaFileSchema
+        folderSchema = MediaFolderSchema()
+        fileSchema = MediaFileSchema()
         if parent_level == 1:
             result_folders = MediaFolder.query.filter_by(owner_user_uid=owner_user_uid, entity_code=entity_code, is_system_folder=is_system,
                                                          is_store_folder=is_store, parent_level=1).all()
@@ -251,7 +251,7 @@ class MediaService:
 
         for folder in result_folders:
             if not only_folder:
-                files = MediaFile.query.filter_by(owner_user_uid, entity_id, folder_code=folder.code, is_system_file=is_system, is_store_file=is_store)
+                files = MediaFile.query.filter_by(owner_user_uid=owner_user_uid, entity_code=entity_code, folder_code=folder.code, is_system_file=is_system, is_store_file=is_store)
                 item = {folder, files}
                 if not return_model:
                     item = {
