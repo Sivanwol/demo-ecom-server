@@ -99,7 +99,7 @@ def get_users(uid):
     filters = result['filters']
     orders = result['orders']
 
-    result = valid_user_list_by_permissions(userService, request.uid, filters)
+    result = valid_user_list_by_permissions(userService, uid, filters)
     if not result:
         return response_error("restricted access to some of the filter params", {'filters': filters, 'orders': orders}, 400)
     if not isinstance(result, (bool)):
@@ -199,7 +199,7 @@ def update_user_info_by_support_user(uid, request_uid):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(userService, request_uid):
-        if userService.user_has_role_matched(request.uid, [RolesTypes.StoreSupport.value]):
+        if userService.user_has_role_matched(uid, [RolesTypes.StoreSupport.value]):
             user = userService.get_user(request_uid, True)
             requester_user = userService.get_user(uid, True)
             if user.store_code != requester_user.store_code:
@@ -232,8 +232,8 @@ def create_store_stuff(uid, store_code):
     except ValidationError as e:
         return response_error("Error on format of the params", {'params': request.json})
 
-    if userService.user_has_any_role_matched(request.uid, [RolesTypes.StoreSupport.value, RolesTypes.StoreOwner.value]):
-        requester_user = userService.get_user(request.uid, True)
+    if userService.user_has_any_role_matched(uid, [RolesTypes.StoreSupport.value, RolesTypes.StoreOwner.value]):
+        requester_user = userService.get_user(uid, True)
         if store_code != requester_user.store_code:
             return response_error("Error support store user not matched with user (not in same store)", {'params': request.json})
     data = Struct(data)
