@@ -1,4 +1,4 @@
-# Reason
+# Server Mapping
 this server that later date will be split into microservices have many parts that required the client connections  as well later data BI and stats system that
 will be required.
 
@@ -25,6 +25,9 @@ for that reason there going be will split to two main services
          - transactions (shallow info)
          - Reports
    - Tasks
+
+Side note check out this [link](https://www.frederikbanke.com/integration-testing-in-python-rabbitmq/) it about rabbitmq and python unit test see if helpful
+max will setup a dev server just for the tests
 
 2. Front Backend service this will control all aspect of user life as well request from backend make reports
    - All user operations
