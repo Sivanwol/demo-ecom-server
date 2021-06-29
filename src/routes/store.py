@@ -1,4 +1,5 @@
 from flask import request
+from lagom import injectable
 from marshmallow import ValidationError
 
 from config.app import app as current_app, containers
@@ -13,7 +14,7 @@ from src.utils.validations import valid_currency_code
 
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/store/<store_code>/info"))
-def get_store_info(store_code):
+def get_store_info(store_code, storeService: StoreService = injectable):
     storeService = containers[StoreService]
     store = storeService.get_store_by_status_code(store_code)
     if store is None:
@@ -24,17 +25,16 @@ def get_store_info(store_code):
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/store/list"))
 @check_role([RolesTypes.Support.value, RolesTypes.Owner.value, RolesTypes.Accounts.value, RolesTypes.Reports.value])
-def list_stores(uid):
-    storeService = containers[StoreService]
+def list_stores(uid, storeService: StoreService = injectable):
     stores = storeService.get_stores()
     return response_success(stores)
 
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/store/<request_uid>/create"), methods=["POST"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
-def create_store(uid, request_uid):
-    userService = containers[UserService]
-    storeService = containers[StoreService]
+def create_store(uid, request_uid,
+                 storeService: StoreService = injectable,
+                 userService: UserService = injectable):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(userService, request_uid):
@@ -52,9 +52,9 @@ def create_store(uid, request_uid):
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/store/<request_uid>/<store_code>"), methods=["DELETE"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
-def delete_store(uid, request_uid, store_code):
-    userService = containers[UserService]
-    storeService = containers[StoreService]
+def delete_store(uid, request_uid, store_code,
+                 storeService: StoreService = injectable,
+                 userService: UserService = injectable):
     if verify_uid(userService, request_uid):
         if not storeService.store_exists(request_uid, store_code):
             response_error("store not exist", {'request_uid': request_uid, 'store_code': store_code})
@@ -68,9 +68,9 @@ def delete_store(uid, request_uid, store_code):
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/store/<request_uid>/<store_code>/toggle/maintenance"),
                    methods=["PUT"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
-def toggle_store_maintenance(uid, request_uid, store_code):
-    userService = containers[UserService]
-    storeService = containers[StoreService]
+def toggle_store_maintenance(uid, request_uid, store_code,
+                             storeService: StoreService = injectable,
+                             userService: UserService = injectable):
     if verify_uid(userService, request_uid):
         if not storeService.store_exists(request_uid, store_code):
             response_error("store not exist", {'request_uid': request_uid, 'store_code': store_code})
@@ -83,9 +83,9 @@ def toggle_store_maintenance(uid, request_uid, store_code):
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/store/<request_uid>/<store_code>/update"), methods=["PUT"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value, RolesTypes.StoreAccount.value])
-def update_store_support(uid, request_uid, store_code):
-    userService = containers[UserService]
-    storeService = containers[StoreService]
+def update_store_support(uid, request_uid, store_code,
+                         storeService: StoreService = injectable,
+                         userService: UserService = injectable):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(userService, request_uid):
@@ -107,9 +107,9 @@ def update_store_support(uid, request_uid, store_code):
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/store/<request_uid>/<store_code>/locations"), methods=["POST"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value, RolesTypes.StoreAccount.value])
-def update_store_location(uid, request_uid, store_code):
-    userService = containers[UserService]
-    storeService = containers[StoreService]
+def update_store_location(uid, request_uid, store_code,
+                          storeService: StoreService = injectable,
+                          userService: UserService = injectable):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(userService, request_uid):
@@ -129,9 +129,9 @@ def update_store_location(uid, request_uid, store_code):
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/store/<request_uid>/<store_code>/hours"), methods=["POST"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreOwner.value, RolesTypes.StoreAccount.value])
-def update_store_hours(uid, request_uid, store_code):
-    userService = containers[UserService]
-    storeService = containers[StoreService]
+def update_store_hours(uid, request_uid, store_code,
+                       storeService: StoreService = injectable,
+                       userService: UserService = injectable):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(userService, request_uid):
