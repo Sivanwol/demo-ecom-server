@@ -2,6 +2,7 @@ import os
 
 from flask import request, make_response
 from marshmallow import ValidationError
+from lagom import injectable
 from config.app import app as current_app, containers
 from src.exceptions import UnableCreateFolder
 from src.middlewares import check_token_of_user
@@ -10,16 +11,16 @@ from src.schemas.requests import RequestMediaCreateFolderSchema, RequestMediaCre
 from src.services import MediaService, UserService, RoleService, FileSystemService, StoreService
 from src.utils.enums import RolesTypes
 from src.utils.responses import response_success, response_error
-from src.utils.validations import vaild_per_page
 
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<entity_code>/uploads"), methods=["POST"])
 @check_token_of_user
-def upload_media(uid, entity_code):
-    fileSystemService = containers[FileSystemService]
-    mediaService = containers[MediaService]
-    userService = containers[UserService]
-    roleService = containers[RoleService]
+def upload_media(uid,
+                 entity_code,
+                 fileSystemService: FileSystemService = injectable,
+                 mediaService: MediaService = injectable,
+                 userService: UserService = injectable,
+                 roleService: RoleService = injectable):
     try:
         schema = RequestMediaCreateFile()
         data = schema.load(request.form)
@@ -72,19 +73,19 @@ def upload_media(uid, entity_code):
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<entity_id>/<file_code>/update"), methods=["PUT"])
 @check_token_of_user
-def upload_media_file_metadata(uid, entity_id, file_code):
-    mediaService = containers[MediaService]
-    userService = containers[UserService]
-    roleService = containers[RoleService]
+def upload_media_file_metadata(uid, entity_id, file_code,
+                               mediaService: MediaService = injectable,
+                               userService: UserService = injectable,
+                               roleService: RoleService = injectable):
     pass
 
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/file/<file_code>/toggle/publish"), methods=["PUT"])
 @check_token_of_user
-def toggle_published_files(uid, file_code):
-    mediaService = containers[MediaService]
-    userService = containers[UserService]
-    roleService = containers[RoleService]
+def toggle_published_files(uid, file_code,
+                           mediaService: MediaService = injectable,
+                           userService: UserService = injectable,
+                           roleService: RoleService = injectable):
     media = mediaService.get_file(file_code)
     if not media:
         return response_error("no file found")
@@ -116,11 +117,11 @@ def toggle_published_files(uid, file_code):
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/file/<file_code>"), methods=["GET"])
 @check_token_of_user
-def download_media_file(uid, file_code):
-    mediaService = containers[MediaService]
-    userService = containers[UserService]
-    roleService = containers[RoleService]
-    media = mediaService.get_file(file_code,True)
+def download_media_file(uid, file_code,
+                        mediaService: MediaService = injectable,
+                        userService: UserService = injectable,
+                        roleService: RoleService = injectable):
+    media = mediaService.get_file(file_code, True)
     if not media:
         return response_error("no file found")
 
@@ -148,10 +149,10 @@ def download_media_file(uid, file_code):
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/folder/create"), methods=["POST"])
 @check_token_of_user
-def create_virtual_directory(uid):
-    mediaService = containers[MediaService]
-    userService = containers[UserService]
-    roleService = containers[RoleService]
+def create_virtual_directory(uid,
+                             mediaService: MediaService = injectable,
+                             userService: UserService = injectable,
+                             roleService: RoleService = injectable):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     try:
@@ -195,11 +196,10 @@ def create_virtual_directory(uid):
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<entity_id>/folder/<folder_code>/delete"),
                    methods=["DELETE"])
 @check_token_of_user
-def delete_virtual_directory(uid, entity_id, folder_code):
-    mediaService = containers[MediaService]
-    userService = containers[UserService]
-    roleService = containers[RoleService]
-
+def delete_virtual_directory(uid, entity_id, folder_code,
+                             mediaService: MediaService = injectable,
+                             userService: UserService = injectable,
+                             roleService: RoleService = injectable):
     def handle(type):
         media = mediaService.get_virtual_folder(folder_code, entity_id, True)
         if media is None:
@@ -224,10 +224,10 @@ def delete_virtual_directory(uid, entity_id, folder_code):
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/<entity_id>/file/<file_code>/delete"), methods=["DELETE"])
 @check_token_of_user
-def delete_files(uid, entity_id, file_code):
-    mediaService = containers[MediaService]
-    userService = containers[UserService]
-    roleService = containers[RoleService]
+def delete_files(uid, entity_id, file_code,
+                 mediaService: MediaService = injectable,
+                 userService: UserService = injectable,
+                 roleService: RoleService = injectable):
     media = mediaService.get_file(file_code)
 
     if not media:
@@ -265,11 +265,11 @@ def delete_files(uid, entity_id, file_code):
 # Todo: get users files and folders
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/media/list"), methods=["GET"])
 @check_token_of_user
-def get_media_list(uid):
-    mediaService = containers[MediaService]
-    userService = containers[UserService]
-    storeService = containers[StoreService]
-    roleService = containers[RoleService]
+def get_media_list(uid,
+                   mediaService: MediaService = injectable,
+                   userService: UserService = injectable,
+                   storeService: StoreService = injectable,
+                   roleService: RoleService = injectable):
     is_system = False
     is_store = False
     from_folder_code = None
@@ -284,11 +284,11 @@ def get_media_list(uid):
             return response_error("folder not found", {'params': request.json})
 
     if request.args.get('is_system', type=int) is not None:
-        is_system = True if request.args.get('is_system', type=int) ==1 else False
+        is_system = True if request.args.get('is_system', type=int) == 1 else False
     if request.args.get('is_store', type=int) is not None:
-        is_store = True if request.args.get('is_store', type=int) ==1 else False
+        is_store = True if request.args.get('is_store', type=int) == 1 else False
     if request.args.get('only_folder', type=int) is not None:
-        only_folder = True if request.args.get('only_folder', type=int) ==1 else False
+        only_folder = True if request.args.get('only_folder', type=int) == 1 else False
     if is_system and is_store:
         return response_error("Cant get both system folder and store please pick", {'params': request.args})
     if not is_system:

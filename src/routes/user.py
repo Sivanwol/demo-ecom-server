@@ -3,8 +3,9 @@ import json
 from firebase_admin.auth import UserNotFoundError
 from firebase_admin.exceptions import FirebaseError
 from flask import request
+from lagom import injectable
 from marshmallow import ValidationError
-from config.app import app as current_app, containers
+from config.app import app as current_app
 from src.middlewares import check_role, check_token_register_firebase_user, check_token_of_user
 from src.schemas.requests import UserRolesList, CreateStoreStaffUser, UpdateUserInfo
 from src.schemas import UserSchema
@@ -17,8 +18,7 @@ from src.utils.validations import vaild_per_page, valid_user_list_by_permissions
 
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/user/<request_uid>"))
-def get(request_uid):
-    userService = containers[UserService]
+def get(request_uid, userService: UserService = injectable):
     if verify_uid(userService, request_uid):
         try:
             firebase_response = {
@@ -46,8 +46,7 @@ def get(request_uid):
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/user/list"))
 @check_token_of_user
-def get_users(uid):
-    userService = containers[UserService]
+def get_users(uid, userService: UserService = injectable):
     per_page = request.args.get('per_page', type=int)
     page = request.args.get('page', type=int)
     if not vaild_per_page(per_page) and isinstance(page, int):
@@ -114,8 +113,7 @@ def get_users(uid):
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/user/<request_uid>/toggle_active"), methods=["PUT"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
-def user_toggle_active(uid, request_uid):
-    userService = containers[UserService]
+def user_toggle_active(uid, request_uid, userService: UserService = injectable):
     if verify_uid(userService, request_uid):
         try:
             userService.toggle_freeze_user(request_uid)
@@ -133,8 +131,7 @@ def user_toggle_active(uid, request_uid):
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/user/platform/list/<per_page>/<page>"), methods=["GET"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value, RolesTypes.Support.value])
-def get_platform_users(uid, per_page, page):
-    userService = containers[UserService]
+def get_platform_users(uid, per_page, page, userService: UserService = injectable):
     if not vaild_per_page(per_page):
         return response_error("Error on support per page", {'per_page': per_page})
     filter = {'names': request.args.getlist('filter_fullname')}
@@ -145,7 +142,7 @@ def get_platform_users(uid, per_page, page):
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/user/store/<store_code>/list/<per_page>/<page>"),
                    methods=["GET"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreAccount.value, RolesTypes.StoreOwner.value, RolesTypes.StoreSupport.value])
-def get_store_users(uid, store_code, per_page, page, userService: UserService, storeService: StoreService):
+def get_store_users(uid, store_code, per_page, page, userService: UserService = injectable, storeService: StoreService = injectable):
     if not vaild_per_page(per_page):
         return response_error("Error on support per page", {per_page: per_page})
     if not storeService.store_exists(uid, store_code):
@@ -157,8 +154,7 @@ def get_store_users(uid, store_code, per_page, page, userService: UserService, s
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/user/passed_tutorial"), methods=["PUT"])
 @check_token_of_user
-def mark_user_passed_tutorial(uid):
-    userService = containers[UserService]
+def mark_user_passed_tutorial(uid, userService: UserService = injectable):
     if verify_uid(userService, uid):
         try:
             userService.mark_user_passed_tutorial(uid)
@@ -176,8 +172,7 @@ def mark_user_passed_tutorial(uid):
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/user/<request_uid>/update"), methods=["PUT"])
 @check_token_of_user
-def update_user_info(uid,request_uid):
-    userService = containers[UserService]
+def update_user_info(uid, request_uid, userService: UserService = injectable):
     if verify_uid(userService, request_uid):
         if not request.is_json:
             return response_error("Request Data must be in json format", request.data)
@@ -196,8 +191,7 @@ def update_user_info(uid,request_uid):
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/user/<uid>/update"), methods=["PUT"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreSupport.value])
-def update_user_info_by_support_user(uid, request_uid):
-    userService = containers[UserService]
+def update_user_info_by_support_user(uid, request_uid, userService: UserService = injectable):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(userService, request_uid):
@@ -222,10 +216,9 @@ def update_user_info_by_support_user(uid, request_uid):
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/user/staff/<store_code>"), methods=["POST"])
 @check_role([RolesTypes.Support.value, RolesTypes.StoreSupport.value, RolesTypes.StoreOwner.value])
-def create_store_stuff(uid, store_code):
-    userService = containers[UserService]
-    roleSerivce = containers[RoleService]
-    fileSystemService = containers[FileSystemService]
+def create_store_stuff(uid, store_code,
+                       userService: UserService = injectable,
+                       roleSerivce: RoleService = injectable):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     try:
@@ -257,9 +250,9 @@ def create_store_stuff(uid, store_code):
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/user/<request_uid>"), methods=["POST"])
 @check_role([RolesTypes.Accounts.value, RolesTypes.Owner.value])
-def sync_platform_user_create(uid, request_uid):
-    userService = containers[UserService]
-    roleSerivce = containers[RoleService]
+def sync_platform_user_create(uid, request_uid,
+                              userService: UserService = injectable,
+                              roleSerivce: RoleService = injectable):
     if not request.is_json:
         return response_error("Request Data must be in json format", request.data)
     if verify_uid(userService, request_uid):
@@ -273,7 +266,7 @@ def sync_platform_user_create(uid, request_uid):
                 return response_error("Error on format of the params", {'params': request.json})
             if roleSerivce.check_roles(data.role_names):
                 return response_error("One or more of fields are invalid", request.data)
-            return response_success(sync_user_from_firebase_user(request_uid, data.role_names, True, False))
+            return response_success(sync_user_from_firebase_user(userService, roleSerivce, request_uid, data.role_names, True, False))
         except ValueError:
             return response_error("Error on format of the params", {'request_uid': request_uid})
         except UserNotFoundError:
@@ -287,16 +280,17 @@ def sync_platform_user_create(uid, request_uid):
 
 @current_app.route(current_app.flask_app.config['API_ROUTE'].format(route="/user/<request_uid>/bind/<store_code>"), methods=["POST"])
 @check_token_register_firebase_user
-def sync_store_user_create(uid, request_uid, store_code):
-    userService = containers[UserService]
-    storeService = containers[StoreService]
+def sync_store_user_create(uid, request_uid, store_code,
+                           userService: UserService = injectable,
+                           roleSerivce: RoleService = injectable,
+                           storeService: StoreService = injectable):
     if not verify_uid(userService, request_uid):
         try:
             has_store = storeService.store_exists(request_uid, store_code)
             if has_store is None:
                 response_error("error store not existed", {'request_uid': request_uid, store_code: store_code})
             return response_success(
-                sync_user_from_firebase_user(request_uid, [RolesTypes.StoreCustomer.value], False, store_code))
+                sync_user_from_firebase_user(userService, roleSerivce, request_uid, [RolesTypes.StoreCustomer.value], False, store_code))
         except ValueError:
             return response_error("Error on format of the params", {'request_uid': request_uid})
         except UserNotFoundError:
@@ -308,9 +302,7 @@ def sync_store_user_create(uid, request_uid, store_code):
     return response_error("Error user exist", {'request_uid': request_uid})
 
 
-def sync_user_from_firebase_user(uid, role_names, is_platform_user, store_code=None, new_user=True):
-    userService = containers[UserService]
-    roleSerivce = containers[RoleService]
+def sync_user_from_firebase_user(userService, roleSerivce, uid, role_names, is_platform_user, store_code=None, new_user=True):
     user_object = userService.get_firebase_user(uid).__dict__['_data']
     response = {'user': json.dumps(user_object, indent=4), 'extend_info': None}
     roles = roleSerivce.get_roles(role_names)

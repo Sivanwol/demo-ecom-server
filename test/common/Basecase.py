@@ -8,7 +8,7 @@ from faker import Faker
 from firebase_admin import auth
 from flask_testing import TestCase
 from config import settings
-from config.app import app, socketio, containers
+from config.app import app, containers
 from config.database import db
 from src.services import FileSystemService, FirebaseService, MediaService, RoleService, StoreService, UserService, SettingsService
 from src.utils.enums import RolesTypes
@@ -46,6 +46,7 @@ class BaseTestCase(TestCase):
         print(settings[os.environ.get("FLASK_ENV", "development")].SQLALCHEMY_DATABASE_URI)
         self.firebase_client_object = setup_firebase_client()
         app.flask_app.app_context().push()
+
         return app.flask_app
 
     def setUp(self):
@@ -55,7 +56,6 @@ class BaseTestCase(TestCase):
         self.client = self.app.test_client()
         self.userUtils = UserTestUtills(self)
         self.mediaUtils = MediaTestUtills(self)
-        self.ws_client = socketio.test_client(self.app)
         db.create_all()
         db.session.commit()
         self.roleService.insert_roles()
