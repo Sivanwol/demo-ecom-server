@@ -34,4 +34,3 @@ max will setup a dev server just for the tests
    - Request Offline Tasks
    - Control and Management Content (Pages and more)
    - Request operations that need backend
-   - 
